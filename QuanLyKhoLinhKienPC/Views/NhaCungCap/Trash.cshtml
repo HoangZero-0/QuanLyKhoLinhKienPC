@@ -1,12 +1,12 @@
-﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.VaiTro>
+﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.NhaCungCap>
 
 @{
-    ViewData["Title"] = "Thùng rác";
+    ViewData["Title"] = "Thùng rác Nhà cung cấp";
 }
 
 <div class="container-fluid pt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="text-danger"><i class="fa-solid fa-trash-can"></i> Thùng Rác Vai Trò</h2>
+        <h2 class="text-danger"><i class="fa-solid fa-trash-can"></i> Thùng Rác Nhà Cung Cấp</h2>
         <a asp-action="Index" class="btn btn-outline-primary">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
         </a>
@@ -25,8 +25,10 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="table-danger">
                     <tr>
-                        <th>@Html.DisplayNameFor(model => model.TenVaiTro)</th>
-                        <th class="text-center">Hành động</th>
+                        <th>@Html.DisplayNameFor(model => model.TenNhaCungCap)</th>
+                        <th>@Html.DisplayNameFor(model => model.SoDienThoai)</th>
+                        <th>@Html.DisplayNameFor(model => model.DiaChi)</th>
+                        <th class="text-center" style="width: 200px;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,15 +37,17 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td class="align-middle fw-bold">@Html.DisplayFor(modelItem => item.TenVaiTro)</td>
+                                <td class="align-middle fw-bold">@Html.DisplayFor(modelItem => item.TenNhaCungCap)</td>
+                                <td class="align-middle">@Html.DisplayFor(modelItem => item.SoDienThoai)</td>
+                                <td class="align-middle text-truncate" style="max-width: 200px;">@Html.DisplayFor(modelItem => item.DiaChi)</td>
                                 <td class="text-center">
-                                    <form asp-action="Restore" asp-route-id="@item.MaVaiTro" method="post" class="d-inline">
+                                    <form asp-action="Restore" asp-route-id="@item.MaNhaCungCap" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success" title="Khôi phục">
                                             <i class="fa-solid fa-rotate-left"></i>
                                         </button>
                                     </form>
 
-                                    <form asp-action="DeleteForce" asp-route-id="@item.MaVaiTro" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO: Xóa vĩnh viễn không thể lấy lại. Bạn chắc chứ?');">
+                                    <form asp-action="DeleteForce" asp-route-id="@item.MaNhaCungCap" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO: Xóa vĩnh viễn không thể lấy lại. Bạn chắc chứ?');">
                                         <button type="submit" class="btn btn-sm btn-dark" title="Xóa vĩnh viễn">
                                             <i class="fa-solid fa-ban"></i>
                                         </button>
@@ -55,7 +59,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="2" class="text-center text-muted py-4">Thùng rác trống.</td>
+                            <td colspan="4" class="text-center text-muted py-4">Thùng rác trống.</td>
                         </tr>
                     }
                 </tbody>
