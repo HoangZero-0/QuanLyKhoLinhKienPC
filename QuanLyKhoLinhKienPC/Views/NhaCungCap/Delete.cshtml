@@ -1,45 +1,43 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.NhaCungCap
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa Nhà cung cấp";
 }
 
-<h1>Delete</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Nhà cung cấp này vào thùng rác?</h5>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>NhaCungCap</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TenNhaCungCap)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TenNhaCungCap)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SoDienThoai)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SoDienThoai)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DiaChi)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DiaChi)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="MaNhaCungCap" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+                    <div class="alert alert-warning d-inline-block text-start">
+                        <strong>Lưu ý:</strong> Dữ liệu sẽ được ẩn đi nhưng không bị mất vĩnh viễn.<br>
+                        Bạn có thể khôi phục lại trong mục <strong>Thùng rác</strong>.
+                    </div>
+
+                    <dl class="row mt-3 text-start justify-content-center">
+                        <dt class="col-sm-4 text-end">Tên NCC:</dt>
+                        <dd class="col-sm-6 fw-bold">@Html.DisplayFor(model => model.TenNhaCungCap)</dd>
+
+                        <dt class="col-sm-4 text-end">SĐT:</dt>
+                        <dd class="col-sm-6">@Html.DisplayFor(model => model.SoDienThoai)</dd>
+                    </dl>
+
+                    <form asp-action="Delete" class="mt-4">
+                        <input type="hidden" asp-for="MaNhaCungCap" />
+                        <a asp-action="Index" class="btn btn-secondary me-2">
+                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

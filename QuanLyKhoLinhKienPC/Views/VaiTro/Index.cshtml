@@ -47,8 +47,8 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td class="align-middle">
-                                    <strong>@Html.DisplayFor(modelItem => item.TenVaiTro)</strong>
+                                <td class="align-middle fw-bold text-primary">
+                                    @Html.DisplayFor(modelItem => item.TenVaiTro)
                                 </td>
                                 <td class="text-center">
                                     <a asp-action="Edit" asp-route-id="@item.MaVaiTro" class="btn btn-sm btn-warning" title="Sửa">
