@@ -1,4 +1,10 @@
+﻿using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Thêm dòng này để kết nối Database
+builder.Services.AddDbContext<QuanLyKhoLinhKienPC.Models.QuanLyKhoLinhKienPCContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

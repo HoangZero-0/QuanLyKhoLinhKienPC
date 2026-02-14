@@ -1,49 +1,93 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QuanLyKhoLinhKienPC</title>
+    <title>@ViewData["Title"] - Quản Lý Kho Linh Kiện PC</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/QuanLyKhoLinhKienPC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { min-height: 100vh; display: flex; flex-direction: column; }
+        .wrapper { display: flex; flex: 1; }
+        .sidebar { min-width: 250px; max-width: 250px; background: #343a40; color: #fff; transition: all 0.3s; }
+        .sidebar .nav-link { color: #cfd8dc; padding: 15px 20px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: #495057; }
+        .sidebar .nav-link i { margin-right: 10px; width: 20px; text-align: center; }
+        .content { flex: 1; padding: 20px; background: #f8f9fa; }
+        .footer { background: #fff; padding: 15px; border-top: 1px solid #dee2e6; text-align: center; }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">QuanLyKhoLinhKienPC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-3">
+        <a class="navbar-brand" href="/">
+            <i class="fa-solid fa-microchip"></i> KHO LINH KIỆN PC
+        </a>
+        <div class="d-flex">
+            <span class="text-light me-3">Xin chào, Admin</span>
+            <a href="#" class="btn btn-sm btn-outline-light">Đăng xuất</a>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+        <nav class="sidebar">
+            <ul class="nav flex-column pt-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Home">
+                        <i class="fa-solid fa-house"></i> Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/NhaCungCaps">
+                        <i class="fa-solid fa-truck"></i> Nhà cung cấp
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/DanhMucs">
+                        <i class="fa-solid fa-list"></i> Danh mục
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/SanPhams">
+                        <i class="fa-solid fa-box-open"></i> Sản phẩm
+                    </a>
+                </li>
+                <hr class="text-secondary mx-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="/PhieuNhaps">
+                        <i class="fa-solid fa-file-import"></i> Nhập kho
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/PhieuXuats">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Xuất kho / Bán hàng
+                    </a>
+                </li>
+                <hr class="text-secondary mx-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="/VaiTros">
+                        <i class="fa-solid fa-user-shield"></i> Vai trò
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/NguoiDungs">
+                        <i class="fa-solid fa-users"></i> Nhân viên
+                    </a>
+                </li>
+            </ul>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <main class="content">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - QuanLyKhoLinhKienPC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+    <footer class="footer">
+        &copy; 2024 - Phần mềm quản lý kho linh kiện PC - Design by @ViewData["Title"]
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
