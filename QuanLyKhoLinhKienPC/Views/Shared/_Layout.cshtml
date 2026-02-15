@@ -5,71 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Quản Lý Kho Linh Kiện PC</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
-        body { min-height: 100vh; display: flex; flex-direction: column; }
-        .wrapper { display: flex; flex: 1; }
-        .sidebar { min-width: 250px; max-width: 250px; background: #343a40; color: #fff; transition: all 0.3s; }
-        .sidebar .nav-link { color: #cfd8dc; padding: 15px 20px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: #495057; }
-        .sidebar .nav-link i { margin-right: 10px; width: 20px; text-align: center; }
-        .content { flex: 1; padding: 20px; background: #f8f9fa; }
-        .footer { background: #fff; padding: 15px; border-top: 1px solid #dee2e6; text-align: center; }
+        /* 1. KHÓA CUỘN TOÀN TRANG */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Cấu trúc Flex dọc */
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar và Footer cố định */
+        .navbar, .footer {
+            flex-shrink: 0;
+            z-index: 1001;
+        }
+
+        /* 2. WRAPPER CHÍNH */
+        .wrapper {
+            flex: 1;
+            display: flex;
+            overflow: hidden; /* Ngăn tràn màn hình */
+        }
+
+        /* 3. SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+            .sidebar .nav-link {
+                color: #b0bec5;
+                padding: 15px 20px;
+                font-size: 15px;
+                transition: all 0.2s ease-in-out;
+                border-left: 4px solid transparent;
+                display: flex;
+                align-items: center;
+            }
+
+                .sidebar .nav-link i {
+                    margin-right: 12px;
+                    width: 25px;
+                    text-align: center;
+                    font-size: 18px;
+                }
+
+                /* Hiệu ứng Hover */
+                .sidebar .nav-link:hover {
+                    background: rgba(255,255,255,0.1);
+                    color: #fff;
+                    transform: translateX(5px);
+                    border-left-color: #3498db;
+                }
+
+                /* Active State */
+                .sidebar .nav-link.active {
+                    background: #3498db;
+                    color: #fff;
+                    font-weight: bold;
+                    border-left-color: #fff;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                }
+
+        /* 4. CONTENT AREA */
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #ecf0f1;
+            overflow: hidden; /* Không cho cuộn cấp này */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer {
+            background: #fff;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-3">
-        <a class="navbar-brand" href="/">
-            <i class="fa-solid fa-microchip"></i> KHO LINH KIỆN PC
+    @{
+        string currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    }
+
+    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-4 shadow-sm">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="fa-solid fa-microchip text-warning"></i> KHO LINH KIỆN PC
         </a>
-        <div class="d-flex">
-            <span class="text-light me-3">Xin chào, Admin</span>
-            <a href="#" class="btn btn-sm btn-outline-light">Đăng xuất</a>
+        <div class="d-flex align-items-center">
+            <span class="text-light me-3 small">Xin chào, Admin</span>
+            <a href="#" class="btn btn-sm btn-outline-warning">Đăng xuất</a>
         </div>
     </nav>
 
     <div class="wrapper">
-        <nav class="sidebar">
+        <nav class="sidebar shadow">
             <ul class="nav flex-column pt-3">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/Home">
+                    <a class="nav-link @(currentController == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
                         <i class="fa-solid fa-house"></i> Trang chủ
                     </a>
                 </li>
+
+                <li class="nav-item mt-2">
+                    <div class="text-muted small fw-bold px-3 text-uppercase">Quản lý kho</div>
+                </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="NhaCungCap" asp-action="Index">
-                        <i class="fa-solid fa-truck"></i> Nhà cung cấp
+                    <a class="nav-link @(currentController == "NhaCungCap" ? "active" : "")" asp-controller="NhaCungCap" asp-action="Index">
+                        <i class="fa-solid fa-truck-field"></i> Nhà cung cấp
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/DanhMucs">
+                    <a class="nav-link @(currentController == "DanhMuc" ? "active" : "")" asp-controller="DanhMuc" asp-action="Index">
                         <i class="fa-solid fa-list"></i> Danh mục
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/SanPhams">
+                    <a class="nav-link @(currentController == "SanPham" ? "active" : "")" asp-controller="SanPham" asp-action="Index">
                         <i class="fa-solid fa-box-open"></i> Sản phẩm
                     </a>
                 </li>
-                <hr class="text-secondary mx-3">
+
+                <li class="nav-item mt-2">
+                    <hr class="text-secondary mx-3 my-2">
+                    <div class="px-3 text-uppercase text-muted" style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Nghiệp vụ</div>
+                </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="/PhieuNhaps">
+                    <a class="nav-link @(currentController == "PhieuNhap" ? "active" : "")" asp-controller="PhieuNhap" asp-action="Index">
                         <i class="fa-solid fa-file-import"></i> Nhập kho
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/PhieuXuats">
+                    <a class="nav-link @(currentController == "PhieuXuat" ? "active" : "")" asp-controller="PhieuXuat" asp-action="Index">
                         <i class="fa-solid fa-file-invoice-dollar"></i> Xuất kho / Bán hàng
                     </a>
                 </li>
-                <hr class="text-secondary mx-3">
+
+                <li class="nav-item mt-2">
+                    <hr class="text-secondary mx-3 my-2">
+                    <div class="px-3 text-uppercase text-muted" style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Hệ thống</div>
+                </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="" asp-controller="VaiTro" asp-action="Index">
+                    <a class="nav-link @(currentController == "VaiTro" ? "active" : "")" asp-controller="VaiTro" asp-action="Index">
                         <i class="fa-solid fa-user-shield"></i> Vai trò
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/NguoiDungs">
+                    <a class="nav-link @(currentController == "NguoiDung" ? "active" : "")" asp-controller="NguoiDung" asp-action="Index">
                         <i class="fa-solid fa-users"></i> Nhân viên
                     </a>
                 </li>
@@ -82,7 +186,7 @@
     </div>
 
     <footer class="footer">
-        &copy; 2024 - Phần mềm quản lý kho linh kiện PC - Design by @ViewData["Title"]
+        &copy; 2026 - Quản lý kho linh kiện PC - Design by @ViewData["Title"]
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
