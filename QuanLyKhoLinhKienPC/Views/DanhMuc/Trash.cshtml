@@ -1,17 +1,17 @@
-﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.NhaCungCap>
+﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.DanhMuc>
 
 @{
-    ViewData["Title"] = "Thùng rác Nhà cung cấp";
+    ViewData["Title"] = "Thùng rác Danh mục";
 }
 
 <div class="d-flex flex-column h-100">
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Nhà Cung Cấp</h2>
+        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Danh Mục</h2>
         <div>
             @if (Model != null && Model.Any())
             {
-                <form asp-action="EmptyTrash" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO NGUY HIỂM:\n\nBạn có chắc chắn muốn XÓA VĨNH VIỄN toàn bộ nhà cung cấp trong thùng rác không?\nHành động này KHÔNG THỂ khôi phục lại!');">
+                <form asp-action="EmptyTrash" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO NGUY HIỂM:\n\nBạn có chắc chắn muốn XÓA VĨNH VIỄN toàn bộ danh mục trong thùng rác không?\nHành động này KHÔNG THỂ khôi phục lại!');">
                     <button type="submit" class="btn btn-danger shadow-sm">
                         <i class="fa-solid fa-fire"></i> Dọn sạch thùng rác
                     </button>
@@ -55,7 +55,7 @@
                 <div class="col-md-10">
                     <div class="input-group">
                         <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" name="searchString" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm tên, SĐT nhà cung cấp..." value="@ViewData["CurrentFilter"]">
+                        <input type="text" name="searchString" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm tên danh mục..." value="@ViewData["CurrentFilter"]">
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -72,13 +72,7 @@
                     <thead class="table-danger">
                         <tr>
                             <th class="py-3 ps-3" style="position: sticky; top: 0; z-index: 10;">
-                                Tên nhà cung cấp
-                            </th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">
-                                Số điện thoại
-                            </th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">
-                                Địa chỉ
+                                Tên danh mục
                             </th>
                             <th class="text-center py-3" style="width: 200px; position: sticky; top: 0; z-index: 10;">
                                 Hành động
@@ -91,17 +85,15 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="align-middle fw-bold ps-3">@Html.DisplayFor(modelItem => item.TenNhaCungCap)</td>
-                                    <td class="align-middle">@Html.DisplayFor(modelItem => item.SoDienThoai)</td>
-                                    <td class="align-middle text-truncate" style="max-width: 300px;">@Html.DisplayFor(modelItem => item.DiaChi)</td>
+                                    <td class="align-middle fw-bold ps-3">@Html.DisplayFor(modelItem => item.TenDanhMuc)</td>
                                     <td class="text-center py-2">
-                                        <form asp-action="Restore" asp-route-id="@item.MaNhaCungCap" method="post" class="d-inline">
+                                        <form asp-action="Restore" asp-route-id="@item.MaDanhMuc" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-success" title="Khôi phục">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
 
-                                        <form asp-action="DeleteForce" asp-route-id="@item.MaNhaCungCap" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO: Xóa vĩnh viễn không thể lấy lại. Bạn chắc chứ?');">
+                                        <form asp-action="DeleteForce" asp-route-id="@item.MaDanhMuc" method="post" class="d-inline" onsubmit="return confirm('CẢNH BÁO: Xóa vĩnh viễn không thể lấy lại. Bạn chắc chứ?');">
                                             <button type="submit" class="btn btn-sm btn-dark" title="Xóa vĩnh viễn">
                                                 <i class="fa-solid fa-ban"></i>
                                             </button>
@@ -113,7 +105,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-5">
+                                <td colspan="2" class="text-center text-muted py-5">
                                     <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-50"></i><br>
                                     Thùng rác trống.
                                 </td>

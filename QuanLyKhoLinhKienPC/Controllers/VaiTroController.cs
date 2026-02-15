@@ -33,7 +33,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // 2. CHI TIẾT
-        // GET: VaiTro/Details/5
+        // GET: VaiTro/Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -80,7 +80,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // 4. CHỈNH SỬA
-        // GET: VaiTro/Edit/5
+        // GET: VaiTro/Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -96,7 +96,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(vaiTro);
         }
 
-        // POST: VaiTro/Edit/5
+        // POST: VaiTro/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MaVaiTro,TenVaiTro,IsDeleted")] VaiTro vaiTro)
@@ -141,7 +141,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // 5. XÓA MỀM (Chuyển vào thùng rác)
-        // GET: VaiTro/Delete/5
+        // GET: VaiTro/Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -159,7 +159,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(vaiTro);
         }
 
-        // POST: VaiTro/Delete/5
+        // POST: VaiTro/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -189,7 +189,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
-        // POST: VaiTro/Restore/5
+        // POST: VaiTro/Restore
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
@@ -206,7 +206,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: VaiTro/DeleteForce/5
+        // POST: VaiTro/DeleteForce
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteForce(int id)
@@ -225,6 +225,59 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 TempData["Error"] = "Không thể xóa vĩnh viễn vai trò này vì đang có nhân viên thuộc vai trò đó!";
                 return RedirectToAction(nameof(Trash));
             }
+        }
+
+        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmptyTrash()
+        {
+            // Lấy tất cả danh sách trong thùng rác
+            var racList = await _context.VaiTro.Where(v => v.IsDeleted == true).ToListAsync();
+
+            if (!racList.Any())
+            {
+                return RedirectToAction(nameof(Trash));
+            }
+
+            int daXoa = 0;
+            int biLoi = 0;
+
+            foreach (var item in racList)
+            {
+                try
+                {
+                    // Cố gắng xóa từng cái
+                    _context.VaiTro.Remove(item);
+                    await _context.SaveChangesAsync(); // Lưu ngay lập tức
+                    daXoa++;
+                }
+                catch (DbUpdateException)
+                {
+                    // Nếu lỗi (do ràng buộc khóa ngoại), bỏ qua và đếm lỗi
+                    biLoi++;
+
+                    // QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
+                    // Nếu không, EF Core sẽ vẫn nhớ lệnh xóa này và gây lỗi cho item tiếp theo
+                    _context.Entry(item).State = EntityState.Unchanged;
+                }
+            }
+
+            // Thông báo kết quả cho người dùng
+            if (daXoa > 0 && biLoi == 0)
+            {
+                TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} vai trò).";
+            }
+            else if (daXoa > 0 && biLoi > 0)
+            {
+                TempData["Warning"] = $"Đã xóa vĩnh viễn {daXoa} vai trò. Còn lại {biLoi} vai trò không thể xóa do đang được sử dụng.";
+            }
+            else if (daXoa == 0 && biLoi > 0)
+            {
+                TempData["Error"] = "Không thể xóa vai trò nào vì tất cả đều đang được sử dụng!";
+            }
+
+            return RedirectToAction(nameof(Trash));
         }
 
         private bool VaiTroExists(int id)
