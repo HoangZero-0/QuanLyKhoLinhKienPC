@@ -1,0 +1,133 @@
+@model QuanLyKhoLinhKienPC.Models.SeriSanPham
+
+@{
+    ViewData["Title"] = "Truy Vết Lõi Seri";
+}
+
+<div class="container-fluid pt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h3 class="text-primary fw-bold"><i class="fa-solid fa-route"></i> Hành Trình Lõi Seri <span class="bg-dark text-white rounded px-2">#@Model.SoSeri</span></h3>
+            <p class="text-muted mb-0">Truy vết nguồn gốc, lịch sử nhập xuất của linh kiện trong hệ thống.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại Kho Seri
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin Linh Kiện -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4 bg-light">
+                <div class="card-header bg-dark text-white fw-bold">
+                    <i class="fa-solid fa-microchip"></i> Thuộc Tính Linh Kiện
+                </div>
+                <div class="card-body">
+                    <h5 class="fw-bold text-primary mb-3">@Model.MaSanPhamNavigation?.TenSanPham</h5>
+                    <p class="mb-2"><strong>Mã Model:</strong> @Model.MaSanPhamNavigation?.MaSanPham.ToString("D5")</p>
+                    <p class="mb-2"><strong>Hãng Sản Xuất:</strong> @Model.MaSanPhamNavigation?.HangSanXuat</p>
+                    <p class="mb-2"><strong>Bảo Hành:</strong> <span class="badge bg-info text-dark">@Model.MaSanPhamNavigation?.ThoiGianBaoHanh Tháng</span></p>
+                    <hr />
+                    <p class="mb-2"><strong>Trạng Thái Kho:</strong> 
+                        @if (Model.TrangThai == 0) {
+                            <span class="badge bg-success"><i class="fa-solid fa-boxes-stacked"></i> Tồn Kho (Chưa Bán)</span>
+                        } else {
+                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-cash-register"></i> Đã Xuất Bán</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Truy Vết -->
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Dấu Vết Lịch Sử (Timeline)
+                </div>
+                <div class="card-body p-4 overflow-hidden">
+                    <div class="timeline">
+                        <!-- Bước 1: Khởi Tạo Lõi (Phiếu Nhập) -->
+                        <div class="timeline-item mb-4 pb-3 border-bottom position-relative">
+                            <span class="position-absolute bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;left:-60px;top:0; font-size:18px; z-index: 2;">
+                                <i class="fa-solid fa-truck-ramp-box"></i>
+                            </span>
+                            <h5 class="fw-bold text-success mb-1">Giai đoạn 1: Lõi Được Nhập Vào Kho Hệ Thống</h5>
+                            @if (Model.MaPhieuNhapNavigation != null)
+                            {
+                                <p class="text-muted small mb-2"><i class="fa-regular fa-clock"></i> @Model.MaPhieuNhapNavigation.NgayNhap.ToString("dd/MM/yyyy HH:mm")</p>
+                                <ul class="list-unstyled">
+                                    <li><i class="fa-solid fa-caret-right text-success"></i> <strong>Chứng từ tham chiếu:</strong> Phiếu Nhập #PN-@Model.MaPhieuNhap?.ToString("D5")</li>
+                                    <li><i class="fa-solid fa-caret-right text-success"></i> <strong>Nhà cung cấp gốc:</strong> @Model.MaPhieuNhapNavigation.MaNhaCungCapNavigation?.TenNhaCungCap</li>
+                                    <li><i class="fa-solid fa-caret-right text-success"></i> <strong>Người kiểm hàng lên phiếu:</strong> @(Model.MaPhieuNhapNavigation.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</li>
+                                </ul>
+                            }
+                        </div>
+
+                        <!-- Bước 2: Xuất Bán (Phiếu Xuất) -->
+                        @if (Model.TrangThai == 1 && Model.MaPhieuXuatNavigation != null)
+                        {
+                            <div class="timeline-item position-relative pb-2">
+                                <span class="position-absolute bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:40px;height:40px;left:-60px;top:0; font-size:18px; z-index: 2;">
+                                    <i class="fa-solid fa-cart-arrow-down"></i>
+                                </span>
+                                <h5 class="fw-bold text-warning-emphasis mb-1">Giai đoạn 2: Bán Cho Khách Hàng (Kích Hoạt Bảo Hành)</h5>
+                                <p class="text-muted small mb-2"><i class="fa-regular fa-clock"></i> @Model.MaPhieuXuatNavigation.NgayXuat.ToString("dd/MM/yyyy HH:mm")</p>
+                                <ul class="list-unstyled bg-light p-3 rounded border">
+                                    <li class="mb-1"><i class="fa-solid fa-caret-right text-warning"></i> <strong>Biên lai tham chiếu:</strong> Phiếu Xuất #PX-@Model.MaPhieuXuat?.ToString("D5")</li>
+                                    <li class="mb-1"><i class="fa-solid fa-caret-right text-warning"></i> <strong>Chủ sở hữu (Khách hàng):</strong> <span class="fw-bold fs-5 text-danger">@Model.MaPhieuXuatNavigation.TenKhachHang</span> @(string.IsNullOrEmpty(Model.MaPhieuXuatNavigation.SoDienThoaiKhach) ? "" : "(SĐT: " + Model.MaPhieuXuatNavigation.SoDienThoaiKhach + ")")</li>
+                                    <li class="mb-2"><i class="fa-solid fa-caret-right text-warning"></i> <strong>Người xuất kho bán:</strong> @(Model.MaPhieuXuatNavigation.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</li>
+                                    <hr/>
+                                    @{
+                                        int thoiGianBaoHanh = Model.MaSanPhamNavigation?.ThoiGianBaoHanh ?? 0;
+                                        DateTime ngayHetHan = Model.MaPhieuXuatNavigation.NgayXuat.AddMonths(thoiGianBaoHanh);
+                                        bool conBaoHanh = DateTime.Now <= ngayHetHan;
+                                    }
+                                    <li class="text-danger mt-1">
+                                        <i class="fa-solid fa-shield-halved"></i> <strong>Ngày hết hạn bảo hành:</strong> @ngayHetHan.ToString("dd/MM/yyyy") 
+                                        @if (conBaoHanh) {
+                                            <span class="badge bg-success ms-2 fs-6"><i class="fa-solid fa-check"></i> Linh Kiện Đang Trong Thời Gian Bảo Hành</span>
+                                        } else {
+                                            <span class="badge bg-danger ms-2 fs-6"><i class="fa-solid fa-xmark"></i> Linh Kiện Đã Hết Bảo Hành</span>
+                                        }
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="timeline-item position-relative pb-2" style="opacity: 0.6;">
+                                <span class="position-absolute bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:40px;height:40px;left:-60px;top:0; font-size:18px; z-index: 2;">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </span>
+                                <h5 class="fw-bold text-secondary mb-1">Giai đoạn 2: Chờ Xuất Kho Bán</h5>
+                                <p class="text-muted small mt-2">Lõi Seri này hiện vẫn đang được cất giữ an toàn trong kho hàng, sẵn sàng để phục vụ khách hàng tương lai.</p>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        padding-left: 70px;
+        position: relative;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0px;
+        left: 28px;
+        width: 4px;
+        background: #e9ecef;
+        border-radius: 4px;
+        z-index: 1;
+    }
+</style>

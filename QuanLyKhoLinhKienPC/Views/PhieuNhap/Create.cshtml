@@ -1,51 +1,211 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.PhieuNhap
-
+@using System.Text.Json
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Lập Phiếu Nhập Kho";
 }
 
-<h1>Create</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow mb-4 border-primary">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fa-solid fa-file-invoice"></i> Lập Phiếu Nhập Kho</h4>
+                    <span class="badge bg-warning text-dark fs-5 shadow-sm">
+                        Tổng cộng: <span id="lblTongTien" class="fw-bold fs-4">0</span> VND
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <form asp-action="Create" id="frmPhieuNhap">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger px-3 py-2"></div>
+                        
+                        <!-- MASTER DATA -->
+                        <h5 class="text-primary border-bottom border-primary pb-2 mb-3"><i class="fa-solid fa-1"></i> Thông Tin Chung</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-5 mb-3">
+                                <label asp-for="MaNhaCungCap" class="form-label fw-bold">Nhà Cung Cấp <span class="text-danger">*</span></label>
+                                <select asp-for="MaNhaCungCap" class ="form-select shadow-sm" asp-items="ViewBag.MaNhaCungCap">
+                                    <option value="">-- Chọn Nhà Cung Cấp --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-7 mb-3">
+                                <label asp-for="GhiChu" class="form-label fw-bold">Ghi Chú Đơn Hàng</label>
+                                <input asp-for="GhiChu" class="form-control shadow-sm" placeholder="Nhập ghi chú (nếu có)..." />
+                            </div>
+                            <!-- Ẩn Mã Người Dùng (Giả lập số 1 vì chưa có Đăng nhập) -->
+                            <input type="hidden" asp-for="MaNguoiDung" value="1" />
+                        </div>
 
-<h4>PhieuNhap</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="TongTien" class="control-label"></label>
-                <input asp-for="TongTien" class="form-control" />
-                <span asp-validation-for="TongTien" class="text-danger"></span>
+                        <!-- DETAIL DATA -->
+                        <div class="d-flex justify-content-between align-items-center border-bottom border-primary pb-2 mb-3">
+                            <h5 class="text-primary mb-0"><i class="fa-solid fa-2"></i> Danh Sách Linh Kiện Lô Hàng</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary shadow-sm" onclick="themDong()">
+                                <i class="fa-solid fa-plus"></i> Thêm Linh Kiện
+                            </button>
+                        </div>
+                        
+                        <div class="table-responsive shadow-sm">
+                            <table class="table table-bordered table-hover mb-0" id="tblChiTiet">
+                                <thead class="table-primary text-center">
+                                    <tr>
+                                        <th>Sản Phẩm <span class="text-danger">*</span></th>
+                                        <th style="width: 15%">Số Lượng <span class="text-danger">*</span></th>
+                                        <th style="width: 20%">Đơn Giá Nhập (VNĐ) <span class="text-danger">*</span></th>
+                                        <th style="width: 20%">Thành Tiền</th>
+                                        <th style="width: 5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dòng động JS sẽ chèn vào đây -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted fst-italic mt-2 d-block"><i class="fa-solid fa-circle-info"></i> Hãy nhập chính xác thông tin, hệ thống sẽ tự động sinh mã Seri tương ứng với số lượng kiện hàng.</small>
+
+                        <!-- Thùng chứa Thẻ Input Hidden -->
+                        <div id="hiddenInputsContainer"></div>
+
+                        <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="button" class="btn btn-success fw-bold px-4" onclick="submitForm()">
+                                <i class="fa-solid fa-clipboard-check"></i> Xác Nhận Lập Phiếu & Nhập Kho
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="GhiChu" class="control-label"></label>
-                <input asp-for="GhiChu" class="form-control" />
-                <span asp-validation-for="GhiChu" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaNhaCungCap" class="control-label"></label>
-                <select asp-for="MaNhaCungCap" class ="form-control" asp-items="ViewBag.MaNhaCungCap"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaNguoiDung" class="control-label"></label>
-                <select asp-for="MaNguoiDung" class ="form-control" asp-items="ViewBag.MaNguoiDung"></select>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Lấy danh sách sản phẩm từ ViewBag truyền qua JSON cho JS
+        var dsSanPham = @Html.Raw(JsonSerializer.Serialize(ViewBag.SanPhamList));
+        var chiTietList = []; // Mảng chứa dữ liệu lưới
+
+        // Hàm Vẽ Kẻ Bảng (Mỗi lần biến mảng thay đổi)
+        function renderTable() {
+            var tbody = $('#tblChiTiet tbody');
+            tbody.empty();
+            var tongTienPhieu = 0;
+
+            if(chiTietList.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center text-muted fst-italic py-4">Giỏ hàng đang trống. Bấm "Thêm Linh Kiện" để bắt đầu.</td></tr>');
+            } else {
+                chiTietList.forEach(function(item, index) {
+                    // Option Dropdown Sản phẩm
+                    var sanPhamOptions = '<option value="">-- Chọn kiện hàng --</option>';
+                    dsSanPham.forEach(function(sp) {
+                        var kMaSanPham = sp.MaSanPham || sp.maSanPham; 
+                        var kTenSanPham = sp.TenSanPham || sp.tenSanPham;
+                        var selected = kMaSanPham == item.MaSanPham ? 'selected' : '';
+                        sanPhamOptions += `<option value="${kMaSanPham}" ${selected}>${kTenSanPham}</option>`;
+                    });
+
+                    // Tính thành tiền và cộng dồn
+                    var thanhTien = item.SoLuong * item.DonGiaNhap;
+                    tongTienPhieu += thanhTien;
+
+                    // Vẽ ra HTML
+                    var tr = `
+                        <tr>
+                            <td>
+                                <select class="form-select form-select-sm border-primary" onchange="capNhatDong(${index}, this, 'MaSanPham')">
+                                    ${sanPhamOptions}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-center fw-bold text-primary" min="1" value="${item.SoLuong}" onchange="capNhatDong(${index}, this, 'SoLuong')" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-end" min="0" value="${item.DonGiaNhap}" onchange="capNhatDong(${index}, this, 'DonGiaNhap')" />
+                            </td>
+                            <td class="text-end fw-bold text-success align-middle fs-6">
+                                ${new Intl.NumberFormat('vi-VN').format(thanhTien)}
+                            </td>
+                            <td class="text-center align-middle">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="xoaDong(${index})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(tr);
+                });
+            }
+
+            // Gắn Số tiền Khổng lồ
+            $('#lblTongTien').text(new Intl.NumberFormat('vi-VN').format(tongTienPhieu));
+        }
+
+        // Action Add row
+        function themDong() {
+            chiTietList.push({ MaSanPham: '', SoLuong: 1, DonGiaNhap: 0 });
+            renderTable();
+        }
+
+        // Action Xóa row
+        function xoaDong(index) {
+            chiTietList.splice(index, 1);
+            renderTable();
+        }
+
+        // Lắng nghe sự thay đổi của các ô Input
+        function capNhatDong(index, element, field) {
+            var value = $(element).val();
+            if (field === 'SoLuong' || field === 'DonGiaNhap') {
+                value = value === '' ? 0 : Number(value);
+                if (value < 0) value = 0;
+            }
+            chiTietList[index][field] = value;
+            renderTable();
+        }
+
+        // Xác Nhận Lập Phiếu
+        function submitForm() {
+            var ncc = $('#MaNhaCungCap').val();
+            if(!ncc) {
+                Swal.fire({ icon: 'warning', title: 'Thiếu Nhập liệu', text: 'Vui lòng Chọn Nhà Cung Cấp!' });
+                return;
+            }
+            if(chiTietList.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Phiếu trống', text: 'Vui lòng Mua ít nhất 1 linh kiện kiện hàng!' });
+                return;
+            }
+
+            var hopLe = true;
+            chiTietList.forEach(function(item) {
+                if(!item.MaSanPham || item.SoLuong <= 0 || item.DonGiaNhap <= 0) {
+                    hopLe = false;
+                }
+            });
+
+            if(!hopLe) {
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Thông tin mặt hàng chưa hợp lệ (Thiếu tên, Số lượng <=0, hoặc Đơn giá = 0).' });
+                return;
+            }
+
+            // Sinh Thẻ Hidden Cấu trúc Array chuẩn C# (EF Core list Binding)
+            var hiddenContainer = $('#hiddenInputsContainer');
+            hiddenContainer.empty();
+            
+            chiTietList.forEach(function(item, index) {
+                hiddenContainer.append(`<input type="hidden" name="ChiTietPhieuNhap[${index}].MaSanPham" value="${item.MaSanPham}" />`);
+                hiddenContainer.append(`<input type="hidden" name="ChiTietPhieuNhap[${index}].SoLuong" value="${item.SoLuong}" />`);
+                hiddenContainer.append(`<input type="hidden" name="ChiTietPhieuNhap[${index}].DonGiaNhap" value="${item.DonGiaNhap}" />`);
+            });
+
+            // Gửi Server
+            $('#frmPhieuNhap').submit();
+        }
+
+        $(document).ready(function() {
+            renderTable();
+        });
+    </script>
 }

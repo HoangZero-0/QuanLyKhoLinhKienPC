@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -16,11 +16,12 @@
             background-color: #f5f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         /* Cấu trúc Flex dọc */
         body {
             display: flex;
             flex-direction: column;
+            zoom: 0.8; /* Thu nhỏ giao diện xuống 80% */
+            height: 125vh; /* Đảm bảo đủ chiều cao khi bị thu nhỏ 20% (100 / 0.8 = 125) */
         }
 
         /* Navbar và Footer cố định */
@@ -44,6 +45,7 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            overflow-x: hidden; /* Ẩn thanh cuộn ngang */
             flex-shrink: 0;
             transition: all 0.3s;
         }
@@ -87,7 +89,7 @@
             flex: 1;
             padding: 20px;
             background: #ecf0f1;
-            overflow: hidden; /* Không cho cuộn cấp này */
+            overflow-y: auto; /* Cho phép cuộn phần nội dung bên phải */
             display: flex;
             flex-direction: column;
         }
@@ -112,8 +114,23 @@
             <i class="fa-solid fa-microchip text-warning"></i> KHO LINH KIỆN PC
         </a>
         <div class="d-flex align-items-center">
-            <span class="text-light me-3 small">Xin chào, Admin</span>
-            <a href="#" class="btn btn-sm btn-outline-warning">Đăng xuất</a>
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <span class="text-light me-3 small">
+                    Xin chào, 
+                    <a asp-controller="HoSo" asp-action="Index" class="text-warning text-decoration-none fw-bold" title="Xem hồ sơ cá nhân">
+                        @User.FindFirst("HoTen")?.Value
+                    </a>
+                    <span class="badge bg-secondary ms-1">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                </span>
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-right-to-bracket"></i> Đăng nhập</a>
+            }
         </div>
     </nav>
 
@@ -161,22 +178,30 @@
                         <i class="fa-solid fa-file-invoice-dollar"></i> Xuất kho / Bán hàng
                     </a>
                 </li>
-
-                <li class="nav-item mt-2">
-                    <hr class="text-secondary mx-3 my-2">
-                    <div class="px-3 text-uppercase text-muted" style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Hệ thống</div>
-                </li>
-
                 <li class="nav-item">
-                    <a class="nav-link @(currentController == "VaiTro" ? "active" : "")" asp-controller="VaiTro" asp-action="Index">
-                        <i class="fa-solid fa-user-shield"></i> Vai trò
+                    <a class="nav-link @(currentController == "SeriSanPham" ? "active" : "")" asp-controller="SeriSanPham" asp-action="Index">
+                        <i class="fa-solid fa-barcode"></i> Kho Lõi (Seri)
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link @(currentController == "NguoiDung" ? "active" : "")" asp-controller="NguoiDung" asp-action="Index">
-                        <i class="fa-solid fa-users"></i> Nhân viên
-                    </a>
-                </li>
+
+                @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+                {
+                    <li class="nav-item mt-2">
+                        <hr class="text-secondary mx-3 my-2">
+                        <div class="px-3 text-uppercase text-muted" style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">Hệ thống</div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "VaiTro" ? "active" : "")" asp-controller="VaiTro" asp-action="Index">
+                            <i class="fa-solid fa-user-shield"></i> Vai trò
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "NguoiDung" ? "active" : "")" asp-controller="NguoiDung" asp-action="Index">
+                            <i class="fa-solid fa-users"></i> Nhân viên
+                        </a>
+                    </li>
+                }
             </ul>
         </nav>
 
@@ -191,6 +216,76 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        $(document).ready(function () {
+            // Chuyển đối các Alert tĩnh thành SweetAlert Toast hiện đại
+            $('.alert').each(function () {
+                var $alert = $(this);
+                
+                // Trích xuất nội dung thực tế (bỏ đi các ký hiệu icon, close x, và title dư thừa)
+                var rawText = $alert.text();
+                // Regex loại bỏ 'Thất bại:', 'Thành công:', 'Lưu ý:' và khoảng trắng
+                var message = rawText.replace(/Thất bại:|Thành công:|Lưu ý:/gi, '').replace('×', '').trim();
+                
+                var iconType = 'info';
+                if ($alert.hasClass('alert-success')) iconType = 'success';
+                else if ($alert.hasClass('alert-danger')) iconType = 'error';
+                else if ($alert.hasClass('alert-warning')) iconType = 'warning';
+
+                // Ẩn bảng HTML Alert cứng đi (Chỉ dùng dữ liệu tạo Toast)
+                $alert.hide();
+
+                // Tạo đối tượng Toast
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top', // 'top' sẽ hiển thị ở giữa trên cùng
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+
+                // Kích hoạt Toast sau 100ms
+                setTimeout(function() {
+                     Toast.fire({
+                        icon: iconType,
+                        title: message
+                    });
+                }, 100);
+            });
+
+            // Global SweetAlert Confirm Form Submit (Bắt lỗi Localhost Says gốc)
+            $('form[data-confirm]').on('submit', function (e) {
+                e.preventDefault();
+                var form = this;
+                var message = $(form).attr('data-confirm');
+                Swal.fire({
+                    title: 'Xác nhận hành động nguy hiểm',
+                    html: message.replace(/\\n/g, '<br/>'),
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fa-solid fa-check"></i> Đồng ý',
+                    cancelButtonText: 'Hủy bỏ',
+                    heightAuto: false,
+                    scrollbarPadding: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Bỏ data confirm đi để submit thật sự
+                        form.removeAttribute('data-confirm');
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

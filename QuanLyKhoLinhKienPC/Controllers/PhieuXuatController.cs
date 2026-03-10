@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +9,14 @@ using QuanLyKhoLinhKienPC.Models;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
+    // DTO (Data Transfer Object) chuyên dụng để hứng dữ liệu "Giỏ hàng" từ Front-End gửi lên
+    public class ChiTietBanHang
+    {
+        public int MaSanPham { get; set; }
+        public int SoLuong { get; set; }
+        public decimal GiaTien { get; set; }
+    }
+
     public class PhieuXuatController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -21,8 +29,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: PhieuXuat
         public async Task<IActionResult> Index()
         {
-            var quanLyKhoLinhKienPCContext = _context.PhieuXuat.Include(p => p.MaNguoiDungNavigation);
-            return View(await quanLyKhoLinhKienPCContext.ToListAsync());
+            var data = _context.PhieuXuat
+                .Where(p => !p.IsDeleted)
+                .Include(p => p.MaNguoiDungNavigation)
+                .OrderByDescending(p => p.NgayXuat);
+            return View(await data.ToListAsync());
         }
 
         // GET: PhieuXuat/Details/5
@@ -35,6 +46,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             var phieuXuat = await _context.PhieuXuat
                 .Include(p => p.MaNguoiDungNavigation)
+                .Include(p => p.ChiTietPhieuXuat)
+                    .ThenInclude(ct => ct.MaSeriNavigation)
+                        .ThenInclude(s => s.MaSanPhamNavigation)
                 .FirstOrDefaultAsync(m => m.MaPhieuXuat == id);
             if (phieuXuat == null)
             {
@@ -47,7 +61,20 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: PhieuXuat/Create
         public IActionResult Create()
         {
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau");
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen");
+            
+            // Danh sách Dropdown cho Detail (Javascript) - Kèm theo Số lượng tồn trong Kho
+            var dsSanPham = _context.SanPham
+                .Where(s => !s.IsDeleted)
+                .Select(s => new { 
+                    MaSanPham = s.MaSanPham, 
+                    TenSanPham = s.TenSanPham,
+                    GiaBan = s.GiaBan,
+                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 0) // Điếm thực tế thẻ seri
+                }).ToList();
+
+            ViewBag.SanPhamList = dsSanPham;
+
             return View();
         }
 
@@ -56,15 +83,91 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MaPhieuXuat,NgayXuat,TenKhachHang,SoDienThoaiKhach,TongTien,MaNguoiDung,IsDeleted")] PhieuXuat phieuXuat)
+        public async Task<IActionResult> Create([Bind("TenKhachHang,SoDienThoaiKhach,GhiChu,MaNguoiDung")] PhieuXuat phieuXuat, List<ChiTietBanHang> ChiTietXuat)
         {
+            ModelState.Remove("MaNguoiDungNavigation");
+            ModelState.Remove("SeriSanPham");
+            ModelState.Remove("ChiTietPhieuXuat");
+
+            if (ChiTietXuat == null || ChiTietXuat.Count == 0)
+            {
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 sản phẩm vào Đơn Bán Hàng!");
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(phieuXuat);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    phieuXuat.NgayXuat = DateTime.Now;
+                    phieuXuat.IsDeleted = false;
+                    
+                    // Server tự tính tổng tiền từ giỏ hàng thực tế
+                    phieuXuat.TongTien = ChiTietXuat.Sum(x => x.SoLuong * x.GiaTien);
+                    
+                    // 1. LƯU VỎ PHIẾU XUẤT ĐỂ LẤY ID
+                    _context.Add(phieuXuat);
+                    await _context.SaveChangesAsync();
+
+                    // 2. RÚT SERI KHO TỰ ĐỘNG (XUẤT KHO)
+                    var lstChiTietMoi = new List<ChiTietPhieuXuat>();
+                    var lstSeriThayDoi = new List<SeriSanPham>();
+
+                    foreach (var mon in ChiTietXuat)
+                    {
+                        // Quét Database lấy n Seri Đang Tồn Kho của SP này (Take = SoLuong)
+                        var nhungSeriRutRa = await _context.SeriSanPham
+                            .Where(s => s.MaSanPham == mon.MaSanPham && s.TrangThai == 0 && !s.IsDeleted)
+                            .Take(mon.SoLuong)
+                            .ToListAsync();
+
+                        if (nhungSeriRutRa.Count < mon.SoLuong)
+                        {
+                            throw new Exception($"Không đủ Số lượng Seri Tồn tại Kho cho mã sản phẩm [{mon.MaSanPham}] !");
+                        }
+
+                        // Lặp qua những seri cầm trên tay, lột xác chúng
+                        foreach (var sr in nhungSeriRutRa)
+                        {
+                            // Đánh dấu là đã Bán & Thuộc về Phiếu xuất nào (Tracking)
+                            sr.TrangThai = 1;
+                            sr.MaPhieuXuat = phieuXuat.MaPhieuXuat;
+                            lstSeriThayDoi.Add(sr);
+
+                            // Tạo 1 dòng chứng từ Hóa Đơn Detail kẹp chung với Seri đó
+                            var ctt = new ChiTietPhieuXuat
+                            {
+                                MaSeri = sr.MaSeri,
+                                MaPhieuXuat = phieuXuat.MaPhieuXuat,
+                                GiaTien = mon.GiaTien
+                            };
+                            lstChiTietMoi.Add(ctt);
+                        }
+                    }
+
+                    // 3. ĐỔ TOÀN BỘ LIST SỰ THAY ĐỔI VÀO DB
+                    _context.SeriSanPham.UpdateRange(lstSeriThayDoi);
+                    _context.ChiTietPhieuXuat.AddRange(lstChiTietMoi);
+                    await _context.SaveChangesAsync();
+
+                    // 4. CHỐT ĐƠN (COMMIT)
+                    await transaction.CommitAsync();
+
+                    TempData["Success"] = "Lập Hóa Đơn và Rút Kho Seri Bán Hàng Thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", "Lỗi Rút Kho Thực Tế: " + ex.Message + " Toàn bộ giao dịch ảo đã được Rollback. Không có dữ liệu nào bị thay đổi.");
+                }
             }
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau", phieuXuat.MaNguoiDung);
+
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuXuat.MaNguoiDung);
+            
+            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 0) }).ToList();
+            ViewBag.SanPhamList = dsSanPham;
+
             return View(phieuXuat);
         }
 
@@ -148,11 +251,175 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuXuat = await _context.PhieuXuat.FindAsync(id);
             if (phieuXuat != null)
             {
-                _context.PhieuXuat.Remove(phieuXuat);
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1. Soft delete phiếu xuất
+                    phieuXuat.IsDeleted = true;
+                    _context.Update(phieuXuat);
+
+                    // 2. Trả lại Seri về kho (TrangThai = 0, thoát khỏi MaPhieuXuat)
+                    var seriXuatList = await _context.SeriSanPham
+                        .Where(s => s.MaPhieuXuat == id)
+                        .ToListAsync();
+
+                    foreach (var seri in seriXuatList)
+                    {
+                        seri.TrangThai = 0; // Trả lại kho
+                        seri.MaPhieuXuat = null;
+                    }
+                    _context.UpdateRange(seriXuatList);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["Success"] = "Đã chuyển Hóa đơn xuất vào thùng rác và hoàn trả Seri về kho hàng.";
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Lỗi khi xóa Hóa đơn: " + ex.Message;
+                }
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // 6. THÙNG RÁC
+        public async Task<IActionResult> Trash()
+        {
+            var data = _context.PhieuXuat
+                .Where(p => p.IsDeleted)
+                .Include(p => p.MaNguoiDungNavigation)
+                .OrderByDescending(p => p.NgayXuat);
+            return View(await data.ToListAsync());
+        }
+
+        // 7. KHÔI PHỤC
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var phieuXuat = await _context.PhieuXuat.FindAsync(id);
+            if (phieuXuat == null)
+            {
+                TempData["Error"] = "Không tìm thấy Phiếu Xuất!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy các ChiTietPhieuXuat để biết những Seri nào cần lấy lại
+                var chiTietList = await _context.ChiTietPhieuXuat
+                    .Where(ct => ct.MaPhieuXuat == id)
+                    .Select(ct => ct.MaSeri)
+                    .ToListAsync();
+
+                var seriList = await _context.SeriSanPham
+                    .Where(s => chiTietList.Contains(s.MaSeri))
+                    .ToListAsync();
+
+                // Kiểm tra xem có Seri nào đã bị đem bán cho hóa đơn khác chưa
+                if (seriList.Any(s => s.TrangThai != 0))
+                {
+                    TempData["Error"] = "Không thể khôi phục hóa đơn này vì một số Seri thuộc hóa đơn đã được xuất bán lại cho khách hàng khác!";
+                    return RedirectToAction(nameof(Trash));
+                }
+
+                // Nếu tất cả seri đều trong kho (TrangThai = 0)
+                foreach (var seri in seriList)
+                {
+                    seri.TrangThai = 1; // Đặt lại thành Đã bán
+                    seri.MaPhieuXuat = id;
+                }
+                _context.UpdateRange(seriList);
+
+                phieuXuat.IsDeleted = false;
+                _context.Update(phieuXuat);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["Success"] = "Đã khôi phục Hóa Đơn và rút lại Seri thành công.";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Lỗi khi khôi phục: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Trash));
+        }
+
+        // 8. XÓA VĨNH VIỄN
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteForce(int id)
+        {
+            var phieuXuat = await _context.PhieuXuat.FindAsync(id);
+            if (phieuXuat == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            try
+            {
+                // Xóa Chi Tiết trước
+                var chiTietList = await _context.ChiTietPhieuXuat.Where(c => c.MaPhieuXuat == id).ToListAsync();
+                _context.ChiTietPhieuXuat.RemoveRange(chiTietList);
+
+                // Xóa Phiếu
+                _context.PhieuXuat.Remove(phieuXuat);
+                await _context.SaveChangesAsync();
+                
+                TempData["Success"] = "Đã xóa vĩnh viễn Phiếu Xuất.";
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["Error"] = "Lỗi Ràng buộc Database. " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Trash));
+        }
+
+        // 9. DỌN SẠCH THÙNG RÁC
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmptyTrash()
+        {
+            var racList = await _context.PhieuXuat.Where(p => p.IsDeleted).ToListAsync();
+            if (!racList.Any()) return RedirectToAction(nameof(Trash));
+
+            int daXoa = 0;
+            int biLoi = 0;
+
+            foreach (var item in racList)
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    var chiTietList = await _context.ChiTietPhieuXuat.Where(c => c.MaPhieuXuat == item.MaPhieuXuat).ToListAsync();
+                    _context.ChiTietPhieuXuat.RemoveRange(chiTietList);
+
+                    _context.PhieuXuat.Remove(item);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    daXoa++;
+                }
+                catch (DbUpdateException)
+                {
+                    await transaction.RollbackAsync();
+                    biLoi++;
+                    _context.Entry(item).State = EntityState.Unchanged;
+                }
+            }
+
+            if (daXoa > 0 && biLoi == 0) TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} hóa đơn).";
+            else if (daXoa > 0 && biLoi > 0) TempData["Warning"] = $"Đã xóa {daXoa} hóa đơn. Lỗi {biLoi} hóa đơn.";
+
+            return RedirectToAction(nameof(Trash));
         }
 
         private bool PhieuXuatExists(int id)

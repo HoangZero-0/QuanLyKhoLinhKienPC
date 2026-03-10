@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +9,28 @@ builder.Services.AddDbContext<QuanLyKhoLinhKienPC.Models.QuanLyKhoLinhKienPCCont
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Cấu hình yêu cầu đăng nhập trên TOÀN BỘ hệ thống (Global Filter)
+    var policy = new AuthorizationPolicyBuilder()
+                     .RequireAuthenticatedUser()
+                     .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
+
+// Thêm cấu hình Cookie Authentication
+builder.Services.AddAuthentication("PCCookieAuth")
+    .AddCookie("PCCookieAuth", options =>
+    {
+        options.LoginPath = "/Auth/Login";       // Đường dẫn khi chưa đăng nhập mà truy cập trang bảo mật
+        options.LogoutPath = "/Auth/Logout";     // Đường dẫn đăng xuất
+        options.AccessDeniedPath = "/Auth/AccessDenied"; // Đường dẫn khi không có quyền (Role)
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);   // Cookie sống 7 ngày
+        options.Cookie.HttpOnly = true;          // Bảo mật Cookie
+        options.SlidingExpiration = true;        // Tự động gia hạn Cookie nếu user vẫn hoạt động
+    });
+
+
 
 var app = builder.Build();
 
@@ -24,6 +47,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Thêm UseAuthentication TRƯỚC UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

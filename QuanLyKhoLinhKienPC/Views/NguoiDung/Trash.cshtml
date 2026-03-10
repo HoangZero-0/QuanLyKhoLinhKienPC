@@ -1,0 +1,138 @@
+@model IEnumerable<QuanLyKhoLinhKienPC.Models.NguoiDung>
+
+@{
+    ViewData["Title"] = "Thùng Rác Người Dùng";
+}
+
+<div class="d-flex flex-column h-100">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Người Dùng</h2>
+        <div>
+            <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn xóa vĩnh viễn TẤT CẢ người dùng trong thùng rác?\nHành động này không thể hoàn tác!">
+                <button type="submit" class="btn btn-danger shadow-sm me-2">
+                    <i class="fa-solid fa-dumpster-fire"></i> Dọn sạch thùng rác
+                </button>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary shadow-sm">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <div class="flex-shrink-0">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i> @TempData["Warning"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    </div>
+
+    <div class="card mb-3 shadow-sm flex-shrink-0 border-0">
+        <div class="card-body py-2">
+            <form asp-action="Trash" method="get" class="row g-2 align-items-center">
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="searchString" class="form-control border-start-0 ps-0" placeholder="Nhập tên người dùng hoặc họ tên..." value="@ViewData["CurrentFilter"]">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="fa-solid fa-user-shield"></i></span>
+                        <select name="MaVaiTro" class="form-select" asp-items="ViewBag.MaVaiTro" onchange="this.form.submit()">
+                            <option value="">-- Tất cả vai trò --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold">Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+        <div class="card-body p-0 position-relative">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+                <table class="table table-striped table-hover mb-0 w-100 align-middle">
+                    <thead class="table-danger">
+                        <tr>
+                            <th class="py-3 ps-3" style="position: sticky; top: 0; z-index: 10;">
+                                Họ tên
+                            </th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">
+                                Tên đăng nhập
+                            </th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">
+                                Vai trò
+                            </th>
+                            <th class="text-center py-3" style="width: 200px; position: sticky; top: 0; z-index: 10;">
+                                Hành động
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-danger ps-3 py-3">
+                                        @Html.DisplayFor(modelItem => item.HoTen)
+                                    </td>
+                                    <td class="text-muted text-decoration-line-through">
+                                        @Html.DisplayFor(modelItem => item.TenDangNhap)
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.MaVaiTroNavigation?.TenVaiTro</span>
+                                    </td>
+                                    <td class="text-center py-2">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form asp-action="Restore" asp-route-id="@item.MaNguoiDung" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success w-100" title="Khôi phục">
+                                                    <i class="fa-solid fa-trash-arrow-up"></i> Khôi phục
+                                                </button>
+                                            </form>
+
+                                            <form asp-action="DeleteForce" asp-route-id="@item.MaNguoiDung" class="d-inline" data-confirm="CẢNH BÁO: Xóa vĩnh viễn người dùng này không thể lấy lại. Bạn chắc chứ?">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Xóa vĩnh viễn">
+                                                    <i class="fa-solid fa-eraser"></i> Xóa
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="fa-solid fa-trash-can-arrow-up fa-3x mb-3 text-secondary opacity-50"></i><br>
+                                    Thùng rác trống.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

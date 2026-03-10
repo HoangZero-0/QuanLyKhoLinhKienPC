@@ -1,59 +1,84 @@
-﻿@model QuanLyKhoLinhKienPC.Models.NguoiDung
+@model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Cập Nhật Người Dùng";
 }
 
-<h1>Edit</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fa-solid fa-pen-to-square"></i> Cập Nhật Người Dùng</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
+                        
+                        <input type="hidden" asp-for="MaNguoiDung" />
+                        <input type="hidden" asp-for="IsDeleted" />
 
-<h4>NguoiDung</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="MaNguoiDung" />
-            <div class="form-group">
-                <label asp-for="TenDangNhap" class="control-label"></label>
-                <input asp-for="TenDangNhap" class="form-control" />
-                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TenDangNhap" class="form-label fw-bold">Tên đăng nhập <span class="text-danger">*</span></label>
+                                <input asp-for="TenDangNhap" class="form-control" readonly style="background-color: #e9ecef;" />
+                                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                                <small class="form-text text-muted">Không thể thay đổi Tên đăng nhập.</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MatKhau" class="form-label fw-bold">Mật khẩu mới (Tùy chọn)</label>
+                                <input asp-for="MatKhau" type="password" class="form-control" placeholder="Để trống nếu không muốn đổi mật khẩu" value="" />
+                                <span asp-validation-for="MatKhau" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="HoTen" class="form-label fw-bold">Họ và tên</label>
+                            <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên người dùng..." />
+                            <span asp-validation-for="HoTen" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label fw-bold">Email</label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: email@domain.com" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MaVaiTro" class="form-label fw-bold">Vai trò <span class="text-danger">*</span></label>
+                                <select asp-for="MaVaiTro" class="form-control" asp-items="ViewBag.MaVaiTro"></select>
+                                <span asp-validation-for="MaVaiTro" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </a>
+
+                            <button type="submit" class="btn btn-warning fw-bold">
+                                <i class="fa-solid fa-save"></i> Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="MatKhau" class="control-label"></label>
-                <input asp-for="MatKhau" class="form-control" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HoTen" class="control-label"></label>
-                <input asp-for="HoTen" class="form-control" />
-                <span asp-validation-for="HoTen" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaVaiTro" class="control-label"></label>
-                <select asp-for="MaVaiTro" class="form-control" asp-items="ViewBag.MaVaiTro"></select>
-                <span asp-validation-for="MaVaiTro" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            if ($(".validation-summary-errors").length > 0) {
+                $(".validation-summary-errors").addClass("alert alert-danger");
+            }
+        });
+    </script>
 }

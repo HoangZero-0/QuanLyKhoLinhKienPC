@@ -38,14 +38,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var danhMuc = await _context.DanhMuc
                 .FirstOrDefaultAsync(m => m.MaDanhMuc == id);
             if (danhMuc == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(danhMuc);
@@ -63,19 +65,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaDanhMuc,TenDanhMuc,IsDeleted")] DanhMuc danhMuc)
         {
-            // Kiểm tra trùng tên
-            bool isDuplicate = _context.DanhMuc.Any(d => d.TenDanhMuc.Trim().ToLower() == danhMuc.TenDanhMuc.Trim().ToLower() && d.IsDeleted == false);
-            if (isDuplicate)
-            {
-                ModelState.AddModelError("TenDanhMuc", "Tên danh mục này đã tồn tại trong hệ thống!");
-            }
-
             if (ModelState.IsValid)
             {
                 _context.Add(danhMuc);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Thêm mới danh mục thành công!";
                 return RedirectToAction(nameof(Index));
             }
+            TempData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
             return View(danhMuc);
         }
 
@@ -85,13 +82,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var danhMuc = await _context.DanhMuc.FindAsync(id);
             if (danhMuc == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
             return View(danhMuc);
         }
@@ -103,18 +102,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id != danhMuc.MaDanhMuc)
             {
-                return NotFound();
-            }
-
-            // Kiểm tra trùng tên (trừ chính nó ra)
-            bool isDuplicate = _context.DanhMuc.Any(d =>
-                d.TenDanhMuc.Trim().ToLower() == danhMuc.TenDanhMuc.Trim().ToLower()
-                && d.MaDanhMuc != danhMuc.MaDanhMuc
-                && d.IsDeleted == false);
-
-            if (isDuplicate)
-            {
-                ModelState.AddModelError("TenDanhMuc", "Tên danh mục này đã bị trùng với một danh mục khác!");
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -123,12 +112,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(danhMuc);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Cập nhật danh mục thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!DanhMucExists(danhMuc.MaDanhMuc))
                     {
-                        return NotFound();
+                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -137,6 +128,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
             return View(danhMuc);
         }
 
@@ -146,14 +138,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var danhMuc = await _context.DanhMuc
                 .FirstOrDefaultAsync(m => m.MaDanhMuc == id);
             if (danhMuc == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(danhMuc);
@@ -171,6 +165,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 danhMuc.IsDeleted = true;
                 _context.Update(danhMuc);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Đã chuyển danh mục vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -197,11 +192,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var danhMuc = await _context.DanhMuc.FindAsync(id);
             if (danhMuc == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
             }
             danhMuc.IsDeleted = false;
             _context.Update(danhMuc);
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Khôi phục danh mục thành công.";
             return RedirectToAction(nameof(Trash));
         }
 
@@ -212,12 +209,17 @@ namespace QuanLyKhoLinhKienPC.Controllers
         public async Task<IActionResult> DeleteForce(int id)
         {
             var danhMuc = await _context.DanhMuc.FindAsync(id);
-            if (danhMuc == null) return NotFound();
+            if (danhMuc == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
+            }
 
             try
             {
                 _context.DanhMuc.Remove(danhMuc);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Đã xóa vĩnh viễn danh mục.";
                 return RedirectToAction(nameof(Trash));
             }
             catch (DbUpdateException)
@@ -257,7 +259,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     // Nếu lỗi (do ràng buộc khóa ngoại với Sản phẩm), bỏ qua và đếm lỗi
                     biLoi++;
 
-                    /// QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
+                    // QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
                     // Nếu không, EF Core sẽ vẫn nhớ lệnh xóa này và gây lỗi cho item tiếp theo
                     _context.Entry(item).State = EntityState.Unchanged;
                 }
@@ -283,6 +285,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
         private bool DanhMucExists(int id)
         {
             return _context.DanhMuc.Any(e => e.MaDanhMuc == id);
-        }        
+        }
     }
 }

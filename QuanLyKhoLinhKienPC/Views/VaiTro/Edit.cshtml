@@ -1,7 +1,7 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.VaiTro
 
 @{
-    ViewData["Title"] = "Chỉnh sửa Vai trò";
+    ViewData["Title"] = "Cập Nhật Vai Trò";
 }
 
 <div class="container-fluid pt-4">
@@ -13,7 +13,7 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Edit">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
                         <input type="hidden" asp-for="MaVaiTro" />
                         <input type="hidden" asp-for="IsDeleted" />
@@ -28,8 +28,8 @@
                             <a asp-action="Index" class="btn btn-secondary">
                                 <i class="fa-solid fa-arrow-left"></i> Quay lại
                             </a>
-                            <button type="submit" class="btn btn-warning">
-                                <i class="fa-solid fa-save"></i> Lưu thay đổi
+                            <button type="submit" class="btn btn-warning fw-bold">
+                                <i class="fa-solid fa-save"></i> Cập nhật
                             </button>
                         </div>
                     </form>
@@ -43,4 +43,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            if ($(".validation-summary-errors").length > 0) {
+                $(".validation-summary-errors").addClass("alert alert-danger");
+            }
+        });
+    </script>
 }

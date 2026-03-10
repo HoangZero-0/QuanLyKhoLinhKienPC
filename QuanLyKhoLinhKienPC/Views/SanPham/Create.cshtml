@@ -1,57 +1,143 @@
-﻿@model QuanLyKhoLinhKienPC.Models.SanPham
+@model QuanLyKhoLinhKienPC.Models.SanPham
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Thêm Mới Sản Phẩm";
 }
 
-<h1>Create</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-box-open"></i> Thêm Mới Sản Phẩm</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
-<h4>SanPham</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="TenSanPham" class="control-label"></label>
-                <input asp-for="TenSanPham" class="form-control" />
-                <span asp-validation-for="TenSanPham" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <label class="form-label fw-bold">Hình ảnh sản phẩm (Tùy chọn)</label>
+                                <div class="border rounded p-2 mb-2" style="background: #f8f9fa;">
+                                    <img id="imgPreview" src="~/images/no-image.png" alt="Ảnh xem trước" class="img-fluid" style="max-height: 200px; object-fit: contain;" />
+                                </div>
+                                <input type="file" name="fHinhAnh" class="form-control" onchange="previewImage(this)" accept="image/*" />
+                                <span asp-validation-for="HinhAnh" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="TenSanPham" class="form-label fw-bold">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    <input asp-for="TenSanPham" class="form-control" placeholder="Ví dụ: RAM Kingston Fury 8GB..." autofocus />
+                                    <span asp-validation-for="TenSanPham" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="HangSanXuat" class="form-label fw-bold">Hãng sản xuất</label>
+                                    <input asp-for="HangSanXuat" class="form-control" placeholder="Ví dụ: Kingston, Intel, ASUS..." />
+                                    <span asp-validation-for="HangSanXuat" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="MaDanhMuc" class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
+                                    <select asp-for="MaDanhMuc" class="form-control" asp-items="ViewBag.MaDanhMuc">
+                                        <option value="">-- Chọn danh mục --</option>
+                                    </select>
+                                    <span asp-validation-for="MaDanhMuc" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="GiaBan" class="form-label fw-bold">Giá bán (VNĐ) <span class="text-danger">*</span></label>
+                                        <input asp-for="GiaBan" type="number" class="form-control" placeholder="Nhập giá bán..." />
+                                        <span asp-validation-for="GiaBan" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="ThoiGianBaoHanh" class="form-label fw-bold">Bảo hành (Tháng) <span class="text-danger">*</span></label>
+                                        <input asp-for="ThoiGianBaoHanh" type="number" class="form-control" placeholder="Ví dụ: 12, 24..." />
+                                        <span asp-validation-for="ThoiGianBaoHanh" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="mb-3">
+                            <label asp-for="ThongSoKyThuat" class="form-label fw-bold mb-1">
+                                <i class="fa-solid fa-list-check"></i> Thông số kỹ thuật
+                            </label>
+                            <p class="form-text text-muted mb-2"><i class="fa-solid fa-circle-info"></i> Quy tắc nhập: Mỗi thông số trên 1 dòng theo định dạng <code>Tên thông số: Giá trị</code></p>
+                            <textarea asp-for="ThongSoKyThuat" class="form-control" rows="6"
+                                      placeholder="Dung lượng: 8GB&#10;Loại RAM: DDR4&#10;Bus RAM: 3200MHz&#10;Hãng: Kingston"></textarea>
+                            <span asp-validation-for="ThongSoKyThuat" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa-solid fa-save"></i> Lưu lại
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="HinhAnh" class="control-label"></label>
-                <input asp-for="HinhAnh" class="form-control" />
-                <span asp-validation-for="HinhAnh" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GiaBan" class="control-label"></label>
-                <input asp-for="GiaBan" class="form-control" />
-                <span asp-validation-for="GiaBan" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ThongSoKyThuat" class="control-label"></label>
-                <input asp-for="ThongSoKyThuat" class="form-control" />
-                <span asp-validation-for="ThongSoKyThuat" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaDanhMuc" class="control-label"></label>
-                <select asp-for="MaDanhMuc" class ="form-control" asp-items="ViewBag.MaDanhMuc"></select>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        var originalSrc = '/images/no-image.png';
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var file = input.files[0];
+                var validExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+                var fileExtension = file.name.split('.').pop().toLowerCase();
+                
+                if (!validExtensions.includes(fileExtension)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Định dạng không hợp lệ',
+                        text: 'Chỉ chấp nhận ảnh .jpg, .jpeg, .png, .webp!'
+                    });
+                    input.value = ''; 
+                    $('#imgPreview').attr('src', originalSrc);
+                    return;
+                }
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Dung lượng quá lớn',
+                        text: 'Kích thước ảnh tối đa 2MB!'
+                    });
+                    input.value = '';
+                    $('#imgPreview').attr('src', originalSrc);
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imgPreview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                $('#imgPreview').attr('src', originalSrc);
+            }
+        }
+
+        $(document).ready(function() {
+            if ($(".validation-summary-errors").length > 0) {
+                $(".validation-summary-errors").addClass("alert alert-danger");
+            }
+        });
+    </script>
 }

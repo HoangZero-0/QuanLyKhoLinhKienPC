@@ -1,0 +1,132 @@
+@model QuanLyKhoLinhKienPC.Models.NguoiDung
+
+@{
+    ViewData["Title"] = "Hồ Sơ Của Tôi";
+}
+
+<div class="container-fluid pt-4">
+    <div class="row">
+        <!-- Cột thông tin cơ bản & Cập nhật -->
+        <div class="col-md-7">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <h4 class="mb-0 flex-grow-1"><i class="fa-solid fa-address-card"></i> Thông Tin Cá Nhân</h4>
+                    <span class="badge bg-light text-primary fs-6">@Model.MaVaiTroNavigation?.TenVaiTro</span>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa-solid fa-check-circle"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width: 120px; height: 120px;">
+                            <i class="fa-solid fa-user-astronaut fa-4x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">@Html.DisplayFor(model => model.HoTen)</h4>
+                        <p class="text-muted"><i class="fa-solid fa-id-badge"></i> @Html.DisplayFor(model => model.TenDangNhap)</p>
+                    </div>
+
+                    <form asp-action="Index" method="post">
+                        <div class="mb-4 bg-light p-3 rounded">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Tên đăng nhập hệ thống</label>
+                            <input type="text" class="form-control bg-white" value="@Model.TenDangNhap" disabled />
+                            <small class="text-secondary"><i class="fa-solid fa-circle-info"></i> Tên đăng nhập không thể thay đổi.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="HoTen" class="form-label fw-bold">Họ và tên hiển thị <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fa-regular fa-user"></i></span>
+                                <input asp-for="HoTen" class="form-control" required />
+                            </div>
+                            <span asp-validation-for="HoTen" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Email" class="form-label fw-bold">Địa chỉ Email liên hệ</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fa-regular fa-envelope"></i></span>
+                                <input asp-for="Email" type="email" class="form-control" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Đổi mật khẩu -->
+        <div class="col-md-5">
+            <div class="card shadow border-top border-4 border-warning">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-warning fw-bold"><i class="fa-solid fa-shield-halved"></i> Đổi Mật Khẩu</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorDoiMK"] != null)
+                    {
+                        <div class="alert alert-danger px-3 py-2 small" role="alert">
+                            <i class="fa-solid fa-circle-xmark"></i> @TempData["ErrorDoiMK"]
+                        </div>
+                    }
+
+                    <p class="text-muted small mb-4">Để bảo vệ tài khoản, vui lòng không chia sẻ mật khẩu của bạn cho bất kỳ ai. Mật khẩu nên dài ít nhất 6 ký tự.</p>
+
+                    <form asp-action="DoiMatKhau" method="post">
+                        <div class="mb-3">
+                            <label for="matKhauCu" class="form-label fw-bold small">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-key"></i></span>
+                                <input type="password" class="form-control" id="matKhauCu" name="matKhauCu" required />
+                            </div>
+                        </div>
+
+                        <hr class="text-muted my-4">
+
+                        <div class="mb-3">
+                            <label for="matKhauMoi" class="form-label fw-bold small text-primary">Mật khẩu TƯƠNG LAI <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-primary"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" class="form-control border-primary" id="matKhauMoi" name="matKhauMoi" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="xacNhanMatKhauMoi" class="form-label fw-bold small">Nhập lại mật khẩu mới <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" class="form-control" id="xacNhanMatKhauMoi" name="xacNhanMatKhauMoi" required />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning fw-bold text-dark">
+                                <i class="fa-solid fa-rotate"></i> Cập Nhật Mật Khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

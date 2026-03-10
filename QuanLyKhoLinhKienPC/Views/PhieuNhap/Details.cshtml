@@ -1,54 +1,146 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.PhieuNhap
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi Tiết Phiếu Nhập Kho";
 }
 
-<h1>Details</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- PAPER RECEIPT STYLE CARD -->
+            <div class="card shadow-lg border-0 mb-4" style="background-color: #fdfdfd; border-top: 5px solid #0d6efd !important;">
+                
+                <!-- RECIEPT HEADER -->
+                <div class="card-header bg-transparent border-bottom-0 pt-4 pb-2 px-4 px-md-5 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="text-primary fw-bold mb-1"><i class="fa-solid fa-file-invoice"></i> PHIẾU NHẬP KHO</h2>
+                        <h5 class="text-muted">Mã chứng từ: <span class="text-dark fw-bold">#PN-@Model.MaPhieuNhap.ToString("D5")</span></h5>
+                    </div>
+                    <div class="text-end">
+                        <img src="/images/logo.png" alt="Logo" style="max-height: 50px; opacity: 0.8" onerror="this.style.display='none'" />
+                        <p class="mb-0 fs-6 text-muted">Ngày lập: @Model.NgayNhap.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
 
-<div>
-    <h4>PhieuNhap</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NgayNhap)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NgayNhap)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TongTien)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TongTien)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GhiChu)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GhiChu)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaNguoiDungNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaNguoiDungNavigation.MatKhau)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaNhaCungCapNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaNhaCungCapNavigation.TenNhaCungCap)
-        </dd>
-    </dl>
+                <div class="card-body px-4 px-md-5 pt-0">
+                    <hr class="mb-4" style="border-top: 2px dashed #ccc; opacity: 1;">
+                    
+                    <!-- MASTER INFO -->
+                    <div class="row mb-5">
+                        <div class="col-sm-6">
+                            <h6 class="text-uppercase text-muted fw-bold mb-2 small"><i class="fa-solid fa-truck-fast"></i> Thông tin đối tác</h6>
+                            <div class="p-3 bg-light rounded border">
+                                <h5 class="fw-bold mb-1">@Model.MaNhaCungCapNavigation?.TenNhaCungCap</h5>
+                                <p class="mb-1"><i class="fa-solid fa-phone text-muted"></i> @(Model.MaNhaCungCapNavigation?.SoDienThoai ?? "Không có")</p>
+                                <p class="mb-0"><i class="fa-solid fa-location-dot text-muted"></i> @(Model.MaNhaCungCapNavigation?.DiaChi ?? "Không có")</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end mt-4 mt-sm-0">
+                            <h6 class="text-uppercase text-muted fw-bold mb-2 small"><i class="fa-solid fa-circle-info"></i> Thông tin thêm</h6>
+                            <p class="mb-1 text-muted">Nhân viên lập: <span class="fw-bold text-dark">@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống Admin")</span></p>
+                            <p class="mb-1 text-muted">Kênh nhập: Nhập kho hệ thống</p>
+                            @if (!string.IsNullOrEmpty(Model.GhiChu))
+                            {
+                                <div class="mt-2 text-start bg-light p-2 rounded border ms-auto" style="max-width: 300px;">
+                                    <strong>Ghi chú:</strong> <i>@Model.GhiChu</i>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- DETAILS TABLE -->
+                    <div class="table-responsive rounded shadow-sm border mb-4">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light text-secondary border-bottom">
+                                <tr>
+                                    <th class="ps-4">STT</th>
+                                    <th>Mã SP</th>
+                                    <th>Tên Linh Kiện</th>
+                                    <th class="text-center">Số Lượng</th>
+                                    <th class="text-end">Đơn Giá Nhập</th>
+                                    <th class="text-end pe-4">Thành Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.ChiTietPhieuNhap == null || !Model.ChiTietPhieuNhap.Any())
+                                {
+                                    <tr><td colspan="6" class="text-center text-muted fst-italic py-3">Không tìm thấy chi tiết lỗi do cơ sở dữ liệu.</td></tr>
+                                }
+                                else
+                                {
+                                    int stt = 1;
+                                    foreach (var ct in Model.ChiTietPhieuNhap)
+                                    {
+                                        var thanhTien = ct.SoLuong * ct.DonGiaNhap;
+                                        <tr>
+                                            <td class="ps-4 text-muted">@stt</td>
+                                            <td><span class="badge bg-secondary">SP-@ct.MaSanPham</span></td>
+                                            <td class="fw-bold text-primary">@ct.MaSanPhamNavigation?.TenSanPham</td>
+                                            <td class="text-center fw-bold">@ct.SoLuong <span class="text-muted small fw-normal">chiếc</span></td>
+                                            <td class="text-end">@string.Format("{0:N0}", ct.DonGiaNhap) đ</td>
+                                            <td class="text-end pe-4 fw-bold">@string.Format("{0:N0}", thanhTien) đ</td>
+                                        </tr>
+                                        stt++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TOTALS SUMMARY -->
+                    <div class="row justify-content-end mb-4">
+                        <div class="col-8 col-sm-6 col-md-5 col-lg-4">
+                            <table class="table table-borderless table-sm mb-0">
+                                <tbody>
+                                    <tr class="fs-5 border-top border-2 border-dark">
+                                        <td class="fw-bold ps-0 pt-3">TỔNG CỘNG:</td>
+                                        <td class="text-end fw-bold text-danger pt-3 pe-0">@string.Format("{0:N0}", Model.TongTien) VNĐ</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- RECIEPT FOOTER -->
+                    <div class="text-center text-muted border-top pt-4 mb-2">
+                        <p class="mb-0 fw-bold">Xin cảm ơn đối tác!</p>
+                        <small class="fst-italic">Hóa đơn nhập kho nội bộ. Vui lòng lưu trữ để đối chiếu.</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex justify-content-between mb-5">
+                <a asp-action="Index" class="btn btn-secondary shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Trở về Lịch Sử
+                </a>
+                <button onclick="window.print()" class="btn btn-primary px-4 shadow-sm fw-bold">
+                    <i class="fa-solid fa-print"></i> In Hóa Đơn
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaPhieuNhap">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+/* CSS giành riêng cho lúc bấm IN Hóa Đơn (Ctrl+P) */
+@@media print {
+    body * {
+        visibility: hidden;
+    }
+    .card, .card * {
+        visibility: visible;
+    }
+    .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .btn {
+        display: none !important;
+    }
+}
+</style>

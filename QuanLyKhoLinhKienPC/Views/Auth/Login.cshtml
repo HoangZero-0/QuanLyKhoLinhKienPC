@@ -1,0 +1,131 @@
+@{
+    ViewData["Title"] = "Đăng Nhập Quản Trị";
+    Layout = null; // Bỏ Layout chung để thiết kế riêng trắng tinh
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản Lý Kho PC</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background-color: #f4f6f9;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            color: white;
+            padding: 40px 20px 30px;
+            text-align: center;
+        }
+        .login-body {
+            padding: 30px 40px 40px;
+        }
+        .input-group-text {
+            background-color: transparent;
+            color: #6c757d;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+        .input-group:focus-within .input-group-text,
+        .input-group:focus-within .form-control {
+            border-color: #0d6efd;
+        }
+        .input-group:focus-within .input-group-text {
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-header">
+            <h2 class="mb-2"><i class="fa-solid fa-microchip"></i> Kho Linh Kiện PC</h2>
+            <p class="mb-0 text-white-50">Hệ thống quản trị và kiểm kho</p>
+        </div>
+        
+        <div class="login-body">
+            @if (ViewData["Error"] != null)
+            {
+                <div class="alert alert-danger p-2 mb-4 text-center small rounded border-0 bg-danger bg-opacity-10 text-danger fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i> @ViewData["Error"]
+                </div>
+            }
+
+            <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div class="mb-4">
+                    <label for="tenDangNhap" class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Tên đăng nhập</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-end-0"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="tenDangNhap" name="tenDangNhap" required autofocus placeholder="Nhập tên đăng nhập...">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="matKhau" class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-end-0"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="matKhau" name="matKhau" required placeholder="Nhập mật khẩu...">
+                        <button class="btn border border-start-0 text-muted" type="button" id="btnTogglePassword" style="background-color: transparent;">
+                            <i class="fa-solid fa-eye" id="iconTogglePassword"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold rounded-pill shadow-sm">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i> ĐĂNG NHẬP
+                    </button>
+                    <a href="/" class="btn btn-link mt-2 text-muted small text-decoration-none">
+                        <i class="fa-solid fa-arrow-left"></i> Trở về trang xem hàng
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // JS để hiện/ẩn mật khẩu
+        document.getElementById('btnTogglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('matKhau');
+            const icon = document.getElementById('iconTogglePassword');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>
