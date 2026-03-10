@@ -1,60 +1,226 @@
-﻿@model QuanLyKhoLinhKienPC.Models.SanPham
+@model QuanLyKhoLinhKienPC.Models.SanPham
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi Tiết Sản Phẩm";
 }
 
-<h1>Details</h1>
+<div class="container-fluid pt-4 h-100 overflow-y-auto">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary"><i class="fa-solid fa-circle-info"></i> Chi Tiết Sản Phẩm</h2>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.MaSanPham" class="btn btn-warning shadow-sm">
+                <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+            </a>
+            <a asp-action="Index" class="btn btn-secondary shadow-sm ms-2">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
 
-<div>
-    <h4>SanPham</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TenSanPham)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TenSanPham)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HinhAnh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HinhAnh)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.GiaBan)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GiaBan)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ThongSoKyThuat)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ThongSoKyThuat)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ThoiGianBaoHanh)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ThoiGianBaoHanh)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaDanhMucNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaDanhMucNavigation.TenDanhMuc)
-        </dd>
-    </dl>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5 text-center mb-4">
+                    <div class="border rounded p-3 bg-light">
+                        <img src="@(string.IsNullOrEmpty(Model.HinhAnh) ? "/images/no-image.png" : Model.HinhAnh)"
+                             alt="@Model.TenSanPham"
+                             class="img-fluid rounded shadow-sm"
+                             style="max-height: 400px; object-fit: contain;" />
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <h3 class="fw-bold text-dark mb-3">@Model.TenSanPham</h3>
+
+                    <div class="mb-3">
+                        <span class="badge bg-secondary fs-6">
+                            <i class="fa-solid fa-tag"></i> Danh mục: @(Model.MaDanhMucNavigation?.TenDanhMuc ?? "Chưa phân loại")
+                        </span>
+
+                        <span class="badge bg-info fs-6 ms-2 text-dark">
+                            <i class="fa-solid fa-industry"></i> Hãng: @(string.IsNullOrEmpty(Model.HangSanXuat) ? "N/A" : Model.HangSanXuat)
+                        </span>
+
+                        @if (Model.SoLuongTon > 0)
+                        {
+                            <span class="badge bg-success fs-6 ms-2">
+                                <i class="fa-solid fa-check-circle"></i> Còn hàng (@Model.SoLuongTon)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger fs-6 ms-2">
+                                <i class="fa-solid fa-circle-xmark"></i> Hết hàng
+                            </span>
+                        }
+
+                        @if (Model.IsDeleted)
+                        {
+                            <span class="badge bg-danger fs-6 ms-2">
+                                <i class="fa-solid fa-trash"></i> Đã xóa
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success fs-6 ms-2">
+                                <i class="fa-solid fa-check"></i> Đang hoạt động
+                            </span>
+                        }
+                    </div>
+
+                    <h2 class="text-danger fw-bold mb-4">
+                        @Model.GiaBan.ToString("N0") VNĐ
+                    </h2>
+
+                    <div class="card border-info mb-3">
+                        <div class="card-header bg-info text-white fw-bold">
+                            <i class="fa-solid fa-shield-halved"></i> Thông tin bảo hành
+                        </div>
+                        <div class="card-body py-2">
+                            <p class="mb-0"><strong>Thời gian bảo hành:</strong> @Model.ThoiGianBaoHanh tháng.</p>
+                            <p class="mb-0 text-muted small">Bảo hành chính hãng theo Serial Number.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header fw-bold bg-light">
+                            <i class="fa-solid fa-microchip"></i> Thông số kỹ thuật
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped table-hover mb-0">
+                                <tbody>
+                                    @{
+                                        // LOGIC CẮT CHUỖI ĐỂ HIỂN THỊ
+                                        if (!string.IsNullOrEmpty(Model.ThongSoKyThuat))
+                                        {
+                                            // 1. Tách các dòng (Split by NewLine)
+                                            var lines = Model.ThongSoKyThuat.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                            foreach (var line in lines)
+                                            {
+                                                // 2. Tách Tên và Giá trị (Split by :)
+                                                // limit = 2 để tránh cắt nhầm nếu trong giá trị có dấu :
+                                                var parts = line.Split(':', 2);
+
+                                                <tr>
+                                                    @if (parts.Length == 2)
+                                                    {
+                                                        <td style="width: 40%; font-weight: 600; color: #555;">@parts[0].Trim()</td>
+                                                        <td>@parts[1].Trim()</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        // Trường hợp dòng không có dấu :, in nguyên dòng đó
+                                                        <td colspan="2">@line</td>
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="2" class="text-center text-muted">Chưa cập nhật thông số kỹ thuật.</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="mt-4 mb-4" />
+
+            <!-- PHẦN XỬ LÝ LỘ SERI (LỖI 5) -->
+            <div class="card border-0 shadow-none">
+                <div class="card-header bg-transparent border-bottom-0 ms-0 ps-0 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-barcode text-primary"></i> Quản lý Số Seri </h4>
+                    <div class="input-group w-auto">
+                        <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Tìm số seri..." onkeyup="searchTable()">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive border rounded mb-3">
+                        <table class="table table-hover table-bordered mb-0" id="seriTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 80px;">STT</th>
+                                    <th>Mã Seri Number</th>
+                                    <th class="text-center" style="width: 150px;">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.SeriSanPham != null && Model.SeriSanPham.Any())
+                                {
+                                    int i = 1;
+                                    foreach (var seri in Model.SeriSanPham)
+                                    {
+                                        <tr>
+                                            <td class="text-center text-muted">@i</td>
+                                            <td class="fw-bold font-monospace text-primary">@seri.SoSeri</td>
+                                            <td class="text-center">
+                                                @if (seri.TrangThai == 1)
+                                                {
+                                                    <span class="badge bg-success">Trong kho</span>
+                                                }
+                                                else if (seri.TrangThai == 2)
+                                                {
+                                                    <span class="badge bg-danger">Đã bán</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Lỗi/Khác</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        i++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="fa-solid fa-folder-open mb-2 fa-2x opacity-50"></i><br />
+                                            Sản phẩm này hiện chưa có Seri nào trong kho.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer bg-light text-end">
+            <small class="text-muted">Mã hệ thống: #@Model.MaSanPham | Ngày cập nhật cuối: @DateTime.Now.ToString("dd/MM/yyyy")</small>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaSanPham">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    <script>
+        function searchTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("seriTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Lặp qua các dòng (bỏ qua dòng tiêu đề thead)
+            for (i = 1; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1]; // Cột Mã Seri (Index 1)
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+}

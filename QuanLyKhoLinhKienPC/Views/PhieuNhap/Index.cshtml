@@ -1,65 +1,85 @@
-﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuNhap>
+@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuNhap>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lịch Sử Nhập Kho";
 }
 
-<h1>Index</h1>
+<div class="container-fluid pt-4">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h3 class="text-primary fw-bold"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Lập Phiếu Nhập</h3>
+        </div>
+        <div class="col-md-6 text-end">
+            <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
+                <i class="fa-solid fa-plus"></i> Tạo Phiếu Nhập Mới
+            </a>
+            <a asp-action="Trash" class="btn btn-secondary shadow-sm fw-bold ms-2">
+                <i class="fa-solid fa-trash-can"></i> Thùng Rác
+            </a>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayNhap)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TongTien)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GhiChu)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaNguoiDungNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaNhaCungCapNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NgayNhap)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TongTien)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GhiChu)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaNguoiDungNavigation.MatKhau)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaNhaCungCapNavigation.TenNhaCungCap)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MaPhieuNhap">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MaPhieuNhap">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th class="ps-4">Mã Phiếu</th>
+                            <th>Ngày Lập</th>
+                            <th>Nhà Cung Cấp</th>
+                            <th>Người Lập</th>
+                            <th class="text-end">Tổng Tiền (VNĐ)</th>
+                            <th>Ghi Chú</th>
+                            <th class="text-center pe-4">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted fst-italic py-4">Chưa có phiếu nhập nào trong hệ thống.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary">
+                                        #PN-@item.MaPhieuNhap.ToString("D5")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fa-regular fa-calendar"></i> @item.NgayNhap.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">
+                                        @item.MaNhaCungCapNavigation?.TenNhaCungCap
+                                    </td>
+                                    <td>
+                                        <i class="fa-solid fa-user-tie text-muted"></i> @(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")
+                                    </td>
+                                    <td class="text-end fw-bold text-danger">
+                                        @string.Format("{0:N0}", item.TongTien) đ
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 150px;" title="@item.GhiChu">
+                                        @(string.IsNullOrEmpty(item.GhiChu) ? "-" : item.GhiChu)
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <a asp-action="Details" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-info text-white shadow-sm" title="Xem Hóa Đơn">
+                                            <i class="fa-solid fa-eye"></i> Chi Tiết
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-danger text-white shadow-sm ms-1" title="Xóa vào thùng rác">
+                                            <i class="fa-solid fa-trash"></i> Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

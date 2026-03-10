@@ -1,0 +1,104 @@
+@model IEnumerable<QuanLyKhoLinhKienPC.Models.SeriSanPham>
+
+@{
+    ViewData["Title"] = "Quản Lý Kho Thẻ Seri";
+}
+
+<div class="container-fluid pt-4">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h3 class="text-primary fw-bold"><i class="fa-solid fa-barcode"></i> Quản Lý Kho Seri Linh Kiện</h3>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="card shadow-sm mb-4 border-0 bg-light">
+        <div class="card-body py-3">
+            <form asp-action="Index" method="get" class="row gx-2 gy-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0" placeholder="Tìm tên linh kiện, mã Seri..." />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="TrangThaiFilter" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="0" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "0")">Còn Trong Kho (Chưa Bán)</option>
+                        <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Đã Bán</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fa-solid fa-filter"></i> Lọc Kết Quả</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 mb-table-sticky-header">
+                    <thead class="table-primary sticky-top" style="z-index: 1;">
+                        <tr>
+                            <th class="ps-4">Mã Số Seri</th>
+                            <th>Linh Kiện Gốc</th>
+                            <th>Thuộc Phiếu Nhập</th>
+                            <th class="text-center">Trạng Thái Kho</th>
+                            <th class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted fst-italic py-5">
+                                    <i class="fa-solid fa-box-open fs-1 text-light mb-3 block"></i><br/>
+                                    Không tìm thấy Serial nào khớp với bộ lọc.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="badge bg-dark fw-bold px-3 py-2 fs-6" style="letter-spacing: 1px;"><i class="fa-solid fa-hashtag"></i> @item.SoSeri</span>
+                                    </td>
+                                    <td class="fw-bold text-primary">
+                                        @item.MaSanPhamNavigation?.TenSanPham
+                                    </td>
+                                    <td>
+                                        <a href="/PhieuNhap/Details/@item.MaPhieuNhap" class="text-decoration-none text-info fw-bold">
+                                            <i class="fa-solid fa-receipt"></i> Lô #PN-@item.MaPhieuNhap?.ToString("D5")
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.TrangThai == 0)
+                                        {
+                                            <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm"><i class="fa-solid fa-boxes-stacked"></i> Tồn Kho (Chưa Bán)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm"><i class="fa-solid fa-cash-register"></i> Đã Bán</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-info text-white shadow-sm fw-bold">
+                                            <i class="fa-solid fa-route"></i> Truy Vết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white text-muted fst-italic small text-end py-2">
+                Tổng số Seri hiển thị: <span class="fw-bold">@Model.Count()</span> thẻ
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,101 @@
+@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuXuat>
+
+@{
+    ViewData["Title"] = "Thùng Rác Hóa Đơn Bán";
+}
+
+<div class="container-fluid pt-4 h-100 overflow-y-auto">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h3 class="text-secondary fw-bold"><i class="fa-solid fa-trash-can"></i> Hóa Đơn Đã Hủy / Khách Trả Hàng</h3>
+        </div>
+        <div class="col-md-6 text-end">
+            <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch danh sách Đơn Đã Hủy? Dữ liệu Hóa đơn này sẽ bị xóa vĩnh viễn (Nhưng Seri đã được trả về kho an toàn)!">
+                <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
+                    <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
+                </button>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold ms-2">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Cảnh báo Mềm -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mt-2">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-secondary text-center">
+                        <tr>
+                            <th class="ps-4 text-start">Mã Phiếu Xuất</th>
+                            <th>Ngày Hủy Yêu Cầu</th>
+                            <th>Khách Hàng</th>
+                            <th>Người Lập Phiếu</th>
+                            <th class="text-end">Tiền Khách Trả (VNĐ)</th>
+                            <th class="text-center pe-4">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted fst-italic py-4">
+                                    <i class="fa-solid fa-file-invoice-dollar fa-2x mb-3 text-secondary"></i><br />
+                                    Không có hóa đơn nào đã hủy.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-secondary">
+                                        #PX-@item.MaPhieuXuat.ToString("D5")
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fa-regular fa-calendar"></i> @item.NgayXuat.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </td>
+                                    <td class="text-center fw-bold text-muted">
+                                        <del>@item.TenKhachHang</del>
+                                    </td>
+                                    <td class="text-center text-muted">
+                                        <i class="fa-solid fa-user-pen text-muted"></i> @(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")
+                                    </td>
+                                    <td class="text-end fw-bold text-muted">
+                                        <del>@string.Format("{0:N0}", item.TongTien) đ</del>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <form asp-action="Restore" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success shadow-sm text-white" title="Khôi phục lại hóa đơn và rút lại hàng trong kho">
+                                                <i class="fa-solid fa-trash-arrow-up"></i> Khôi Phục
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn hóa đơn Hủy này? (Seri đã nằm an toàn trong kho)">
+                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
+                                                <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,82 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Trang Chủ";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid pt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark"><i class="fa-solid fa-chart-line text-primary"></i> Tổng Quan Hệ Thống</h3>
+            <p class="text-muted">Báo cáo nhanh tình hình kinh doanh và kho hàng.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Doanh thu -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Tổng Doanh Thu</p>
+                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewBag.TongDoanhThu ?? 0) đ</h4>
+                        </div>
+                        <div class="fs-1 text-white-50">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Số hóa đơn -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Hóa Đơn Bán</p>
+                            <h4 class="mb-0 fw-bold">@ViewBag.SoDonHang</h4>
+                        </div>
+                        <div class="fs-1 text-white-50">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tồn kho (Seri) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-warning text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-1 fw-bold text-uppercase" style="font-size: 0.85rem; color: #b67d02;">Tồn Kho (LõI SERI)</p>
+                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewBag.TongTonKho ?? 0) <small class="fw-normal" style="font-size: 0.8rem;">linh kiện</small></h4>
+                        </div>
+                        <div class="fs-1" style="color: #c98b04;">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mã Sản Phẩm -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Mã SP Quản Lý</p>
+                            <h4 class="mb-0 fw-bold">@ViewBag.TongSoSanPham <small class="fw-normal" style="font-size: 0.8rem;">model</small></h4>
+                        </div>
+                        <div class="fs-1 text-white-50">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

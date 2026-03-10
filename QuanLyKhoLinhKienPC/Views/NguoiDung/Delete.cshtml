@@ -1,57 +1,45 @@
-﻿@model QuanLyKhoLinhKienPC.Models.NguoiDung
+@model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa Người Dùng";
 }
 
-<h1>Delete</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Người Dùng</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Người dùng này vào thùng rác?</h5>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>NguoiDung</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TenDangNhap)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TenDangNhap)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MatKhau)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MatKhau)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HoTen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HoTen)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaVaiTroNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaVaiTroNavigation.TenVaiTro)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="MaNguoiDung" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+                    <p class="text-muted small mb-4">
+                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác và tài khoản này sẽ không thể đăng nhập.
+                    </p>
+
+                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
+                        <dt class="col-sm-5 text-end text-muted">Tên đăng nhập:</dt>
+                        <dd class="col-sm-5 fw-bold">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+
+                        <dt class="col-sm-5 text-end text-muted">Họ và tên:</dt>
+                        <dd class="col-sm-5 fw-bold text-primary">@Html.DisplayFor(model => model.HoTen)</dd>
+
+                        <dt class="col-sm-5 text-end text-muted">Vai trò:</dt>
+                        <dd class="col-sm-5"><span class="badge bg-secondary">@Model.MaVaiTroNavigation?.TenVaiTro</span></dd>
+                    </dl>
+
+                    <form asp-action="Delete" class="mt-4">
+                        <input type="hidden" asp-for="MaNguoiDung" />
+                        <a asp-action="Index" class="btn btn-secondary me-2">
+                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

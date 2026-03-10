@@ -1,7 +1,7 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.NhaCungCap
 
 @{
-    ViewData["Title"] = "Thêm mới Nhà cung cấp";
+    ViewData["Title"] = "Thêm Mới Nhà Cung Cấp";
 }
 
 <div class="container-fluid pt-4">
@@ -9,11 +9,11 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-plus-circle"></i> Thêm Nhà Cung Cấp</h4>
+                    <h4 class="mb-0"><i class="fa-solid fa-plus-circle"></i> Thêm Mới Nhà Cung Cấp</h4>
                 </div>
                 <div class="card-body">
                     <form asp-action="Create">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -53,4 +53,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            if ($(".validation-summary-errors").length > 0) {
+                $(".validation-summary-errors").addClass("alert alert-danger");
+            }
+        });
+    </script>
 }

@@ -1,52 +1,253 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.PhieuXuat
-
+@using System.Text.Json
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Lập Phiếu Xuất (Bán Hàng)";
 }
 
-<h1>Create</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow mb-4 border-success">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fa-solid fa-cart-shopping"></i> Lập Hóa Đơn Bán Hàng</h4>
+                    <span class="badge bg-warning text-dark fs-5 shadow-sm">
+                        Tổng cộng: <span id="lblTongTien" class="fw-bold fs-4">0</span> VND
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <form asp-action="Create" id="frmPhieuXuat">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger px-3 py-2"></div>
+                        
+                        <!-- MASTER INFO -->
+                        <h5 class="text-success border-bottom border-success pb-2 mb-3"><i class="fa-solid fa-user-tag"></i> Thông Tin Khách Hàng</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="TenKhachHang" class="form-label fw-bold">Tên Khách Hàng <span class="text-danger">*</span></label>
+                                <input asp-for="TenKhachHang" class="form-control shadow-sm" placeholder="Nhập tên khách..." required />
+                                <span asp-validation-for="TenKhachHang" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="SoDienThoaiKhach" class="form-label fw-bold">Số điện thoại</label>
+                                <input asp-for="SoDienThoaiKhach" class="form-control shadow-sm" placeholder="09xxxx..." />
+                            </div>
+                            <!-- Lưu ý: Cấu trúc gốc bảng PhieuXuat cho phép nullable GhiChu nên ta mượn tạm nếu cần. -->
+                            <!-- Ẩn Mã Người Dùng -->
+                            <input type="hidden" asp-for="MaNguoiDung" value="1" />
+                        </div>
 
-<h4>PhieuXuat</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="TenKhachHang" class="control-label"></label>
-                <input asp-for="TenKhachHang" class="form-control" />
-                <span asp-validation-for="TenKhachHang" class="text-danger"></span>
+                        <!-- DETAILS CAART -->
+                        <div class="d-flex justify-content-between align-items-center border-bottom border-success pb-2 mb-3">
+                            <h5 class="text-success mb-0"><i class="fa-solid fa-box"></i> Chi Tiết Bán Hàng</h5>
+                            <button type="button" class="btn btn-sm btn-outline-success shadow-sm fw-bold" onclick="themDong()">
+                                <i class="fa-solid fa-plus"></i> Thêm Mặt Hàng
+                            </button>
+                        </div>
+                        
+                        <div class="table-responsive shadow-sm">
+                            <table class="table table-bordered table-hover mb-0" id="tblChiTiet">
+                                <thead class="table-success text-center">
+                                    <tr>
+                                        <th>Sản Phẩm <span class="text-danger">*</span></th>
+                                        <th style="width: 15%">Tồn Kho</th>
+                                        <th style="width: 15%">Số Lượng Mua <span class="text-danger">*</span></th>
+                                        <th style="width: 20%">Đơn Giá Bán (VNĐ)</th>
+                                        <th style="width: 20%">Thành Tiền</th>
+                                        <th style="width: 5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dòng động JS sẽ chèn vào đây -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted mt-2 d-block fst-italic">
+                            <i class="fa-solid fa-triangle-exclamation text-warning"></i> Lưu ý: Không thể xuất bán Nếu mặt hàng không có đủ thẻ Seri Tồn Kho.
+                        </small>
+
+                        <!-- Thùng chứa Thẻ Input Hidden Binding vào List<ChiTietBanHang> ChiTietXuat -->
+                        <div id="hiddenInputsContainer"></div>
+
+                        <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                            <a asp-action="Index" class="btn btn-secondary shadow-sm">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="button" class="btn btn-warning shadow-sm fw-bold fs-5 px-4" onclick="submitForm()">
+                                <i class="fa-solid fa-cash-register"></i> Chốt Đơn & Rút Kho
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="SoDienThoaiKhach" class="control-label"></label>
-                <input asp-for="SoDienThoaiKhach" class="form-control" />
-                <span asp-validation-for="SoDienThoaiKhach" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TongTien" class="control-label"></label>
-                <input asp-for="TongTien" class="form-control" />
-                <span asp-validation-for="TongTien" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaNguoiDung" class="control-label"></label>
-                <select asp-for="MaNguoiDung" class ="form-control" asp-items="ViewBag.MaNguoiDung"></select>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Lấy danh sách sản phẩm từ ViewBag (Đã chứa thêm cột TonKho và GiaBan)
+        var dsSanPham = @Html.Raw(JsonSerializer.Serialize(ViewBag.SanPhamList));
+        var chiTietList = [];
+
+        // Tìm 1 SP trong list json
+        function findProduct(maSP) {
+            return dsSanPham.find(s => (s.MaSanPham || s.maSanPham) == maSP);
+        }
+
+        // Vẽ Kẻ Bảng (Render)
+        function renderTable() {
+            var tbody = $('#tblChiTiet tbody');
+            tbody.empty();
+            var tongTienPhieu = 0;
+
+            if(chiTietList.length === 0) {
+                tbody.append('<tr><td colspan="6" class="text-center text-muted fst-italic py-4">Giỏ hàng rỗng. Bấm "Thêm Mặt Hàng" để tiến hành bán kính.</td></tr>');
+            } else {
+                chiTietList.forEach(function(item, index) {
+                    // Option Dropdown Sản phẩm (Màu xám nếu hết hàng)
+                    var sanPhamOptions = '<option value="">-- Chọn Món Hàng --</option>';
+                    var maxTonKho = 0;
+                    
+                    dsSanPham.forEach(function(sp) {
+                        var kMaSP = sp.MaSanPham || sp.maSanPham;
+                        var kTenSP = sp.TenSanPham || sp.tenSanPham;
+                        var kTonKho = sp.TonKho || sp.tonKho;
+
+                        var selected = kMaSP == item.MaSanPham ? 'selected' : '';
+                        if(selected) { maxTonKho = kTonKho; }
+
+                        var disabledText = kTonKho == 0 ? '[HẾT HÀNG] ' : '';
+                        sanPhamOptions += `<option value="${kMaSP}" ${selected} ${kTonKho == 0 ? 'disabled' : ''}>${disabledText}${kTenSP}</option>`;
+                    });
+
+                    // Tính thành tiền và cộng dồn
+                    var thanhTien = item.SoLuong * item.GiaTien;
+                    tongTienPhieu += thanhTien;
+
+                    // Vẽ dòng
+                    var tr = `
+                        <tr>
+                            <td>
+                                <select class="form-select form-select-sm border-success fw-bold text-dark" onchange="chonSanPham(${index}, this)">
+                                    ${sanPhamOptions}
+                                </select>
+                            </td>
+                            <td class="text-center align-middle">
+                                ${item.MaSanPham ? `<span class="badge bg-${maxTonKho > 0 ? 'success' : 'danger'}">${maxTonKho} chiếc</span>` : '-'}
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-center fw-bold text-success" 
+                                    min="1" max="${maxTonKho}" 
+                                    value="${item.SoLuong}" 
+                                    ${!item.MaSanPham ? 'disabled' : ''}
+                                    onchange="capNhatDong(${index}, this, 'SoLuong', ${maxTonKho})" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm text-end bg-light" readonly value="${item.GiaTien}" />
+                            </td>
+                            <td class="text-end fw-bold text-danger align-middle fs-6">
+                                ${new Intl.NumberFormat('vi-VN').format(thanhTien)}
+                            </td>
+                            <td class="text-center align-middle">
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="xoaDong(${index})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(tr);
+                });
+            }
+
+            $('#lblTongTien').text(new Intl.NumberFormat('vi-VN').format(tongTienPhieu));
+        }
+
+        // Thay đổi món hàng từ Dropdown
+        function chonSanPham(index, selectElem) {
+            var maSP = $(selectElem).val();
+            if(maSP) {
+                var prod = findProduct(maSP);
+                chiTietList[index].MaSanPham = maSP;
+                chiTietList[index].GiaTien = prod.GiaBan || prod.giaBan; // Tự động load Giá Bán
+                
+                // Trả số lượng về 1 để tránh kẹt TonKho
+                var tonKhoSP = prod.TonKho || prod.tonKho;
+                chiTietList[index].SoLuong = tonKhoSP > 0 ? 1 : 0;
+            } else {
+                chiTietList[index].MaSanPham = '';
+                chiTietList[index].GiaTien = 0;
+                chiTietList[index].SoLuong = 0;
+            }
+            renderTable();
+        }
+
+        function themDong() {
+            chiTietList.push({ MaSanPham: '', SoLuong: 0, GiaTien: 0 });
+            renderTable();
+        }
+
+        function xoaDong(index) {
+            chiTietList.splice(index, 1);
+            renderTable();
+        }
+
+        // Lắng nghe sự thay đổi Số Lượng
+        function capNhatDong(index, inputElem, field, maxTon) {
+            var value = parseInt($(inputElem).val()) || 0;
+            
+            // Core Ràng buộc: Chặn Khách đòi mua hơn số lượng Kho
+            if (field === 'SoLuong') {
+                if (value < 1) value = 1;
+                if (value > maxTon) {
+                    value = maxTon;
+                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Vượt quá hạn mức Tồn Kho!', showConfirmButton: false, timer: 3000 });
+                }
+            }
+            
+            chiTietList[index][field] = value;
+            renderTable();
+        }
+
+        // Xác Nhận Bán Hàng
+        function submitForm() {
+            var tenKhach = $('#TenKhachHang').val();
+            if(!tenKhach) {
+                Swal.fire({ icon: 'error', title: 'Thiếu Dữ Liệu', text: 'Vui lòng điền Tên Khách Hàng!' });
+                return;
+            }
+            if(chiTietList.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Giỏ hàng trống', text: 'Chưa có sản phẩm Khách chọn mua thuộc phiếu Xuất này!' });
+                return;
+            }
+
+            // Kiểm tra trùng lặp và tính hợp lệ chặn HACK
+            var checkHopLe = true;
+            chiTietList.forEach(function(item) {
+                if(!item.MaSanPham || item.SoLuong <= 0) checkHopLe = false;
+            });
+
+            if(!checkHopLe) {
+                Swal.fire({ icon: 'error', title: 'Dữ liệu dơ', text: 'Vui lòng kiểm tra lại. Không được để trống tên sản phẩm hoặc mua số lượng = 0.' });
+                return;
+            }
+
+            // Sinh Thẻ Hidden Cấu trúc Array DTO (List<ChiTietBanHang> ChiTietXuat) -> PhieuXuatController.cs
+            var hiddenContainer = $('#hiddenInputsContainer');
+            hiddenContainer.empty();
+            
+            chiTietList.forEach(function(item, index) {
+                hiddenContainer.append(`<input type="hidden" name="ChiTietXuat[${index}].MaSanPham" value="${item.MaSanPham}" />`);
+                hiddenContainer.append(`<input type="hidden" name="ChiTietXuat[${index}].SoLuong" value="${item.SoLuong}" />`);
+                hiddenContainer.append(`<input type="hidden" name="ChiTietXuat[${index}].GiaTien" value="${item.GiaTien}" />`);
+            });
+
+            $('#frmPhieuXuat').submit();
+        }
+
+        $(document).ready(function() {
+            renderTable();
+        });
+    </script>
 }

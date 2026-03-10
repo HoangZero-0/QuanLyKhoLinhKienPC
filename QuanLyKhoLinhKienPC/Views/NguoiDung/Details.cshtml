@@ -1,54 +1,54 @@
-﻿@model QuanLyKhoLinhKienPC.Models.NguoiDung
+@model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Chi Tiết Người Dùng";
 }
 
-<h1>Details</h1>
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-circle-info"></i> Chi Tiết Người Dùng</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Họ và tên:</dt>
+                        <dd class="col-sm-8 fw-bold text-primary">@Html.DisplayFor(model => model.HoTen)</dd>
 
-<div>
-    <h4>NguoiDung</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TenDangNhap)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TenDangNhap)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MatKhau)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MatKhau)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HoTen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HoTen)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaVaiTroNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaVaiTroNavigation.TenVaiTro)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MaNguoiDung">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+                        <dt class="col-sm-4 text-muted">Tên đăng nhập:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+
+                        <dt class="col-sm-4 text-muted">Email:</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4 text-muted">Vai trò:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-secondary">@Model.MaVaiTroNavigation?.TenVaiTro</span>
+                        </dd>
+
+                        <dt class="col-sm-4 text-muted">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsDeleted)
+                            {
+                                <span class="badge bg-danger">Đã khóa / Xóa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="Index" class="btn btn-secondary me-2">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model?.MaNguoiDung" class="btn btn-warning">
+                        <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

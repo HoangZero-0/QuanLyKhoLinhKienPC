@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
+    [Authorize(Roles = "Quản trị viên,Admin")]
     public class VaiTroController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -38,14 +40,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var vaiTro = await _context.VaiTro
                 .FirstOrDefaultAsync(m => m.MaVaiTro == id);
             if (vaiTro == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(vaiTro);
@@ -63,19 +67,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaVaiTro,TenVaiTro,IsDeleted")] VaiTro vaiTro)
         {
-            // Kiểm tra trùng tên
-            bool isDuplicate = _context.VaiTro.Any(d => d.TenVaiTro.Trim().ToLower() == vaiTro.TenVaiTro.Trim().ToLower() && d.IsDeleted == false);
-            if (isDuplicate)
-            {
-                ModelState.AddModelError("TenVaiTro", "Tên vai trò này đã tồn tại trong hệ thống!");
-            }
-
             if (ModelState.IsValid)
             {
                 _context.Add(vaiTro);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Thêm mới vai trò thành công!";
                 return RedirectToAction(nameof(Index));
             }
+            TempData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
             return View(vaiTro);
         }
 
@@ -85,13 +84,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var vaiTro = await _context.VaiTro.FindAsync(id);
             if (vaiTro == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
             return View(vaiTro);
         }
@@ -103,18 +104,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id != vaiTro.MaVaiTro)
             {
-                return NotFound();
-            }
-
-            // Kiểm tra trùng tên (trừ chính nó ra)
-            bool isDuplicate = _context.VaiTro.Any(d =>
-                d.TenVaiTro.Trim().ToLower() == vaiTro.TenVaiTro.Trim().ToLower()
-                && d.MaVaiTro != vaiTro.MaVaiTro
-                && d.IsDeleted == false);
-
-            if (isDuplicate)
-            {
-                ModelState.AddModelError("TenVaiTro", "Tên vai trò này đã bị trùng với một vai trò khác!");
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -123,12 +114,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(vaiTro);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Cập nhật vai trò thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!VaiTroExists(vaiTro.MaVaiTro))
                     {
-                        return NotFound();
+                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -137,6 +130,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
             return View(vaiTro);
         }
 
@@ -146,14 +140,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var vaiTro = await _context.VaiTro
                 .FirstOrDefaultAsync(m => m.MaVaiTro == id);
             if (vaiTro == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(vaiTro);
@@ -171,6 +167,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 vaiTro.IsDeleted = true;
                 _context.Update(vaiTro);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Đã chuyển vai trò vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -197,11 +194,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var vaiTro = await _context.VaiTro.FindAsync(id);
             if (vaiTro == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
             }
             vaiTro.IsDeleted = false;
             _context.Update(vaiTro);
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Khôi phục vai trò thành công.";
             return RedirectToAction(nameof(Trash));
         }
 
@@ -212,12 +211,17 @@ namespace QuanLyKhoLinhKienPC.Controllers
         public async Task<IActionResult> DeleteForce(int id)
         {
             var vaiTro = await _context.VaiTro.FindAsync(id);
-            if (vaiTro == null) return NotFound();
+            if (vaiTro == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
+            }
 
             try
             {
                 _context.VaiTro.Remove(vaiTro);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Đã xóa vĩnh viễn vai trò.";
                 return RedirectToAction(nameof(Trash));
             }
             catch (DbUpdateException)
