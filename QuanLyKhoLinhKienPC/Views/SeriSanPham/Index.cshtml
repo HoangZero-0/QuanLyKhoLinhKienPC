@@ -75,14 +75,14 @@
                                             <i class="fa-solid fa-receipt"></i> Lô #PN-@item.MaPhieuNhap?.ToString("D5")
                                         </a>
                                     </td>
-                                    <td class="text-center">
-                                        @if (item.TrangThai == 0)
+                                    <td class="text-center align-middle">
+                                        @if (item.TrangThai == 1)
                                         {
-                                            <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm"><i class="fa-solid fa-boxes-stacked"></i> Tồn Kho (Chưa Bán)</span>
+                                            <span class="badge bg-success shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-box text-light me-1"></i> Tồn Kho</span>
                                         }
-                                        else
+                                        else if (item.TrangThai == 2)
                                         {
-                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm"><i class="fa-solid fa-cash-register"></i> Đã Bán</span>
+                                            <span class="badge bg-secondary shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-cart-shopping text-light me-1"></i> Đã Bán</span>
                                         }
                                     </td>
                                     <td class="text-center">

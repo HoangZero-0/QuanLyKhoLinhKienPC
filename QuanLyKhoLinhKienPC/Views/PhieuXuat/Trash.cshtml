@@ -10,26 +10,20 @@
             <h3 class="text-secondary fw-bold"><i class="fa-solid fa-trash-can"></i> Hóa Đơn Đã Hủy / Khách Trả Hàng</h3>
         </div>
         <div class="col-md-6 text-end">
-            <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch danh sách Đơn Đã Hủy? Dữ liệu Hóa đơn này sẽ bị xóa vĩnh viễn (Nhưng Seri đã được trả về kho an toàn)!">
-                <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
-                    <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
-                </button>
-            </form>
+            @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+            {
+                <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch danh sách Đơn Đã Hủy? Dữ liệu Hóa đơn này sẽ bị xóa vĩnh viễn (Nhưng Seri đã được trả về kho an toàn)!">
+                    <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
+                        <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
+                    </button>
+                </form>
+            }
             <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold ms-2">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
             </a>
         </div>
     </div>
 
-    <!-- Cảnh báo Mềm -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success mt-2">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger mt-2">@TempData["Error"]</div>
-    }
 
     <div class="card shadow border-0">
         <div class="card-body p-0">
@@ -84,11 +78,14 @@
                                             </button>
                                         </form>
 
-                                        <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn hóa đơn Hủy này? (Seri đã nằm an toàn trong kho)">
-                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
-                                                <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
-                                            </button>
-                                        </form>
+                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+                                        {
+                                            <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn hóa đơn Hủy này? (Seri đã nằm an toàn trong kho)">
+                                                <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
+                                                    <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
+                                                </button>
+                                            </form>
+                                        }
                                     </td>
                                 </tr>
                             }

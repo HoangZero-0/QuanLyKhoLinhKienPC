@@ -10,11 +10,14 @@
             <h3 class="text-secondary fw-bold"><i class="fa-solid fa-trash-can"></i> Thùng Rác Phiếu Nhập</h3>
         </div>
         <div class="col-md-6 text-end">
-            <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch thùng rác? Mọi Phiếu Nhập và Mã Seri trong này sẽ bị xóa vĩnh viễn và không thể khôi phục!">
-                <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
-                    <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
-                </button>
-            </form>
+            @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+            {
+                <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch thùng rác? Mọi Phiếu Nhập và Mã Seri trong này sẽ bị xóa vĩnh viễn và không thể khôi phục!">
+                    <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
+                        <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
+                    </button>
+                </form>
+            }
             <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold ms-2">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
             </a>
@@ -70,11 +73,14 @@
                                             </button>
                                         </form>
                                         
-                                        <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuNhap" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn phiếu nhập này cùng toàn bộ các Seri liên quan?">
-                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
-                                                <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
-                                            </button>
-                                        </form>
+                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+                                        {
+                                            <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuNhap" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn phiếu nhập này cùng toàn bộ các Seri liên quan?">
+                                                <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
+                                                    <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
+                                                </button>
+                                            </form>
+                                        }
                                     </td>
                                 </tr>
                             }

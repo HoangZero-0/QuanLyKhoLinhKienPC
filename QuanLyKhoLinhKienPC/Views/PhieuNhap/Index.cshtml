@@ -9,14 +9,17 @@
         <div class="col-md-6">
             <h3 class="text-primary fw-bold"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Lập Phiếu Nhập</h3>
         </div>
-        <div class="col-md-6 text-end">
-            <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
-                <i class="fa-solid fa-plus"></i> Tạo Phiếu Nhập Mới
-            </a>
-            <a asp-action="Trash" class="btn btn-secondary shadow-sm fw-bold ms-2">
-                <i class="fa-solid fa-trash-can"></i> Thùng Rác
-            </a>
-        </div>
+        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+        {
+            <div class="col-md-6 text-end">
+                <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
+                    <i class="fa-solid fa-plus"></i> Tạo Phiếu Nhập Mới
+                </a>
+                <a asp-action="Trash" class="btn btn-secondary shadow-sm fw-bold ms-2">
+                    <i class="fa-solid fa-trash-can"></i> Thùng Rác
+                </a>
+            </div>
+        }
     </div>
 
     <div class="card shadow border-0">
@@ -70,9 +73,12 @@
                                         <a asp-action="Details" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-info text-white shadow-sm" title="Xem Hóa Đơn">
                                             <i class="fa-solid fa-eye"></i> Chi Tiết
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-danger text-white shadow-sm ms-1" title="Xóa vào thùng rác">
-                                            <i class="fa-solid fa-trash"></i> Xóa
-                                        </a>
+                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-danger text-white shadow-sm ms-1" title="Xóa vào thùng rác">
+                                                <i class="fa-solid fa-trash"></i> Xóa
+                                            </a>
+                                        }
                                     </td>
                                 </tr>
                             }

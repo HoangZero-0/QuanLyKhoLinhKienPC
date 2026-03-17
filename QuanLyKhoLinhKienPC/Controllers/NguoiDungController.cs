@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
 using QuanLyKhoLinhKienPC.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
@@ -216,7 +217,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var nguoiDung = await _context.NguoiDung.FindAsync(id);
             if (nguoiDung != null)
             {
-                // Kiểm tra xem có đang tự xóa chính mình không (có thể để dành cho Auth sau)
+                // Logic chống đạn: Kiểm tra xem có đang tự xóa chính mình không
+                var currentUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (currentUserId == id.ToString())
+                {
+                    TempData["Error"] = "Thao tác bị chặn: Bạn không thể tự khóa/xóa tài khoản của chính mình được!";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 // Logic xóa mềm
                 nguoiDung.IsDeleted = true;
                 _context.Update(nguoiDung);

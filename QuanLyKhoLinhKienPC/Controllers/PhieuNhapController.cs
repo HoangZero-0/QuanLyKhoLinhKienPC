@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
+    [Authorize]
     public class PhieuNhapController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -18,6 +20,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             _context = context;
         }
 
+        // 1. DANH SÁCH
         // GET: PhieuNhap
         public async Task<IActionResult> Index()
         {
@@ -29,12 +32,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(await data.ToListAsync());
         }
 
+        // 2. CHI TIẾT
         // GET: PhieuNhap/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuNhap = await _context.PhieuNhap
@@ -45,13 +50,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhieuNhap == id);
             if (phieuNhap == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phieuNhap);
         }
 
+        // 3. TẠO MỚI
         // GET: PhieuNhap/Create
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public IActionResult Create()
         {
             // Danh sách Dropdown cho Master
@@ -68,9 +76,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // POST: PhieuNhap/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("GhiChu,MaNhaCungCap,MaNguoiDung,ChiTietPhieuNhap")] PhieuNhap phieuNhap)
         {
@@ -120,7 +127,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                                 var seriMoi = new SeriSanPham
                                 {
                                     SoSeri = soSeriPhatSinh,
-                                    TrangThai = 0, // 0 = Chưa Bán (Trong Kho)
+                                    TrangThai = 1, // 1 = Chưa Bán (Trong Kho)
                                     MaSanPham = chitiet.MaSanPham,
                                     MaPhieuNhap = phieuNhap.MaPhieuNhap,
                                     IsDeleted = false
@@ -156,18 +163,22 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(phieuNhap);
         }
 
+        // 4. CHỈNH SỬA
         // GET: PhieuNhap/Edit/5
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuNhap = await _context.PhieuNhap.FindAsync(id);
             if (phieuNhap == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau", phieuNhap.MaNguoiDung);
             ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap, "MaNhaCungCap", "TenNhaCungCap", phieuNhap.MaNhaCungCap);
@@ -175,15 +186,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // POST: PhieuNhap/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MaPhieuNhap,NgayNhap,TongTien,GhiChu,MaNhaCungCap,MaNguoiDung,IsDeleted")] PhieuNhap phieuNhap)
         {
             if (id != phieuNhap.MaPhieuNhap)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -197,7 +208,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     if (!PhieuNhapExists(phieuNhap.MaPhieuNhap))
                     {
-                        return NotFound();
+                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -211,12 +223,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(phieuNhap);
         }
 
+        // 5. XÓA MỀM (Chuyển vào thùng rác)
         // GET: PhieuNhap/Delete/5
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuNhap = await _context.PhieuNhap
@@ -225,7 +240,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhieuNhap == id);
             if (phieuNhap == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phieuNhap);
@@ -233,6 +249,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: PhieuNhap/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -271,7 +288,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // 6. THÙNG RÁC
+        // 6. THÙNG RÁC (Hiện danh sách đã xóa)
+        // GET: PhieuNhap/Trash
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Trash()
         {
             var data = _context.PhieuNhap
@@ -282,8 +301,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(await data.ToListAsync());
         }
 
-        // 7. KHÔI PHỤC
+        // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
+        // POST: PhieuNhap/Restore
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
@@ -325,8 +346,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Trash));
         }
 
-        // 8. XÓA VĨNH VIỄN
+        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
+        // POST: PhieuNhap/DeleteForce
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteForce(int id)
         {
@@ -359,8 +382,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Trash));
         }
 
-        // 9. DỌN SẠCH THÙNG RÁC
+        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
+        // POST: PhieuNhap/EmptyTrash
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmptyTrash()
         {

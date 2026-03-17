@@ -35,7 +35,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (nguoiDung == null)
             {
-                return NotFound();
+                TempData["Error"] = "Tài khoản không còn tồn tại trong hệ thống. Vui lòng đăng nhập lại!";
+                return RedirectToAction("Logout", "Auth");
             }
 
             return View(nguoiDung);
@@ -58,7 +59,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
             
             if (nguoiDung == null)
             {
-                return NotFound();
+                TempData["Error"] = "Tài khoản không còn tồn tại trong hệ thống. Vui lòng đăng nhập lại!";
+                return RedirectToAction("Logout", "Auth");
             }
 
             // Chỉ cho phép cập nhật Họ Tên và Email
@@ -112,7 +114,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
             
             if (nguoiDung == null)
             {
-                return NotFound();
+                TempData["Error"] = "Tài khoản không còn tồn tại trong hệ thống. Vui lòng đăng nhập lại!";
+                return RedirectToAction("Logout", "Auth");
             }
 
             // Kiểm tra Mật Khẩu Cũng

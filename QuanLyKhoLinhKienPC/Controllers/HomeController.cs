@@ -35,9 +35,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .Where(s => !s.IsDeleted)
                 .CountAsync();
                 
-            // Số linh kiện (Seri) đang có sẵn trong kho (TrangThai = 0 và không bị xóa)
+            // Số linh kiện (Seri) đang có sẵn trong kho (TrangThai = 1 và không bị xóa)
             var tongTonKho = await _context.SeriSanPham
-                .Where(s => s.TrangThai == 0 && !s.IsDeleted)
+                .Where(s => s.TrangThai == 1 && !s.IsDeleted)
                 .CountAsync();
 
             ViewBag.TongDoanhThu = tongDoanhThu;

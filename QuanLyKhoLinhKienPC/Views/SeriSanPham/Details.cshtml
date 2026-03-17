@@ -30,13 +30,13 @@
                     <p class="mb-2"><strong>Hãng Sản Xuất:</strong> @Model.MaSanPhamNavigation?.HangSanXuat</p>
                     <p class="mb-2"><strong>Bảo Hành:</strong> <span class="badge bg-info text-dark">@Model.MaSanPhamNavigation?.ThoiGianBaoHanh Tháng</span></p>
                     <hr />
-                    <p class="mb-2"><strong>Trạng Thái Kho:</strong> 
-                        @if (Model.TrangThai == 0) {
-                            <span class="badge bg-success"><i class="fa-solid fa-boxes-stacked"></i> Tồn Kho (Chưa Bán)</span>
-                        } else {
-                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-cash-register"></i> Đã Xuất Bán</span>
+                    <dd class="col-sm-8 fw-bold">
+                        @if (Model.TrangThai == 1) {
+                            <span class="badge bg-success shadow-sm px-3 py-2 fs-6 rounded-pill"><i class="fa-solid fa-box-open me-1"></i> Đang tồn kho</span>
+                        } else if (Model.TrangThai == 2) {
+                            <span class="badge bg-secondary shadow-sm px-3 py-2 fs-6 rounded-pill"><i class="fa-solid fa-cart-check me-1"></i> Đã xuất bán</span>
                         }
-                    </p>
+                    </dd>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
+    [Authorize]
     public class DanhMucController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -55,6 +57,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 3. TẠO MỚI
         // GET: DanhMuc/Create
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public IActionResult Create()
         {
             return View();
@@ -62,6 +65,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: DanhMuc/Create
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaDanhMuc,TenDanhMuc,IsDeleted")] DanhMuc danhMuc)
         {
@@ -78,6 +82,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 4. CHỈNH SỬA
         // GET: DanhMuc/Edit
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -97,6 +102,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: DanhMuc/Edit
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MaDanhMuc,TenDanhMuc,IsDeleted")] DanhMuc danhMuc)
         {
@@ -134,6 +140,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 5. XÓA MỀM (Chuyển vào thùng rác)
         // GET: DanhMuc/Delete
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -155,6 +162,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: DanhMuc/Delete
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -172,6 +180,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 6. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: DanhMuc/Trash
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Trash(string searchString)
         {
             var dsDanhMuc = _context.DanhMuc.Where(d => d.IsDeleted == true);
@@ -186,6 +195,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
         // POST: DanhMuc/Restore
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
@@ -205,6 +215,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
         // POST: DanhMuc/DeleteForce
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteForce(int id)
         {
@@ -231,6 +242,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmptyTrash()
         {

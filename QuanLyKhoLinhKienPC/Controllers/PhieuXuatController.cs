@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
@@ -17,6 +18,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         public decimal GiaTien { get; set; }
     }
 
+    [Authorize]
     public class PhieuXuatController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -26,6 +28,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             _context = context;
         }
 
+        // 1. DANH SÁCH
         // GET: PhieuXuat
         public async Task<IActionResult> Index()
         {
@@ -36,12 +39,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(await data.ToListAsync());
         }
 
+        // 2. CHI TIẾT
         // GET: PhieuXuat/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuXuat = await _context.PhieuXuat
@@ -52,13 +57,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhieuXuat == id);
             if (phieuXuat == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phieuXuat);
         }
 
+        // 3. TẠO MỚI
         // GET: PhieuXuat/Create
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         public IActionResult Create()
         {
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen");
@@ -70,7 +78,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     MaSanPham = s.MaSanPham, 
                     TenSanPham = s.TenSanPham,
                     GiaBan = s.GiaBan,
-                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 0) // Điếm thực tế thẻ seri
+                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1) // Điểm thực tế thẻ seri
                 }).ToList();
 
             ViewBag.SanPhamList = dsSanPham;
@@ -79,9 +87,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         // POST: PhieuXuat/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenKhachHang,SoDienThoaiKhach,GhiChu,MaNguoiDung")] PhieuXuat phieuXuat, List<ChiTietBanHang> ChiTietXuat)
         {
@@ -117,7 +124,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     {
                         // Quét Database lấy n Seri Đang Tồn Kho của SP này (Take = SoLuong)
                         var nhungSeriRutRa = await _context.SeriSanPham
-                            .Where(s => s.MaSanPham == mon.MaSanPham && s.TrangThai == 0 && !s.IsDeleted)
+                            .Where(s => s.MaSanPham == mon.MaSanPham && s.TrangThai == 1 && !s.IsDeleted)
                             .Take(mon.SoLuong)
                             .ToListAsync();
 
@@ -130,7 +137,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                         foreach (var sr in nhungSeriRutRa)
                         {
                             // Đánh dấu là đã Bán & Thuộc về Phiếu xuất nào (Tracking)
-                            sr.TrangThai = 1;
+                            sr.TrangThai = 2;
                             sr.MaPhieuXuat = phieuXuat.MaPhieuXuat;
                             lstSeriThayDoi.Add(sr);
 
@@ -165,39 +172,43 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuXuat.MaNguoiDung);
             
-            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 0) }).ToList();
+            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1) }).ToList();
             ViewBag.SanPhamList = dsSanPham;
 
             return View(phieuXuat);
         }
 
+        // 4. CHỈNH SỬA
         // GET: PhieuXuat/Edit/5
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuXuat = await _context.PhieuXuat.FindAsync(id);
             if (phieuXuat == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau", phieuXuat.MaNguoiDung);
             return View(phieuXuat);
         }
 
         // POST: PhieuXuat/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MaPhieuXuat,NgayXuat,TenKhachHang,SoDienThoaiKhach,TongTien,MaNguoiDung,IsDeleted")] PhieuXuat phieuXuat)
         {
             if (id != phieuXuat.MaPhieuXuat)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -211,7 +222,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     if (!PhieuXuatExists(phieuXuat.MaPhieuXuat))
                     {
-                        return NotFound();
+                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
@@ -224,12 +236,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(phieuXuat);
         }
 
+        // 5. XÓA MỀM (Chuyển vào thùng rác)
         // GET: PhieuXuat/Delete/5
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             var phieuXuat = await _context.PhieuXuat
@@ -237,7 +252,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .FirstOrDefaultAsync(m => m.MaPhieuXuat == id);
             if (phieuXuat == null)
             {
-                return NotFound();
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(phieuXuat);
@@ -245,6 +261,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: PhieuXuat/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -258,14 +275,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     phieuXuat.IsDeleted = true;
                     _context.Update(phieuXuat);
 
-                    // 2. Trả lại Seri về kho (TrangThai = 0, thoát khỏi MaPhieuXuat)
+                    // 2. Trả lại Seri về kho (TrangThai = 1, thoát khỏi MaPhieuXuat)
                     var seriXuatList = await _context.SeriSanPham
                         .Where(s => s.MaPhieuXuat == id)
                         .ToListAsync();
 
                     foreach (var seri in seriXuatList)
                     {
-                        seri.TrangThai = 0; // Trả lại kho
+                        seri.TrangThai = 1; // Trả lại kho
                         seri.MaPhieuXuat = null;
                     }
                     _context.UpdateRange(seriXuatList);
@@ -285,7 +302,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // 6. THÙNG RÁC
+        // 6. THÙNG RÁC (Hiện danh sách đã xóa)
+        // GET: PhieuXuat/Trash
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         public async Task<IActionResult> Trash()
         {
             var data = _context.PhieuXuat
@@ -295,8 +314,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(await data.ToListAsync());
         }
 
-        // 7. KHÔI PHỤC
+        // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
+        // POST: PhieuXuat/Restore
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
@@ -321,16 +342,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     .ToListAsync();
 
                 // Kiểm tra xem có Seri nào đã bị đem bán cho hóa đơn khác chưa
-                if (seriList.Any(s => s.TrangThai != 0))
+                if (seriList.Any(s => s.TrangThai != 1))
                 {
                     TempData["Error"] = "Không thể khôi phục hóa đơn này vì một số Seri thuộc hóa đơn đã được xuất bán lại cho khách hàng khác!";
                     return RedirectToAction(nameof(Trash));
                 }
 
-                // Nếu tất cả seri đều trong kho (TrangThai = 0)
+                // Nếu tất cả seri đều trong kho (TrangThai = 1)
                 foreach (var seri in seriList)
                 {
-                    seri.TrangThai = 1; // Đặt lại thành Đã bán
+                    seri.TrangThai = 2; // Đặt lại thành Đã bán
                     seri.MaPhieuXuat = id;
                 }
                 _context.UpdateRange(seriList);
@@ -352,8 +373,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Trash));
         }
 
-        // 8. XÓA VĨNH VIỄN
+        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
+        // POST: PhieuXuat/DeleteForce
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteForce(int id)
         {
@@ -384,8 +407,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Trash));
         }
 
-        // 9. DỌN SẠCH THÙNG RÁC
+        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
+        // POST: PhieuXuat/EmptyTrash
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmptyTrash()
         {

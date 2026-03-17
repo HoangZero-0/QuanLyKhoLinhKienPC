@@ -12,9 +12,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
 {
+    [Authorize]
     public class SanPhamController : Controller
     {
         private readonly QuanLyKhoLinhKienPCContext _context;
@@ -101,6 +103,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 3. TẠO MỚI
         // GET: SanPham/Create
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public IActionResult Create()
         {
             ViewData["MaDanhMuc"] = new SelectList(_context.DanhMuc.Where(d => !d.IsDeleted), "MaDanhMuc", "TenDanhMuc");
@@ -109,6 +112,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: SanPham/Create
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaSanPham,TenSanPham,HangSanXuat,GiaBan,ThongSoKyThuat,ThoiGianBaoHanh,MaDanhMuc,IsDeleted")] SanPham sanPham, IFormFile? fHinhAnh)
         {
@@ -192,6 +196,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 4. CHỈNH SỬA
         // GET: SanPham/Edit
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -213,6 +218,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: SanPham/Edit
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MaSanPham,TenSanPham,HangSanXuat,HinhAnh,GiaBan,ThongSoKyThuat,ThoiGianBaoHanh,MaDanhMuc,IsDeleted")] SanPham sanPham, IFormFile? fHinhAnh)
         {
@@ -323,6 +329,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 5. XÓA MỀM (Chuyển vào thùng rác)
         // GET: SanPham/Delete
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -346,6 +353,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // POST: SanPham/Delete
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -402,6 +410,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
         // POST: SanPham/Restore
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
@@ -422,6 +431,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
         // POST: SanPham/DeleteForce
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteForce(int id)
         {
@@ -455,6 +465,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
         [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmptyTrash()
         {
