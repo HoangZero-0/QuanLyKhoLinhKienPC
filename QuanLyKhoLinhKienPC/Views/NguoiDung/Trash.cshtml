@@ -9,11 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
         <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Người Dùng</h2>
         <div>
-            <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn xóa vĩnh viễn TẤT CẢ người dùng trong thùng rác?\nHành động này không thể hoàn tác!">
-                <button type="submit" class="btn btn-danger shadow-sm me-2">
-                    <i class="fa-solid fa-dumpster-fire"></i> Dọn sạch thùng rác
-                </button>
-            </form>
+
             <a asp-action="Index" class="btn btn-secondary shadow-sm">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
             </a>
@@ -83,7 +79,7 @@
                             <th class="py-3" style="position: sticky; top: 0; z-index: 10;">
                                 Vai trò
                             </th>
-                            <th class="text-center py-3" style="width: 200px; position: sticky; top: 0; z-index: 10;">
+                            <th class="text-center py-3" style="width: 150px; position: sticky; top: 0; z-index: 10;">
                                 Hành động
                             </th>
                         </tr>
@@ -94,10 +90,10 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="fw-bold text-danger ps-3 py-3">
+                                    <td class="fw-bold ps-3 py-3">
                                         @Html.DisplayFor(modelItem => item.HoTen)
                                     </td>
-                                    <td class="text-muted text-decoration-line-through">
+                                    <td class="py-3">
                                         @Html.DisplayFor(modelItem => item.TenDangNhap)
                                     </td>
                                     <td>
@@ -106,16 +102,12 @@
                                     <td class="text-center py-2">
                                         <div class="d-flex justify-content-center gap-2">
                                             <form asp-action="Restore" asp-route-id="@item.MaNguoiDung" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-success w-100" title="Khôi phục">
-                                                    <i class="fa-solid fa-trash-arrow-up"></i> Khôi phục
+                                                <button type="submit" class="btn btn-sm btn-success" title="Khôi phục">
+                                                    <i class="fa-solid fa-rotate-left"></i>
                                                 </button>
                                             </form>
 
-                                            <form asp-action="DeleteForce" asp-route-id="@item.MaNguoiDung" class="d-inline" data-confirm="CẢNH BÁO: Xóa vĩnh viễn người dùng này không thể lấy lại. Bạn chắc chứ?">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Xóa vĩnh viễn">
-                                                    <i class="fa-solid fa-eraser"></i> Xóa
-                                                </button>
-                                            </form>
+
                                         </div>
                                     </td>
                                 </tr>

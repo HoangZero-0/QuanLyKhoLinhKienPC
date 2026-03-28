@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -209,88 +209,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
             _context.Update(nhaCungCap);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Khôi phục nhà cung cấp thành công.";
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: NhaCungCap/DeleteForce
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteForce(int id)
-        {
-            var nhaCungCap = await _context.NhaCungCap.FindAsync(id);
-            if (nhaCungCap == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Trash));
-            }
-
-            try
-            {
-                _context.NhaCungCap.Remove(nhaCungCap);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Đã xóa vĩnh viễn nhà cung cấp.";
-                return RedirectToAction(nameof(Trash));
-            }
-            catch (DbUpdateException)
-            {
-                TempData["Error"] = "Không thể xóa vĩnh viễn nhà cung cấp này vì đang có phiếu nhập hàng liên quan!";
-                return RedirectToAction(nameof(Trash));
-            }
-        }
-
-        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmptyTrash()
-        {
-            // Lấy tất cả danh sách trong thùng rác
-            var racList = await _context.NhaCungCap.Where(d => d.IsDeleted == true).ToListAsync();
-
-            if (!racList.Any())
-            {
-                return RedirectToAction(nameof(Trash));
-            }
-
-            int daXoa = 0;
-            int biLoi = 0;
-
-            foreach (var item in racList)
-            {
-                try
-                {
-                    // Cố gắng xóa từng cái
-                    _context.NhaCungCap.Remove(item);
-                    await _context.SaveChangesAsync(); // Lưu ngay lập tức
-                    daXoa++;
-                }
-                catch (DbUpdateException)
-                {
-                    // Nếu lỗi (do ràng buộc khóa ngoại với Phiếu Nhập), bỏ qua và đếm lỗi
-                    biLoi++;
-
-                    // QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
-                    // Nếu không, EF Core sẽ vẫn nhớ lệnh xóa này và gây lỗi cho item tiếp theo
-                    _context.Entry(item).State = EntityState.Unchanged;
-                }
-            }
-
-            // Thông báo kết quả cho người dùng
-            if (daXoa > 0 && biLoi == 0)
-            {
-                TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} nhà cung cấp).";
-            }
-            else if (daXoa > 0 && biLoi > 0)
-            {
-                TempData["Warning"] = $"Đã xóa vĩnh viễn {daXoa} nhà cung cấp. Còn lại {biLoi} nhà cung cấp không thể xóa do đang được sử dụng.";
-            }
-            else if (daXoa == 0 && biLoi > 0)
-            {
-                TempData["Error"] = "Không thể xóa nhà cung cấp nào vì tất cả đều đang được sử dụng!";
-            }
-
             return RedirectToAction(nameof(Trash));
         }
 

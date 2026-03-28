@@ -1,59 +1,62 @@
 @model IEnumerable<QuanLyKhoLinhKienPC.Models.SeriSanPham>
 
 @{
-    ViewData["Title"] = "Quản Lý Kho Thẻ Seri";
+    ViewData["Title"] = "Quản Lý Kho Seri";
 }
 
-<div class="container-fluid pt-4">
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-6">
-            <h3 class="text-primary fw-bold"><i class="fa-solid fa-barcode"></i> Quản Lý Kho Seri Linh Kiện</h3>
-        </div>
+<div class="d-flex flex-column h-100">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+        <h2 class="text-primary m-0"><i class="fa-solid fa-barcode"></i> Quản Lý Kho Seri Linh Kiện</h2>
     </div>
 
     <!-- FILTER BAR -->
-    <div class="card shadow-sm mb-4 border-0 bg-light">
-        <div class="card-body py-3">
-            <form asp-action="Index" method="get" class="row gx-2 gy-2 align-items-center">
-                <div class="col-md-5">
+    <div class="card mb-3 shadow-sm flex-shrink-0 border-0">
+        <div class="card-body py-2">
+            <form asp-action="Index" method="get" class="row g-2 align-items-center">
+                <div class="col-md-7">
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0" placeholder="Tìm tên linh kiện, mã Seri..." />
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="SearchString" class="form-control border-start-0 ps-0" placeholder="Tìm tên linh kiện, mã Seri, hãng sản xuất..." value="@ViewData["CurrentFilter"]">
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <select name="TrangThaiFilter" class="form-select">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option value="0" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "0")">Còn Trong Kho (Chưa Bán)</option>
-                        <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Đã Bán</option>
-                    </select>
-                </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fa-solid fa-filter"></i> Lọc Kết Quả</button>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted"><i class="fa-solid fa-filter"></i></span>
+                        <select name="TrangThaiFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Còn Trong Kho (Chưa Bán)</option>
+                            <option value="2" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "2")">Đã Bán (Khách Hàng)</option>
+                            <option value="3" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "3")">Bị Lỗi / Đang Bảo Hành</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Tìm kiếm</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- DATA TABLE -->
-    <div class="card shadow border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0 mb-table-sticky-header">
-                    <thead class="table-primary sticky-top" style="z-index: 1;">
+    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+        <div class="card-body p-0 position-relative">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+                <table class="table table-striped table-hover mb-0 w-100 align-middle">
+                    <thead class="table-primary">
                         <tr>
-                            <th class="ps-4">Mã Số Seri</th>
-                            <th>Linh Kiện Gốc</th>
-                            <th>Thuộc Phiếu Nhập</th>
-                            <th class="text-center">Trạng Thái Kho</th>
-                            <th class="text-center">Thao Tác</th>
+                            <th class="py-3 ps-3 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10;">STT</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Mã Số Seri</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Linh Kiện</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Phiếu Nhập</th>
+                            <th class="py-3 text-center" style="position: sticky; top: 0; z-index: 10;">Trạng Thái Kho</th>
+                            <th class="py-3 text-center" style="width: 150px; position: sticky; top: 0; z-index: 10;">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted fst-italic py-5">
+                                <td colspan="6" class="text-center text-muted fst-italic py-5">
                                     <i class="fa-solid fa-box-open fs-1 text-light mb-3 block"></i><br/>
                                     Không tìm thấy Serial nào khớp với bộ lọc.
                                 </td>
@@ -61,14 +64,19 @@
                         }
                         else
                         {
+                            int stt = 1;
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="ps-4">
+                                    <td class="ps-4 text-center text-muted fw-bold">@(stt++)</td>
+                                    <td>
                                         <span class="badge bg-dark fw-bold px-3 py-2 fs-6" style="letter-spacing: 1px;"><i class="fa-solid fa-hashtag"></i> @item.SoSeri</span>
                                     </td>
-                                    <td class="fw-bold text-primary">
-                                        @item.MaSanPhamNavigation?.TenSanPham
+                                    <td class="fw-bold">
+                                        <a asp-controller="SanPham" asp-action="Details" asp-route-id="@item.MaSanPham" class="text-decoration-none text-primary" title="Xem chi tiết linh kiện này">
+                                            @item.MaSanPhamNavigation?.TenSanPham
+                                        </a>
+                                        <div class="small text-muted fw-normal mt-1"><i class="fa-solid fa-tag"></i> Hãng: @item.MaSanPhamNavigation?.HangSanXuat</div>
                                     </td>
                                     <td>
                                         <a href="/PhieuNhap/Details/@item.MaPhieuNhap" class="text-decoration-none text-info fw-bold">
@@ -84,20 +92,33 @@
                                         {
                                             <span class="badge bg-secondary shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-cart-shopping text-light me-1"></i> Đã Bán</span>
                                         }
+                                        else if (item.TrangThai == 3)
+                                        {
+                                            <span class="badge bg-danger shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-wrench text-light me-1"></i> Lỗi/Bảo Hành</span>
+                                        }
                                     </td>
                                     <td class="text-center">
-                                        <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-info text-white shadow-sm fw-bold">
-                                            <i class="fa-solid fa-route"></i> Truy Vết
-                                        </a>
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-info text-white shadow-sm fw-bold" title="Truy Vết Cụ Thể">
+                                                <i class="fa-solid fa-route"></i> Truy vết
+                                            </a>
+                                            <form asp-action="ToggleDefect" asp-route-id="@item.MaSeri" method="post" class="d-inline" onsubmit="return confirm('@(item.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục hoạt động cho Seri: {item.SoSeri}?" : $"Xác nhận báo lỗi cho Seri: {item.SoSeri}?")');">
+                                                @if (item.TrangThai == 3)
+                                                {
+                                                    <button type="submit" class="btn btn-sm btn-success shadow-sm fw-bold" title="Đã Sửa Xong / Hoàn Tất"><i class="fa-solid fa-wrench"></i> OK</button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm fw-bold" title="Báo Lỗi / Thu Bảo Hành"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi</button>
+                                                }
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }
                         }
                     </tbody>
                 </table>
-            </div>
-            <div class="card-footer bg-white text-muted fst-italic small text-end py-2">
-                Tổng số Seri hiển thị: <span class="fw-bold">@Model.Count()</span> thẻ
             </div>
         </div>
     </div>

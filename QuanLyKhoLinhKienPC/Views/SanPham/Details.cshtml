@@ -158,20 +158,26 @@
                                     foreach (var seri in Model.SeriSanPham)
                                     {
                                         <tr>
-                                            <td class="text-center text-muted">@i</td>
-                                            <td class="fw-bold font-monospace text-primary">@seri.SoSeri</td>
-                                            <td class="text-center">
+                                            <td class="text-center text-muted fw-bold align-middle">@i</td>
+                                            <td class="align-middle">
+                                                <span class="badge bg-dark fw-bold px-3 py-2 fs-6" style="letter-spacing: 1px;"><i class="fa-solid fa-hashtag"></i> @seri.SoSeri</span>
+                                            </td>
+                                            <td class="text-center align-middle">
                                                 @if (seri.TrangThai == 1)
                                                 {
-                                                    <span class="badge bg-success">Trong kho</span>
+                                                    <span class="badge bg-success shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-box text-light me-1"></i> Tồn Kho</span>
                                                 }
                                                 else if (seri.TrangThai == 2)
                                                 {
-                                                    <span class="badge bg-danger">Đã bán</span>
+                                                    <span class="badge bg-secondary shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-cart-shopping text-light me-1"></i> Đã Bán</span>
+                                                }
+                                                else if (seri.TrangThai == 3)
+                                                {
+                                                    <span class="badge bg-danger shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-wrench text-light me-1"></i> Lỗi/Bảo Hành</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning text-dark">Lỗi/Khác</span>
+                                                    <span class="badge bg-warning text-dark shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-circle-question me-1"></i> Khác</span>
                                                 }
                                             </td>
                                         </tr>

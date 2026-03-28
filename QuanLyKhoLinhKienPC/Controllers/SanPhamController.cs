@@ -57,7 +57,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Tính tồn kho ảo
             foreach (var item in list)
             {
-                item.SoLuongTon = item.SeriSanPham.Count();
+                item.SoLuongTon = item.SeriSanPham.Count(s => s.TrangThai == 1 && s.IsDeleted == false);
             }
 
             // Lấy danh sách Hãng sản xuất duy nhất
@@ -96,7 +96,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            sanPham.SoLuongTon = sanPham.SeriSanPham.Count();
+            sanPham.SoLuongTon = sanPham.SeriSanPham.Count(s => s.TrangThai == 1 && s.IsDeleted == false);
 
             return View(sanPham);
         }
@@ -164,7 +164,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                             // 4. Dán chồng ảnh lên và xuất ra WebP
                             destImage.Mutate(c => c.DrawImage(sourceImage, new Point(x, y), 1f));
-                            
+
                             await destImage.SaveAsWebpAsync(filePath, new SixLabors.ImageSharp.Formats.Webp.WebpEncoder
                             {
                                 Quality = 75
@@ -282,7 +282,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                                 int y = (800 - sourceImage.Height) / 2;
 
                                 destImage.Mutate(c => c.DrawImage(sourceImage, new Point(x, y), 1f));
-                                
+
                                 await destImage.SaveAsWebpAsync(fullPath, new SixLabors.ImageSharp.Formats.Webp.WebpEncoder
                                 {
                                     Quality = 75
@@ -425,100 +425,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
             _context.Update(sanPham);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Khôi phục sản phẩm thành công.";
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: SanPham/DeleteForce
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteForce(int id)
-        {
-            var sanPham = await _context.SanPham.FindAsync(id);
-            if (sanPham == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Trash));
-            }
-
-            try
-            {
-                // Lưu đường dẫn ảnh trước khi xóa DB
-                string imagePath = sanPham.HinhAnh;
-
-                _context.SanPham.Remove(sanPham);
-                await _context.SaveChangesAsync();
-
-                // Nếu xóa DB thành công thì mới xóa ảnh
-                DeleteOldImage(imagePath);
-
-                TempData["Success"] = "Đã xóa vĩnh viễn sản phẩm và hình ảnh.";
-                return RedirectToAction(nameof(Trash));
-            }
-            catch (DbUpdateException)
-            {
-                TempData["Error"] = "Không thể xóa vĩnh viễn sản phẩm này vì đã có dữ liệu nhập/xuất kho liên quan!";
-                return RedirectToAction(nameof(Trash));
-            }
-        }
-
-        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmptyTrash()
-        {
-            // Lấy tất cả danh sách trong thùng rác
-            var racList = await _context.SanPham.Where(v => v.IsDeleted == true).ToListAsync();
-
-            if (!racList.Any())
-            {
-                return RedirectToAction(nameof(Trash));
-            }
-
-            int daXoa = 0;
-            int biLoi = 0;
-
-            foreach (var item in racList)
-            {
-                try
-                {
-                    string imagePath = item.HinhAnh; // Lưu lại đường dẫn ảnh
-
-                    // Cố gắng xóa từng cái
-                    _context.SanPham.Remove(item);
-                    await _context.SaveChangesAsync(); // Xóa trong DB
-
-                    DeleteOldImage(imagePath); // Xóa file ảnh
-
-                    daXoa++;
-                }
-                catch (DbUpdateException)
-                {
-                    // Nếu lỗi (do ràng buộc khóa ngoại), bỏ qua và đếm lỗi
-                    biLoi++;
-
-                    // QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
-                    // Nếu không, EF Core sẽ vẫn nhớ lệnh xóa này và gây lỗi cho item tiếp theo
-                    _context.Entry(item).State = EntityState.Unchanged;
-                }
-            }
-
-            // Thông báo kết quả cho người dùng
-            if (daXoa > 0 && biLoi == 0)
-            {
-                TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} sản phẩm).";
-            }
-            else if (daXoa > 0 && biLoi > 0)
-            {
-                TempData["Warning"] = $"Đã xóa vĩnh viễn {daXoa} sản phẩm. Còn lại {biLoi} sản phẩm không thể xóa do đang được sử dụng.";
-            }
-            else if (daXoa == 0 && biLoi > 0)
-            {
-                TempData["Error"] = "Không thể xóa sản phẩm nào vì tất cả đều đang được sử dụng!";
-            }
-
             return RedirectToAction(nameof(Trash));
         }
 

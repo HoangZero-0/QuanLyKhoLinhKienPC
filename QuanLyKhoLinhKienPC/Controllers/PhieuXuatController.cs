@@ -78,7 +78,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     MaSanPham = s.MaSanPham, 
                     TenSanPham = s.TenSanPham,
                     GiaBan = s.GiaBan,
-                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1) // Điểm thực tế thẻ seri
+                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) // Điểm thực tế thẻ seri
                 }).ToList();
 
             ViewBag.SanPhamList = dsSanPham;
@@ -172,7 +172,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuXuat.MaNguoiDung);
             
-            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1) }).ToList();
+            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) }).ToList();
             ViewBag.SanPhamList = dsSanPham;
 
             return View(phieuXuat);
@@ -369,80 +369,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 await transaction.RollbackAsync();
                 TempData["Error"] = "Lỗi khi khôi phục: " + ex.Message;
             }
-
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: PhieuXuat/DeleteForce
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteForce(int id)
-        {
-            var phieuXuat = await _context.PhieuXuat.FindAsync(id);
-            if (phieuXuat == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu!";
-                return RedirectToAction(nameof(Trash));
-            }
-
-            try
-            {
-                // Xóa Chi Tiết trước
-                var chiTietList = await _context.ChiTietPhieuXuat.Where(c => c.MaPhieuXuat == id).ToListAsync();
-                _context.ChiTietPhieuXuat.RemoveRange(chiTietList);
-
-                // Xóa Phiếu
-                _context.PhieuXuat.Remove(phieuXuat);
-                await _context.SaveChangesAsync();
-                
-                TempData["Success"] = "Đã xóa vĩnh viễn Phiếu Xuất.";
-            }
-            catch (DbUpdateException ex)
-            {
-                TempData["Error"] = "Lỗi Ràng buộc Database. " + ex.Message;
-            }
-
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
-        // POST: PhieuXuat/EmptyTrash
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmptyTrash()
-        {
-            var racList = await _context.PhieuXuat.Where(p => p.IsDeleted).ToListAsync();
-            if (!racList.Any()) return RedirectToAction(nameof(Trash));
-
-            int daXoa = 0;
-            int biLoi = 0;
-
-            foreach (var item in racList)
-            {
-                using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    var chiTietList = await _context.ChiTietPhieuXuat.Where(c => c.MaPhieuXuat == item.MaPhieuXuat).ToListAsync();
-                    _context.ChiTietPhieuXuat.RemoveRange(chiTietList);
-
-                    _context.PhieuXuat.Remove(item);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    daXoa++;
-                }
-                catch (DbUpdateException)
-                {
-                    await transaction.RollbackAsync();
-                    biLoi++;
-                    _context.Entry(item).State = EntityState.Unchanged;
-                }
-            }
-
-            if (daXoa > 0 && biLoi == 0) TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} hóa đơn).";
-            else if (daXoa > 0 && biLoi > 0) TempData["Warning"] = $"Đã xóa {daXoa} hóa đơn. Lỗi {biLoi} hóa đơn.";
 
             return RedirectToAction(nameof(Trash));
         }

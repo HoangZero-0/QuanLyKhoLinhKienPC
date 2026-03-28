@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuXuat>
+﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuXuat>
 
 @{
     ViewData["Title"] = "Thùng Rác Hóa Đơn Bán";
@@ -12,11 +12,7 @@
         <div class="col-md-6 text-end">
             @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
             {
-                <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn dọn sạch danh sách Đơn Đã Hủy? Dữ liệu Hóa đơn này sẽ bị xóa vĩnh viễn (Nhưng Seri đã được trả về kho an toàn)!">
-                    <button type="submit" class="btn btn-danger shadow-sm fw-bold @(!Model.Any() ? "disabled" : "")">
-                        <i class="fa-solid fa-dumpster-fire"></i> Dọn Sạch
-                    </button>
-                </form>
+
             }
             <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold ms-2">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
@@ -80,11 +76,7 @@
 
                                         @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
                                         {
-                                            <form asp-action="DeleteForce" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline" data-confirm="Xóa rớt vĩnh viễn hóa đơn Hủy này? (Seri đã nằm an toàn trong kho)">
-                                                <button type="submit" class="btn btn-sm btn-danger shadow-sm ms-1" title="Xóa vĩnh viễn">
-                                                    <i class="fa-solid fa-xmark"></i> Xóa V.Viễn
-                                                </button>
-                                            </form>
+
                                         }
                                     </td>
                                 </tr>

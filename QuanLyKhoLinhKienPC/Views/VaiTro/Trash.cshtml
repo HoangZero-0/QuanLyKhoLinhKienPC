@@ -1,4 +1,4 @@
-@model IEnumerable<QuanLyKhoLinhKienPC.Models.VaiTro>
+﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.VaiTro>
 
 @{
     ViewData["Title"] = "Thùng Rác Vai Trò";
@@ -11,11 +11,7 @@
         <div>
             @if (Model != null && Model.Any())
             {
-                <form asp-action="EmptyTrash" method="post" class="d-inline" data-confirm="Bạn có chắc chắn muốn DỌN SẠCH toàn bộ thùng rác?\nDữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục!">
-                    <button type="submit" class="btn btn-danger shadow-sm">
-                        <i class="fa-solid fa-fire"></i> Dọn sạch thùng rác
-                    </button>
-                </form>
+
             }
             <a asp-action="Index" class="btn btn-secondary shadow-sm me-2">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
@@ -93,11 +89,7 @@
                                             </button>
                                         </form>
 
-                                        <form asp-action="DeleteForce" asp-route-id="@item.MaVaiTro" method="post" class="d-inline" data-confirm="CẢNH BÁO: Xóa vĩnh viễn vai trò này không thể lấy lại. Bạn chắc chứ?">
-                                            <button type="submit" class="btn btn-sm btn-dark" title="Xóa vĩnh viễn">
-                                                <i class="fa-solid fa-ban"></i>
-                                            </button>
-                                        </form>
+
                                     </td>
                                 </tr>
                             }

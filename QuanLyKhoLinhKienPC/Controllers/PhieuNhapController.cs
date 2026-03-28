@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -342,86 +342,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 await transaction.RollbackAsync();
                 TempData["Error"] = "Lỗi khi khôi phục: " + ex.Message;
             }
-
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: PhieuNhap/DeleteForce
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteForce(int id)
-        {
-            var phieuNhap = await _context.PhieuNhap.FindAsync(id);
-            if (phieuNhap == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu!";
-                return RedirectToAction(nameof(Trash));
-            }
-
-            try
-            {
-                // Note: SQL Server OnDelete Cascade có thể lo phần ChiTietPhieuNhap và SeriSanPham nếu đã config,
-                // Nhưng nếu không, cần xóa thủ công ChiTiet và Seri trước.
-                var seriList = await _context.SeriSanPham.Where(s => s.MaPhieuNhap == id).ToListAsync();
-                _context.SeriSanPham.RemoveRange(seriList);
-                
-                var chiTietList = await _context.ChiTietPhieuNhap.Where(c => c.MaPhieuNhap == id).ToListAsync();
-                _context.ChiTietPhieuNhap.RemoveRange(chiTietList);
-
-                _context.PhieuNhap.Remove(phieuNhap);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Đã xóa vĩnh viễn Phiếu Nhập và toàn bộ dữ liệu kèm theo.";
-            }
-            catch (DbUpdateException ex)
-            {
-                TempData["Error"] = "Lỗi Ràng buộc: Không thể xóa vĩnh viễn Phiếu Nhập này vì các Seri liên quan đã được đem đi xuất bán! " + ex.Message;
-            }
-
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
-        // POST: PhieuNhap/EmptyTrash
-        [HttpPost]
-        [Authorize(Roles = "Quản trị viên,Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmptyTrash()
-        {
-            var racList = await _context.PhieuNhap.Where(p => p.IsDeleted).ToListAsync();
-            if (!racList.Any()) return RedirectToAction(nameof(Trash));
-
-            int daXoa = 0;
-            int biLoi = 0;
-
-            foreach (var item in racList)
-            {
-                using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    var seriList = await _context.SeriSanPham.Where(s => s.MaPhieuNhap == item.MaPhieuNhap).ToListAsync();
-                    _context.SeriSanPham.RemoveRange(seriList);
-                    
-                    var chiTietList = await _context.ChiTietPhieuNhap.Where(c => c.MaPhieuNhap == item.MaPhieuNhap).ToListAsync();
-                    _context.ChiTietPhieuNhap.RemoveRange(chiTietList);
-
-                    _context.PhieuNhap.Remove(item);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    daXoa++;
-                }
-                catch (DbUpdateException)
-                {
-                    await transaction.RollbackAsync();
-                    biLoi++;
-                    _context.Entry(item).State = EntityState.Unchanged;
-                }
-            }
-
-            if (daXoa > 0 && biLoi == 0) TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} phiếu nhập).";
-            else if (daXoa > 0 && biLoi > 0) TempData["Warning"] = $"Đã xóa {daXoa} phiếu. Bỏ qua {biLoi} phiếu lỗi (Series đã xuất kho).";
-            else TempData["Error"] = "Không thể xóa bất kỳ Phiếu Nhập nào do vướng dữ liệu đã Xuất!";
 
             return RedirectToAction(nameof(Trash));
         }

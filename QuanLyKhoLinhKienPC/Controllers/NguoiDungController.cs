@@ -59,7 +59,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var nguoiDung = await _context.NguoiDung
                 .Include(n => n.MaVaiTroNavigation)
                 .FirstOrDefaultAsync(m => m.MaNguoiDung == id);
-                
+
             if (nguoiDung == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
@@ -82,10 +82,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MaNguoiDung,TenDangNhap,MatKhau,HoTen,Email,MaVaiTro,IsDeleted")] NguoiDung nguoiDung)
         {
-            // Bỏ qua Validate mặc định cho khóa ngoại điều hướng
+            // Bỏ qua Validate mặc định cho khóa ngoại điều hướng và các cột ảo (Xác nhận mật khẩu) không dùng ở form này
             ModelState.Remove("MaVaiTroNavigation");
             ModelState.Remove("PhieuNhap");
             ModelState.Remove("PhieuXuat");
+            ModelState.Remove("XacNhanMatKhau");
 
             // Kiểm tra trùng Tên Đăng Nhập
             if (_context.NguoiDung.Any(n => n.TenDangNhap == nguoiDung.TenDangNhap))
@@ -103,88 +104,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 TempData["Success"] = "Thêm mới người dùng thành công!";
                 return RedirectToAction(nameof(Index));
             }
-            
+
             TempData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
             ViewData["MaVaiTro"] = new SelectList(_context.VaiTro.Where(v => !v.IsDeleted), "MaVaiTro", "TenVaiTro", nguoiDung.MaVaiTro);
             return View(nguoiDung);
         }
 
-        // 4. CHỈNH SỬA
-        // GET: NguoiDung/Edit
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Index));
-            }
 
-            var nguoiDung = await _context.NguoiDung.FindAsync(id);
-            if (nguoiDung == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewData["MaVaiTro"] = new SelectList(_context.VaiTro.Where(v => !v.IsDeleted), "MaVaiTro", "TenVaiTro", nguoiDung.MaVaiTro);
-            return View(nguoiDung);
-        }
-
-        // POST: NguoiDung/Edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MaNguoiDung,TenDangNhap,MatKhau,HoTen,Email,MaVaiTro,IsDeleted")] NguoiDung nguoiDung)
-        {
-            if (id != nguoiDung.MaNguoiDung)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            ModelState.Remove("MaVaiTroNavigation");
-            ModelState.Remove("PhieuNhap");
-            ModelState.Remove("PhieuXuat");
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Giữ lại mật khẩu cũ nếu Admin không đổi mật khẩu
-                    var oldNguoiDung = await _context.NguoiDung.AsNoTracking().FirstOrDefaultAsync(n => n.MaNguoiDung == id);
-                    
-                    if (string.IsNullOrEmpty(nguoiDung.MatKhau))
-                    {
-                        nguoiDung.MatKhau = oldNguoiDung.MatKhau;
-                    }
-                    else
-                    {
-                        // Nếu có nhập mật khẩu mới, băm mật khẩu mới đó
-                        nguoiDung.MatKhau = SecurityHelper.HashPassword(nguoiDung.MatKhau);
-                    }
-
-                    _context.Update(nguoiDung);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Cập nhật người dùng thành công!";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!NguoiDungExists(nguoiDung.MaNguoiDung))
-                    {
-                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            
-            ViewData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
-            ViewData["MaVaiTro"] = new SelectList(_context.VaiTro.Where(v => !v.IsDeleted), "MaVaiTro", "TenVaiTro", nguoiDung.MaVaiTro);
-            return View(nguoiDung);
-        }
 
         // 5. XÓA MỀM (Chuyển vào thùng rác)
         // GET: NguoiDung/Delete
@@ -199,7 +125,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var nguoiDung = await _context.NguoiDung
                 .Include(n => n.MaVaiTroNavigation)
                 .FirstOrDefaultAsync(m => m.MaNguoiDung == id);
-                
+
             if (nguoiDung == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
@@ -274,86 +200,6 @@ namespace QuanLyKhoLinhKienPC.Controllers
             _context.Update(nguoiDung);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Khôi phục người dùng thành công.";
-            return RedirectToAction(nameof(Trash));
-        }
-
-        // 8. XÓA VĨNH VIỄN (Chỉ xóa được khi không có ràng buộc)
-        // POST: NguoiDung/DeleteForce
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteForce(int id)
-        {
-            var nguoiDung = await _context.NguoiDung.FindAsync(id);
-            if (nguoiDung == null)
-            {
-                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
-                return RedirectToAction(nameof(Trash));
-            }
-
-            try
-            {
-                _context.NguoiDung.Remove(nguoiDung);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Đã xóa vĩnh viễn người dùng.";
-                return RedirectToAction(nameof(Trash));
-            }
-            catch (DbUpdateException)
-            {
-                TempData["Error"] = "Không thể xóa vĩnh viễn người dùng này vì họ đã thực hiện các giao dịch nhập/xuất kho!";
-                return RedirectToAction(nameof(Trash));
-            }
-        }
-
-        // 9. DỌN SẠCH THÙNG RÁC (Phiên bản thông minh: Xóa được bao nhiêu thì xóa)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EmptyTrash()
-        {
-            // Lấy tất cả danh sách trong thùng rác
-            var racList = await _context.NguoiDung.Where(v => v.IsDeleted == true).ToListAsync();
-
-            if (!racList.Any())
-            {
-                return RedirectToAction(nameof(Trash));
-            }
-
-            int daXoa = 0;
-            int biLoi = 0;
-
-            foreach (var item in racList)
-            {
-                try
-                {
-                    // Cố gắng xóa từng cái
-                    _context.NguoiDung.Remove(item);
-                    await _context.SaveChangesAsync(); // Lưu ngay lập tức
-                    daXoa++;
-                }
-                catch (DbUpdateException)
-                {
-                    // Nếu lỗi (do ràng buộc khóa ngoại), bỏ qua và đếm lỗi
-                    biLoi++;
-
-                    // QUAN TRỌNG: Phải reset trạng thái của item bị lỗi về "Chưa thay đổi"
-                    // Nếu không, EF Core sẽ vẫn nhớ lệnh xóa này và gây lỗi cho item tiếp theo
-                    _context.Entry(item).State = EntityState.Unchanged;
-                }
-            }
-
-            // Thông báo kết quả cho người dùng
-            if (daXoa > 0 && biLoi == 0)
-            {
-                TempData["Success"] = $"Đã dọn sạch thùng rác ({daXoa} người dùng).";
-            }
-            else if (daXoa > 0 && biLoi > 0)
-            {
-                TempData["Warning"] = $"Đã xóa vĩnh viễn {daXoa} người dùng. Còn lại {biLoi} người dùng không thể xóa do đang sử dụng.";
-            }
-            else if (daXoa == 0 && biLoi > 0)
-            {
-                TempData["Error"] = "Không thể xóa người dùng nào vì tất cả đều đã tham gia hệ thống!";
-            }
-
             return RedirectToAction(nameof(Trash));
         }
 

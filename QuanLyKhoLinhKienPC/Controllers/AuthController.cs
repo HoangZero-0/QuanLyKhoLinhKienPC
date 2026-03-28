@@ -47,14 +47,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return View();
             }
 
-            // 2. Tìm User trong cơ sở dữ liệu (chỉ lấy những user chưa bị xóa)
+            // 2. Tìm User trong cơ sở dữ liệu (Lấy tất cả để báo lỗi tường minh)
             var user = await _context.NguoiDung
                 .Include(u => u.MaVaiTroNavigation)
-                .FirstOrDefaultAsync(u => u.TenDangNhap == tenDangNhap && u.IsDeleted == false);
+                .FirstOrDefaultAsync(u => u.TenDangNhap == tenDangNhap);
 
             if (user == null)
             {
-                ViewData["Error"] = "Tên đăng nhập không tồn tại hoặc đã bị khóa.";
+                ViewData["Error"] = "Tên đăng nhập không tồn tại trong hệ thống.";
                 return View();
             }
 
@@ -62,6 +62,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
             if (!SecurityHelper.VerifyPassword(matKhau, user.MatKhau))
             {
                 ViewData["Error"] = "Mật khẩu không chính xác.";
+                return View();
+            }
+
+            // 4. KIỂM TRA TÀI KHOẢN KHÓA SAU KHI XÁC THỰC MẬT KHẨU ĐÚNG
+            if (user.IsDeleted)
+            {
+                ViewData["Error"] = "Tài khoản này đã bị khóa. Vui lòng liên hệ Quản trị viên!";
                 return View();
             }
 

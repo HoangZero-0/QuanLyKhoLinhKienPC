@@ -80,5 +80,72 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             return View(seri);
         }
+
+        // 3. THAY ĐỔI TRẠNG THÁI LỖI / BẢO HÀNH
+        // POST: SeriSanPham/ToggleDefect/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleDefect(int id)
+        {
+            var seri = await _context.SeriSanPham
+                .Include(s => s.MaSanPhamNavigation)
+                .Include(s => s.MaPhieuXuatNavigation)
+                .FirstOrDefaultAsync(s => s.MaSeri == id);
+
+            if (seri == null)
+            {
+                TempData["Error"] = "Không tìm thấy lỗi seri!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (seri.TrangThai == 1) // Đang tồn kho -> Báo lỗi
+            {
+                seri.TrangThai = 3;
+                TempData["Success"] = $"Đã báo lỗi cho Seri: {seri.SoSeri}.";
+            }
+            else if (seri.TrangThai == 3) // Đang lỗi -> Đã sửa xong -> Về tồn kho HOẶC Đã Bán
+            {
+                if (seri.MaPhieuXuat == null)
+                {
+                    seri.TrangThai = 1; // Chưa từng bán -> Về tồn kho
+                    TempData["Success"] = $"Seri: {seri.SoSeri} đã sửa/bảo hành thành công.";
+                }
+                else
+                {
+                    seri.TrangThai = 2; // Đã từng bán -> Trả lại khách -> Về Đã Bán
+                    TempData["Success"] = $"Seri: {seri.SoSeri} đã hoàn tất bảo hành và bàn giao lại cho Khách hàng.";
+                }
+            }
+            else if (seri.TrangThai == 2) // Đã bán -> Khách mang tới bảo hành
+            {
+                if (seri.MaPhieuXuatNavigation != null)
+                {
+                    int thoiGianBaoHanh = seri.MaSanPhamNavigation?.ThoiGianBaoHanh ?? 0;
+                    DateTime ngayHetHan = seri.MaPhieuXuatNavigation.NgayXuat.AddMonths(thoiGianBaoHanh);
+
+                    if (DateTime.Now <= ngayHetHan)
+                    {
+                        seri.TrangThai = 3;
+                        TempData["Success"] = $"Đã tiếp nhận bảo hành Seri: {seri.SoSeri} (Còn hạn bảo hành đến {ngayHetHan:dd/MM/yyyy}).";
+                    }
+                    else
+                    {
+                        seri.TrangThai = 3;
+                        TempData["Warning"] = $"Seri: {seri.SoSeri} ĐÃ HẾT HẠN BẢO HÀNH từ {ngayHetHan:dd/MM/yyyy}. Đã nhận phiếu sửa chữa dịch vụ tính phí.";
+                    }
+                }
+            }
+
+            _context.Update(seri);
+            await _context.SaveChangesAsync();
+
+            // Trích xuất filter hiện tại để quay lại đúng trạng thái đang ở
+            string referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
