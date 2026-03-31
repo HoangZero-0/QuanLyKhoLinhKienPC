@@ -70,12 +70,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
         public IActionResult Create()
         {
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen");
-            
+
             // Danh sách Dropdown cho Detail (Javascript) - Kèm theo Số lượng tồn trong Kho
             var dsSanPham = _context.SanPham
                 .Where(s => !s.IsDeleted)
-                .Select(s => new { 
-                    MaSanPham = s.MaSanPham, 
+                .Select(s => new
+                {
+                    MaSanPham = s.MaSanPham,
                     TenSanPham = s.TenSanPham,
                     GiaBan = s.GiaBan,
                     TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) // Điểm thực tế thẻ seri
@@ -98,7 +99,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (ChiTietXuat == null || ChiTietXuat.Count == 0)
             {
-                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 sản phẩm vào Đơn Bán Hàng!");
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 Sản Phẩm vào hóa đơn!");
             }
 
             if (ModelState.IsValid)
@@ -108,10 +109,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     phieuXuat.NgayXuat = DateTime.Now;
                     phieuXuat.IsDeleted = false;
-                    
+
                     // Server tự tính tổng tiền từ giỏ hàng thực tế
                     phieuXuat.TongTien = ChiTietXuat.Sum(x => x.SoLuong * x.GiaTien);
-                    
+
                     // 1. LƯU VỎ PHIẾU XUẤT ĐỂ LẤY ID
                     _context.Add(phieuXuat);
                     await _context.SaveChangesAsync();
@@ -160,7 +161,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     // 4. CHỐT ĐƠN (COMMIT)
                     await transaction.CommitAsync();
 
-                    TempData["Success"] = "Lập Hóa Đơn và Rút Kho Seri Bán Hàng Thành công!";
+                    TempData["Success"] = "Lập hóa đơn và rút kho Seri bán hàng thành công!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
@@ -171,7 +172,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             }
 
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuXuat.MaNguoiDung);
-            
+
             var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) }).ToList();
             ViewBag.SanPhamList = dsSanPham;
 
@@ -290,12 +291,12 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    TempData["Success"] = "Đã chuyển Hóa đơn xuất vào thùng rác và hoàn trả Seri về kho hàng.";
+                    TempData["Success"] = "Đã chuyển hóa đơn xuất vào thùng rác và hoàn trả Seri về kho hàng.";
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    TempData["Error"] = "Lỗi khi xóa Hóa đơn: " + ex.Message;
+                    TempData["Error"] = "Lỗi khi xóa hóa đơn: " + ex.Message;
                 }
             }
 
@@ -362,7 +363,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                TempData["Success"] = "Đã khôi phục Hóa Đơn và rút lại Seri thành công.";
+                TempData["Success"] = "Đã khôi phục hóa đơn và rút lại Seri thành công.";
             }
             catch (Exception ex)
             {

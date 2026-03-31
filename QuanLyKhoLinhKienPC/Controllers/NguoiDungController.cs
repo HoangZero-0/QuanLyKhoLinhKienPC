@@ -101,7 +101,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                 _context.Add(nguoiDung);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Thêm mới người dùng thành công!";
+                TempData["Success"] = "Thêm mới Người Dùng thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -155,7 +155,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 nguoiDung.IsDeleted = true;
                 _context.Update(nguoiDung);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Đã chuyển người dùng vào thùng rác.";
+                TempData["Success"] = "Đã chuyển Người Dùng vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -199,7 +199,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             nguoiDung.IsDeleted = false;
             _context.Update(nguoiDung);
             await _context.SaveChangesAsync();
-            TempData["Success"] = "Khôi phục người dùng thành công.";
+            TempData["Success"] = "Khôi phục Người Dùng thành công.";
             return RedirectToAction(nameof(Trash));
         }
 

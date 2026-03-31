@@ -68,7 +68,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // 4. KIỂM TRA TÀI KHOẢN KHÓA SAU KHI XÁC THỰC MẬT KHẨU ĐÚNG
             if (user.IsDeleted)
             {
-                ViewData["Error"] = "Tài khoản này đã bị khóa. Vui lòng liên hệ Quản trị viên!";
+                ViewData["Error"] = "Tài khoản này đã bị khóa. Vui lòng liên hệ quản trị viên!";
                 return View();
             }
 
@@ -79,7 +79,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 new Claim(ClaimTypes.Name, user.TenDangNhap),
                 new Claim("HoTen", user.HoTen ?? user.TenDangNhap),
                 // Có thể lưu Vai Trò vào ClaimTypes.Role để sau này phân quyền: [Authorize(Roles = "Quản trị viên")]
-                new Claim(ClaimTypes.Role, user.MaVaiTroNavigation?.TenVaiTro ?? "") 
+                new Claim(ClaimTypes.Role, user.MaVaiTroNavigation?.TenVaiTro ?? "")
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, "PCCookieAuth");
@@ -113,7 +113,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             // Xóa Cookie đăng nhập
             await HttpContext.SignOutAsync("PCCookieAuth");
-            
+
             return RedirectToAction("Login", "Auth");
         }
 

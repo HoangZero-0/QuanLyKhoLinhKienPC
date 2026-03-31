@@ -7,6 +7,38 @@
 <div class="d-flex flex-column h-100">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
         <h2 class="text-primary m-0"><i class="fa-solid fa-barcode"></i> Quản Lý Kho Seri Linh Kiện</h2>
+        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+        {
+            <div>
+                <a asp-action="Trash" class="btn btn-outline-danger shadow-sm" title="Thùng rác">
+                    <i class="fa-solid fa-trash-can"></i>
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="flex-shrink-0">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i> @TempData["Warning"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
     </div>
 
     <!-- FILTER BAR -->
@@ -48,17 +80,18 @@
                             <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Mã Số Seri</th>
                             <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Linh Kiện</th>
                             <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Phiếu Nhập</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Giá Nhập</th>
                             <th class="py-3 text-center" style="position: sticky; top: 0; z-index: 10;">Trạng Thái Kho</th>
-                            <th class="py-3 text-center" style="width: 150px; position: sticky; top: 0; z-index: 10;">Thao Tác</th>
+                            <th class="py-3 text-center" style="width: 150px; position: sticky; top: 0; z-index: 10;">Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted fst-italic py-5">
-                                    <i class="fa-solid fa-box-open fs-1 text-light mb-3 block"></i><br/>
-                                    Không tìm thấy Serial nào khớp với bộ lọc.
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="fa-solid fa-barcode fa-3x mb-3 text-secondary opacity-50"></i><br>
+                                    Không tìm thấy dữ liệu nào.
                                 </td>
                             </tr>
                         }
@@ -68,9 +101,9 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="ps-4 text-center text-muted fw-bold">@(stt++)</td>
-                                    <td>
-                                        <span class="badge bg-dark fw-bold px-3 py-2 fs-6" style="letter-spacing: 1px;"><i class="fa-solid fa-hashtag"></i> @item.SoSeri</span>
+                                    <td class="text-center text-muted fw-bold align-middle">@(stt++)</td>
+                                    <td class="fw-bold ps-3 align-middle">
+                                        @item.SoSeri
                                     </td>
                                     <td class="fw-bold">
                                         <a asp-controller="SanPham" asp-action="Details" asp-route-id="@item.MaSanPham" class="text-decoration-none text-primary" title="Xem chi tiết linh kiện này">
@@ -82,6 +115,15 @@
                                         <a href="/PhieuNhap/Details/@item.MaPhieuNhap" class="text-decoration-none text-info fw-bold">
                                             <i class="fa-solid fa-receipt"></i> Lô #PN-@item.MaPhieuNhap?.ToString("D5")
                                         </a>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var giaNhap = item.MaPhieuNhapNavigation?.ChiTietPhieuNhap?.FirstOrDefault(ct => ct.MaSanPham == item.MaSanPham)?.DonGiaNhap;
+                                        }
+                                        @if(giaNhap.HasValue)
+                                        {
+                                            <span class="fw-bold text-danger">@string.Format("{0:N0}", giaNhap) VNĐ</span>
+                                        }
                                     </td>
                                     <td class="text-center align-middle">
                                         @if (item.TrangThai == 1)
@@ -99,19 +141,26 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-info text-white shadow-sm fw-bold" title="Truy Vết Cụ Thể">
-                                                <i class="fa-solid fa-route"></i> Truy vết
+                                            <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-info text-white shadow-sm" title="Truy Vết">
+                                                <i class="fa-solid fa-route"></i>
                                             </a>
-                                            <form asp-action="ToggleDefect" asp-route-id="@item.MaSeri" method="post" class="d-inline" onsubmit="return confirm('@(item.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục hoạt động cho Seri: {item.SoSeri}?" : $"Xác nhận báo lỗi cho Seri: {item.SoSeri}?")');">
+                                            <form asp-action="ToggleDefect" asp-route-id="@item.MaSeri" method="post" class="d-inline m-0" onsubmit="return confirm('@(item.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục: {item.SoSeri}?" : $"Xác nhận báo lỗi cho: {item.SoSeri}?")');">
                                                 @if (item.TrangThai == 3)
                                                 {
-                                                    <button type="submit" class="btn btn-sm btn-success shadow-sm fw-bold" title="Đã Sửa Xong / Hoàn Tất"><i class="fa-solid fa-wrench"></i> OK</button>
+                                                    <button type="submit" class="btn btn-sm btn-success shadow-sm" title="Đã Sửa/Bảo Hành Xong"><i class="fa-solid fa-wrench"></i></button>
                                                 }
                                                 else
                                                 {
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm fw-bold" title="Báo Lỗi / Thu Bảo Hành"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Báo Lỗi"><i class="fa-solid fa-triangle-exclamation"></i></button>
                                                 }
                                             </form>
+
+                                            @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.MaSeri" class="btn btn-sm btn-danger shadow-sm" title="Xoá">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </a>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

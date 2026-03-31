@@ -99,6 +99,7 @@
                                         @Html.DisplayFor(modelItem => item.Email)
                                     </td>
                                     <td class="text-center py-2">
+                                        <div class="d-flex justify-content-center gap-2">
                                             <a asp-action="Details" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
@@ -106,6 +107,7 @@
                                             <a asp-action="Delete" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-danger" title="Xóa">
                                                 <i class="fa-solid fa-trash"></i>
                                             </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }

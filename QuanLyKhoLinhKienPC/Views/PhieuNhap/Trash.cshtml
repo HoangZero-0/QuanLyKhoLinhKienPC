@@ -20,35 +20,38 @@
         </div>
     </div>
 
-    <div class="card shadow border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0">
+    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+        <div class="card-body p-0 position-relative">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+                <table class="table table-hover table-striped align-middle mb-0 w-100">
                     <thead class="table-secondary">
                         <tr>
-                            <th class="ps-4">Mã Phiếu Nhập</th>
-                            <th>Ngày Lập</th>
-                            <th>Nhà Cung Cấp</th>
-                            <th>Người Lập</th>
-                            <th class="text-end">Tổng Tiền (VNĐ)</th>
-                            <th class="text-center pe-4">Thao Tác</th>
+                            <th class="py-3 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10;">STT</th>
+                            <th class="py-3 ps-4" style="position: sticky; top: 0; z-index: 10;">Mã Phiếu Nhập</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Ngày Lập</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Nhà Cung Cấp</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Người Lập</th>
+                            <th class="py-3 text-end" style="position: sticky; top: 0; z-index: 10;">Tổng Tiền (VNĐ)</th>
+                            <th class="py-3 text-center pe-4" style="position: sticky; top: 0; z-index: 10;">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted fst-italic py-4">
-                                    <i class="fa-solid fa-box-open fa-2x mb-3 text-secondary"></i><br />
-                                    Thùng rác đang trống.
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-50"></i><br>
+                                    Thùng rác trống.
                                 </td>
                             </tr>
                         }
                         else
                         {
+                            int stt = 1;
                             @foreach (var item in Model)
                             {
                                 <tr>
+                                    <td class="text-center text-muted fw-bold">@(stt++)</td>
                                     <td class="ps-4 fw-bold text-secondary">
                                         #PN-@item.MaPhieuNhap.ToString("D5")
                                     </td>

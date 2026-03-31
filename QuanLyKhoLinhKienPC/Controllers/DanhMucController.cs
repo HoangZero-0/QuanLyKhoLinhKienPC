@@ -73,7 +73,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Add(danhMuc);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Thêm mới danh mục thành công!";
+                TempData["Success"] = "Thêm mới Danh Mục thành công!";
                 return RedirectToAction(nameof(Index));
             }
             TempData["Error"] = "Vui lòng kiểm tra lại thông tin nhập!";
@@ -118,7 +118,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(danhMuc);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "Cập nhật danh mục thành công!";
+                    TempData["Success"] = "Cập nhật Danh Mục thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -173,7 +173,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 danhMuc.IsDeleted = true;
                 _context.Update(danhMuc);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Đã chuyển danh mục vào thùng rác.";
+                TempData["Success"] = "Đã chuyển Danh Mục vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -208,7 +208,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             danhMuc.IsDeleted = false;
             _context.Update(danhMuc);
             await _context.SaveChangesAsync();
-            TempData["Success"] = "Khôi phục danh mục thành công.";
+            TempData["Success"] = "Khôi phục Danh Mục thành công.";
             return RedirectToAction(nameof(Trash));
         }
 

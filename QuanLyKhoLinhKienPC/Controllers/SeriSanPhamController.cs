@@ -27,6 +27,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var seriList = _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
                 .Include(s => s.MaPhieuNhapNavigation)
+                    .ThenInclude(pn => pn.ChiTietPhieuNhap)
+                .Include(s => s.MaPhieuXuatNavigation)
+                    .ThenInclude(px => px.ChiTietPhieuXuat)
                 .Where(s => !s.IsDeleted);
 
             // Tìm kiếm theo chuỗi Seri
@@ -71,12 +74,36 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .Include(s => s.MaPhieuXuatNavigation)
                     .ThenInclude(px => px.MaNguoiDungNavigation)
                 .FirstOrDefaultAsync(m => m.MaSeri == id);
-
             if (seri == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
                 return RedirectToAction(nameof(Index));
             }
+
+            decimal donGiaNhap = 0;
+            if (seri.MaPhieuNhap != null)
+            {
+                var chiTiet = await _context.ChiTietPhieuNhap
+                    .FirstOrDefaultAsync(ct => ct.MaPhieuNhap == seri.MaPhieuNhap && ct.MaSanPham == seri.MaSanPham);
+                if (chiTiet != null)
+                {
+                    donGiaNhap = chiTiet.DonGiaNhap;
+                }
+            }
+            ViewBag.DonGiaNhap = donGiaNhap;
+
+            // Lấy đơn giá xuất (giá bán) từ ChiTietPhieuXuat
+            decimal donGiaXuat = 0;
+            if (seri.MaPhieuXuat != null)
+            {
+                var chiTietXuat = await _context.ChiTietPhieuXuat
+                    .FirstOrDefaultAsync(ctx => ctx.MaPhieuXuat == seri.MaPhieuXuat && ctx.MaSeri == seri.MaSeri);
+                if (chiTietXuat != null)
+                {
+                    donGiaXuat = chiTietXuat.GiaTien;
+                }
+            }
+            ViewBag.DonGiaXuat = donGiaXuat;
 
             return View(seri);
         }
@@ -94,7 +121,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (seri == null)
             {
-                TempData["Error"] = "Không tìm thấy lỗi seri!";
+                TempData["Error"] = "Không tìm thấy lỗi Seri!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -113,7 +140,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 else
                 {
                     seri.TrangThai = 2; // Đã từng bán -> Trả lại khách -> Về Đã Bán
-                    TempData["Success"] = $"Seri: {seri.SoSeri} đã hoàn tất bảo hành và bàn giao lại cho Khách hàng.";
+                    TempData["Success"] = $"Seri: {seri.SoSeri} đã hoàn tất bảo hành và bàn giao lại cho khách hàng.";
                 }
             }
             else if (seri.TrangThai == 2) // Đã bán -> Khách mang tới bảo hành
@@ -126,12 +153,12 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     if (DateTime.Now <= ngayHetHan)
                     {
                         seri.TrangThai = 3;
-                        TempData["Success"] = $"Đã tiếp nhận bảo hành Seri: {seri.SoSeri} (Còn hạn bảo hành đến {ngayHetHan:dd/MM/yyyy}).";
+                        TempData["Success"] = $"Đã tiếp nhận bảo hành Seri: {seri.SoSeri} (còn hạn bảo hành đến {ngayHetHan:dd/MM/yyyy}).";
                     }
                     else
                     {
                         seri.TrangThai = 3;
-                        TempData["Warning"] = $"Seri: {seri.SoSeri} ĐÃ HẾT HẠN BẢO HÀNH từ {ngayHetHan:dd/MM/yyyy}. Đã nhận phiếu sửa chữa dịch vụ tính phí.";
+                        TempData["Warning"] = $"Seri: {seri.SoSeri} đã hết hạn bảo hành từ {ngayHetHan:dd/MM/yyyy}. Đã nhận phiếu sửa chữa dịch vụ tính phí.";
                     }
                 }
             }
@@ -146,6 +173,91 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return Redirect(referer);
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // 4. XÓA MỀM (Chuyển vào thùng rác)
+        // GET: SeriSanPham/Delete/5
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var seri = await _context.SeriSanPham
+                .Include(s => s.MaSanPhamNavigation)
+                .FirstOrDefaultAsync(m => m.MaSeri == id);
+
+            if (seri == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(seri);
+        }
+
+        // POST: SeriSanPham/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var seri = await _context.SeriSanPham.FindAsync(id);
+            if (seri != null)
+            {
+                seri.IsDeleted = true;
+                _context.Update(seri);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"Đã chuyển Seri {seri.SoSeri} vào thùng rác.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        // 5. THÙNG RÁC (Hiện danh sách đã xóa)
+        // GET: SeriSanPham/Trash
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        public async Task<IActionResult> Trash(string searchString)
+        {
+            var seriList = _context.SeriSanPham
+                .Include(s => s.MaSanPhamNavigation)
+                .Include(s => s.MaPhieuNhapNavigation)
+                    .ThenInclude(pn => pn.ChiTietPhieuNhap)
+                .Where(s => s.IsDeleted == true);
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                seriList = seriList.Where(s => s.SoSeri.Contains(searchString) ||
+                                               s.MaSanPhamNavigation.TenSanPham.Contains(searchString));
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            return View(await seriList.ToListAsync());
+        }
+
+        // 6. KHÔI PHỤC (Hồi sinh từ thùng rác)
+        // POST: SeriSanPham/Restore/5
+        [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var seri = await _context.SeriSanPham.FindAsync(id);
+            if (seri == null)
+            {
+                TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            seri.IsDeleted = false;
+            _context.Update(seri);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Khôi phục Seri {seri.SoSeri} thành công.";
+
+            return RedirectToAction(nameof(Trash));
         }
     }
 }

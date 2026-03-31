@@ -21,35 +21,38 @@
     </div>
 
 
-    <div class="card shadow border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+        <div class="card-body p-0 position-relative">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+                <table class="table table-hover align-middle mb-0 w-100">
                     <thead class="table-secondary text-center">
                         <tr>
-                            <th class="ps-4 text-start">Mã Phiếu Xuất</th>
-                            <th>Ngày Hủy Yêu Cầu</th>
-                            <th>Khách Hàng</th>
-                            <th>Người Lập Phiếu</th>
-                            <th class="text-end">Tiền Khách Trả (VNĐ)</th>
-                            <th class="text-center pe-4">Thao Tác</th>
+                            <th class="py-3 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10;">STT</th>
+                            <th class="py-3 ps-4 text-start" style="position: sticky; top: 0; z-index: 10;">Mã Phiếu Xuất</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Ngày Hủy Yêu Cầu</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Khách Hàng</th>
+                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Người Lập Phiếu</th>
+                            <th class="py-3 text-end" style="position: sticky; top: 0; z-index: 10;">Tiền Khách Trả (VNĐ)</th>
+                            <th class="py-3 text-center pe-4" style="position: sticky; top: 0; z-index: 10;">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted fst-italic py-4">
-                                    <i class="fa-solid fa-file-invoice-dollar fa-2x mb-3 text-secondary"></i><br />
-                                    Không có hóa đơn nào đã hủy.
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-50"></i><br>
+                                    Thùng rác trống.
                                 </td>
                             </tr>
                         }
                         else
                         {
+                            int stt = 1;
                             @foreach (var item in Model)
                             {
                                 <tr>
+                                    <td class="text-center text-muted fw-bold">@(stt++)</td>
                                     <td class="ps-4 fw-bold text-secondary">
                                         #PX-@item.MaPhieuXuat.ToString("D5")
                                     </td>

@@ -1,0 +1,64 @@
+@model QuanLyKhoLinhKienPC.Models.SeriSanPham
+
+@{
+    ViewData["Title"] = "Xóa Seri Số Lõi";
+}
+
+<div class="container-fluid pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Lõi Seri #@Model.SoSeri</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Seri này vào thùng rác?</h5>
+
+                    <p class="text-muted small mb-4">
+                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
+                    </p>
+
+                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
+                        <dt class="col-sm-4 text-end">Mã Số Seri:</dt>
+                        <dd class="col-sm-8 fw-bold text-dark">@Model.SoSeri</dd>
+
+                        <dt class="col-sm-4 text-end">Linh Kiện:</dt>
+                        <dd class="col-sm-8 fw-bold text-primary">@Model.MaSanPhamNavigation?.TenSanPham</dd>
+
+                        <dt class="col-sm-4 text-end">Hãng:</dt>
+                        <dd class="col-sm-8">@Model.MaSanPhamNavigation?.HangSanXuat</dd>
+
+                        <dt class="col-sm-4 text-end">Trạng Thái:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.TrangThai == 1)
+                            {
+                                <span class="badge bg-success">Tồn Kho</span>
+                            }
+                            else if (Model.TrangThai == 2)
+                            {
+                                <span class="badge bg-secondary">Đã Bán</span>
+                            }
+                            else if (Model.TrangThai == 3)
+                            {
+                                <span class="badge bg-danger">Lỗi/Bảo Hành</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 text-end">Từ Phiếu Nhập:</dt>
+                        <dd class="col-sm-8 fw-bold"><a href="/PhieuNhap/Details/@Model.MaPhieuNhap" class="text-decoration-none">Lô #PN-@Model.MaPhieuNhap?.ToString("D5")</a></dd>
+                    </dl>
+
+                    <form asp-action="Delete" class="mt-4">
+                        <input type="hidden" asp-for="MaSeri" />
+                        <a asp-action="Index" class="btn btn-secondary me-2">
+                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

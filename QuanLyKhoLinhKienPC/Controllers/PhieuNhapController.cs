@@ -65,11 +65,12 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Danh sách Dropdown cho Master
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen");
             ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap");
-            
+
             // Danh sách Dropdown cho Detail (Javascript)
-            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { 
-                MaSanPham = s.MaSanPham, 
-                TenSanPham = s.TenSanPham 
+            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new
+            {
+                MaSanPham = s.MaSanPham,
+                TenSanPham = s.TenSanPham
             }).ToList();
 
             return View();
@@ -85,10 +86,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             ModelState.Remove("MaNguoiDungNavigation");
             ModelState.Remove("MaNhaCungCapNavigation");
             ModelState.Remove("SeriSanPham");
-            
+
             if (phieuNhap.ChiTietPhieuNhap == null || phieuNhap.ChiTietPhieuNhap.Count == 0)
             {
-                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 sản phẩm vào Phiếu Nhập!");
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 Sản Phẩm vào Phiếu Nhập!");
             }
 
             if (ModelState.IsValid)
@@ -96,7 +97,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 // Bổ sung các trường tự động
                 phieuNhap.NgayNhap = DateTime.Now;
                 phieuNhap.IsDeleted = false;
-                
+
                 // Server tự tính lại Tổng Tiền phòng Front-end bị thay đổi
                 phieuNhap.TongTien = phieuNhap.ChiTietPhieuNhap.Sum(ct => ct.SoLuong * ct.DonGiaNhap);
 
@@ -120,7 +121,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                             {
                                 // Tạo chuỗi ngẫu nhiên 3 ký tự gắn mác tránh trùng lặp
                                 string randomEnd = new string(Enumerable.Repeat(chars, 4).Select(s => s[random.Next(s.Length)]).ToArray());
-                                
+
                                 // Format: [Mã PhieuNhap]-[Mã SP]-[NgayNhap]-[ChuoiRandom] (Ví dụ: PN7-SP2-26032026-X8Y1)
                                 string soSeriPhatSinh = $"PN{phieuNhap.MaPhieuNhap}-SP{chitiet.MaSanPham}-{DateTime.Now:ddMM}-{randomEnd}";
 
@@ -143,18 +144,18 @@ namespace QuanLyKhoLinhKienPC.Controllers
                         // Hoàn tất 3 Cấp độ lưu trữ (Commit)
                         await transaction.CommitAsync();
 
-                        TempData["Success"] = "Tạo phiếu nhập và Sinh mã Seri thành công!";
+                        TempData["Success"] = "Tạo Phiếu Nhập và sinh mã Seri thành công!";
                         return RedirectToAction(nameof(Index));
                     }
                     catch (Exception)
                     {
                         // Nếu lỡ rớt mạng hoặc đứt đoạn, Hủy toàn bộ Phiếu Nhập, Chi Tiết và Seri vừa tạo
                         await transaction.RollbackAsync();
-                        ModelState.AddModelError("", "Đã có lỗi xảy ra trong quá trình Sinh Seri. Hệ thống đã hủy tác vụ để bảo vệ dữ liệu nền.");
+                        ModelState.AddModelError("", "Đã có lỗi xảy ra trong quá trình sinh mã Seri. Hệ thống đã hủy tác vụ để bảo vệ dữ liệu nền.");
                     }
                 }
             }
-            
+
             TempData["Error"] = "Vui lòng xem lại thông tin!";
             ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuNhap.MaNguoiDung);
             ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", phieuNhap.MaNhaCungCap);
@@ -267,8 +268,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     var seriList = await _context.SeriSanPham
                         .Where(s => s.MaPhieuNhap == id && !s.IsDeleted)
                         .ToListAsync();
-                    
-                    foreach(var seri in seriList)
+
+                    foreach (var seri in seriList)
                     {
                         seri.IsDeleted = true;
                     }
