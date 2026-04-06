@@ -40,6 +40,15 @@
             min-height: auto !important;
             overflow: visible !important;
         }
+
+        /* Ẩn triệt để thanh cuộn (Scrollbar) Windows bị dính vào khi in */
+        ::-webkit-scrollbar {
+            display: none !important;
+        }
+        * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
         
         .table-responsive {
             top: auto !important;
@@ -52,6 +61,19 @@
         .card {
             border: none !important;
             box-shadow: none !important;
+        }
+
+        /* Khắc phục lỗi "Vạch dọc ảo" của Trình duyệt khi in Bootstrap Table */
+        .table > tbody > tr > *,
+        .table > thead > tr > * {
+            box-shadow: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            background-clip: padding-box !important;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) > * {
+            background-color: #f2f2f2 !important; /* Dùng màu thật thay thế bóng đổ nội bộ */
         }
 
         /* Đẩy nội dung in ra trọn trang giấy, giấu tiêu đề phụ do trình duyệt sinh ra (Ngày tháng, URL) */
@@ -199,11 +221,11 @@
                                         <a asp-controller="SanPham" asp-action="Details" asp-route-id="@item.MaSanPham" class="text-decoration-none text-primary" title="Xem chi tiết linh kiện này">
                                             @item.MaSanPhamNavigation?.TenSanPham
                                         </a>
-                                        <div class="small text-muted fw-normal mt-1"><i class="fa-solid fa-tag"></i> Hãng: @item.MaSanPhamNavigation?.HangSanXuat</div>
+                                        <div class="small text-muted fw-normal mt-1"><i class="fa-solid fa-tag d-print-none"></i> Hãng: @item.MaSanPhamNavigation?.HangSanXuat</div>
                                     </td>
                                     <td>
                                         <a href="/PhieuNhap/Details/@item.MaPhieuNhap" class="text-decoration-none text-info fw-bold">
-                                            <i class="fa-solid fa-receipt"></i> Lô #PN-@item.MaPhieuNhap?.ToString("D5")
+                                            Lô #PN-@item.MaPhieuNhap?.ToString("D5")
                                         </a>
                                     </td>
                                     <td>
@@ -218,15 +240,15 @@
                                     <td class="text-center align-middle">
                                         @if (item.TrangThai == 1)
                                         {
-                                            <span class="badge bg-success shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-box text-light me-1"></i> Tồn Kho</span>
+                                            <span class="badge bg-success shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-box text-light me-1 d-print-none"></i> Tồn Kho</span>
                                         }
                                         else if (item.TrangThai == 2)
                                         {
-                                            <span class="badge bg-secondary shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-cart-shopping text-light me-1"></i> Đã Bán</span>
+                                            <span class="badge bg-secondary shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-cart-shopping text-light me-1 d-print-none"></i> Đã Bán</span>
                                         }
                                         else if (item.TrangThai == 3)
                                         {
-                                            <span class="badge bg-danger shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-wrench text-light me-1"></i> Lỗi/Bảo Hành</span>
+                                            <span class="badge bg-danger shadow-sm rounded-pill px-3 py-2"><i class="fa-solid fa-wrench text-light me-1 d-print-none"></i> Lỗi/Bảo Hành</span>
                                         }
                                     </td>
                                     <td class="text-center d-print-none">

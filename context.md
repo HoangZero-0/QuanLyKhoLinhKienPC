@@ -118,6 +118,7 @@
     - Chi tiết truy vết: Xem lịch sử (Nhập từ NCC nào, ngày nào, giá nào; Bán cho ai, ngày nào, giá nào).
     - Quản lý Bảo hành: Chuyển trạng thái Lỗi/Bảo hành, tự động đối soát thời hạn bảo hành từ ngày bán.
     - Xóa mềm, Thùng rác & Khôi phục.
+    - In thống kê thông tin đã lọc
   - [x] `Nhập kho (PhieuNhap)`:
     - Danh sách phiếu (Xem NCC, Người nhập, Ngày nhập).
     - Chi tiết phiếu: Hiển thị danh sách sản phẩm và các mã Seri tương ứng đã sinh.
