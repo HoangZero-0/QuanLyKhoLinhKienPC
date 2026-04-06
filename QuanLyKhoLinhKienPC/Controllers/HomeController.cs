@@ -34,7 +34,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var tongSoSanPham = await _context.SanPham
                 .Where(s => !s.IsDeleted)
                 .CountAsync();
-                
+
             // Số linh kiện (Seri) đang có sẵn trong kho (TrangThai = 1 và không bị xóa)
             var tongTonKho = await _context.SeriSanPham
                 .Where(s => s.TrangThai == 1 && !s.IsDeleted)
@@ -44,6 +44,47 @@ namespace QuanLyKhoLinhKienPC.Controllers
             ViewBag.SoDonHang = soDonHang;
             ViewBag.TongSoSanPham = tongSoSanPham;
             ViewBag.TongTonKho = tongTonKho;
+
+            // 1. Cảnh báo hết hàng (Tồn kho < 3)
+            var spHetHang = await _context.SanPham
+                .Where(s => !s.IsDeleted)
+                .Select(s => new
+                {
+                    SanPham = s,
+                    TonKho = s.SeriSanPham.Count(sr => sr.TrangThai == 1 && !sr.IsDeleted)
+                })
+                .Where(x => x.TonKho < 3)
+                .OrderBy(x => x.TonKho)
+                .ToListAsync();
+
+            ViewBag.CanhBaoHetHang = spHetHang.Select(x => new
+            {
+                MaSanPham = x.SanPham.MaSanPham,
+                TenSanPham = x.SanPham.TenSanPham,
+                TonKho = x.TonKho
+            }).ToList();
+
+            // 2. Hoạt động gần đây (Tất cả hoạt động hệ thống từ NhatKyHoatDong)
+            var lastLogs = await _context.NhatKyHoatDong
+                .Include(nk => nk.MaNguoiDungNavigation)
+                .OrderByDescending(nk => nk.ThoiGian)
+                .ToListAsync();
+
+            var listHoatDong = lastLogs.Select(nk => new HoatDongVM
+            {
+                LoaiHoatDong = nk.LoaiHanhDong,
+                Icon = nk.LoaiHanhDong == "Thêm mới" ? "fa-plus-circle" :
+                       nk.LoaiHanhDong == "Cập nhật" ? "fa-pen-to-square" :
+                       nk.LoaiHanhDong == "Khôi phục" ? "fa-trash-can-arrow-up" : "fa-trash",
+                ColorClass = nk.LoaiHanhDong == "Thêm mới" ? "text-success bg-success" :
+                             nk.LoaiHanhDong == "Cập nhật" ? "text-primary bg-primary" :
+                             nk.LoaiHanhDong == "Khôi phục" ? "text-info bg-info" : "text-danger bg-danger",
+                ThoiGian = nk.ThoiGian ?? DateTime.Now,
+                NguoiThucHien = nk.MaNguoiDungNavigation?.HoTen ?? "Hệ thống",
+                MoTa = nk.MoTaChiTiet
+            }).ToList();
+
+            ViewBag.HoatDongGanDay = listHoatDong;
 
             return View();
         }
@@ -59,4 +100,27 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
+
+    // ViewModel phụ trợ cho trang chủ
+    public class HoatDongVM
+    {
+        public string? LoaiHoatDong { get; set; } // "Nhap" hoặc "Xuat"
+        public string? NguoiThucHien { get; set; } // "A đã..."
+        public string? MoTa { get; set; }
+        public DateTime ThoiGian { get; set; }
+        public string? Icon { get; set; }
+        public string? ColorClass { get; set; }
+        public string ThoiGianText
+        {
+            get
+            {
+                var ts = DateTime.Now - ThoiGian;
+                if (ts.TotalMinutes < 60) return $"{(int)ts.TotalMinutes} phút trước";
+                if (ts.TotalHours < 24) return $"{(int)ts.TotalHours} giờ trước";
+                if (ts.TotalDays < 2) return "Hôm qua";
+                return $"{(int)ts.TotalDays} ngày trước";
+            }
+        }
+    }
 }
+

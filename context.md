@@ -132,13 +132,13 @@
     - Xóa mềm: Đồng bộ ẩn Phiếu xuất và **Hoàn trả Seri về trạng thái Tồn kho**.
     - Thùng rác & Khôi phục: Rút lại Seri từ kho (nếu Seri chưa bị bán lại đơn khác).
     - Bảo mật: Sử dụng **Transaction** bảo vệ luồng rút/trả kho.
+  - [x] `Cảnh báo tồn kho & Hoạt động`: Module Dashboard hiện thống kê cảnh báo hết hàng (khi số seri < 3) và hiển thị hoạt động nhập xuất gần đây.
 
 ## Đang tiến hành (In Progress)
 
 - [ ] `Tối ưu UI/UX`: Chỉnh sửa lại nhập, xuất toàn diện từ logic đến giao diện.
 - [ ] `Báo cáo & In ấn`: Phát triển chức năng xuất file PDF/Excel cho hóa đơn Nhập và Xuất, báo cáo doanh thu, báo cáo tồn kho (Excel: Dùng cho Nhập kho và Báo cáo thống kê. Dữ liệu nhập cần bóc tách nhiều cột (Header Auto-Detection, bóc tách Seri, làm sạch đơn giá). Thống kê cần Excel để kế toán/chủ shop có thể filter, tính toán lại, PDF: Dùng cho Phiếu Xuất (Hóa đơn bán hàng). Hóa đơn đưa cho khách hàng cần sự nguyên bản, không thể chỉnh sửa, in ra đẹp mắt và chuyên nghiệp).
-- [ ] `Cảnh báo tồn kho`: Phát triển chức năng cảnh báo khi tồn kho cho sản phẩm ở trang chủ khi số lượng seri của 1 sản phẩm <3.
-- [] `Mối liên hệ Giá cả`: Giá nhập (trong bảng ChiTietPhieuNhap) sẽ ảnh hưởng đến giá bán chung của SanPham. Tuy nhiên, không được tự động đè giá. Giải pháp dễ nhất: Khi lập Phiếu Nhập, hiển thị giá nhập hiện tại, hệ thống gợi ý cập nhật GiaBan bên bảng SanPham, nhưng quyền quyết định cuối cùng vẫn thuộc về nhân viên nhập kho.
+- [ ] `Mối liên hệ Giá cả`: Giá nhập (trong bảng ChiTietPhieuNhap) sẽ ảnh hưởng đến giá bán chung của SanPham. Tuy nhiên, không được tự động đè giá. Giải pháp dễ nhất: Khi lập Phiếu Nhập, hiển thị giá nhập hiện tại, hệ thống gợi ý cập nhật GiaBan bên bảng SanPham, nhưng quyền quyết định cuối cùng vẫn thuộc về nhân viên nhập kho.
 
 ## Cần làm (TODO/Backlog)
 

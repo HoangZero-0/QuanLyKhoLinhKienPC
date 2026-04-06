@@ -23,6 +23,8 @@ public partial class QuanLyKhoLinhKienPCContext : DbContext
 
     public virtual DbSet<NhaCungCap> NhaCungCap { get; set; }
 
+    public virtual DbSet<NhatKyHoatDong> NhatKyHoatDong { get; set; }
+
     public virtual DbSet<PhieuNhap> PhieuNhap { get; set; }
 
     public virtual DbSet<PhieuXuat> PhieuXuat { get; set; }

@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
-
+using QuanLyKhoLinhKienPC.Helpers;
+using System.Security.Claims;
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     [Authorize]
@@ -142,6 +143,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                         await _context.SaveChangesAsync();
 
                         // Hoàn tất 3 Cấp độ lưu trữ (Commit)
+                        await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Phiếu Nhập", $"Nhập kho: Lô hàng PN-{phieuNhap.MaPhieuNhap}");
                         await transaction.CommitAsync();
 
                         TempData["Success"] = "Tạo Phiếu Nhập và sinh mã Seri thành công!";
@@ -204,6 +206,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(phieuNhap);
                     await _context.SaveChangesAsync();
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Nhập", $"Cập nhật thông tin phiếu PN-{phieuNhap.MaPhieuNhap}");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -263,6 +266,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     // 1. Soft delete phiếu nhập
                     phieuNhap.IsDeleted = true;
                     _context.Update(phieuNhap);
+                    await _context.SaveChangesAsync();
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Phiếu Nhập", $"Chuyển thùng rác phiếu PN-{phieuNhap.MaPhieuNhap}");
+                    TempData["Success"] = "Đã chuyển Phiếu Nhập vào thùng rác.";
 
                     // 2. Soft delete các SeriSanPham thuộc Phiếu nhập này
                     var seriList = await _context.SeriSanPham

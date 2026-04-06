@@ -2,15 +2,15 @@
     ViewData["Title"] = "Trang Chủ";
 }
 
-<div class="container-fluid pt-4">
-    <div class="row mb-4">
+<div class="container-fluid pt-4 d-flex flex-column h-100 pb-3">
+    <div class="row mb-4 flex-shrink-0">
         <div class="col-12">
             <h3 class="fw-bold text-dark"><i class="fa-solid fa-chart-line text-primary"></i> Tổng Quan Hệ Thống</h3>
             <p class="text-muted">Báo cáo nhanh tình hình kinh doanh và kho hàng.</p>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 flex-shrink-0">
         <!-- Doanh thu -->
         <div class="col-xl-3 col-md-6">
             <div class="card border-0 shadow-sm bg-primary text-white h-100">
@@ -79,4 +79,115 @@
             </div>
         </div>
     </div>
+
+    <!-- Hoạt động gần đây & Cảnh báo hết hàng -->
+    <div class="row g-4 mt-2 flex-grow-1 overflow-hidden">
+        <!-- Hoạt động gần đây -->
+        <div class="col-xl-8 col-lg-7 h-100">
+            <div class="card border-0 shadow-sm h-100 rounded-3 d-flex flex-column overflow-hidden">
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="fw-bold mb-4 flex-shrink-0" style="color: #2c3e50;">Nhật Kí Hoạt Động</h5>
+                    
+                    <div class="flex-grow-1 position-relative">
+                        <div class="activity-feed" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-y: auto;">
+                        @if (ViewBag.HoatDongGanDay != null)
+                        {
+                            foreach (var hd in ViewBag.HoatDongGanDay)
+                            {
+                                <div class="d-flex align-items-start mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-opacity-10 @hd.ColorClass" style="width: 45px; height: 45px;">
+                                            <i class="fa-solid @hd.Icon fs-5"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1 text-dark" style="font-size: 0.95rem;">
+                                            <span class="fw-bold">@hd.NguoiThucHien</span> vừa @hd.MoTa?.ToLower()
+                                        </h6>
+                                        <p class="mb-0 text-muted" style="font-size: 0.8rem;">@hd.ThoiGianText</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Chưa có hoạt động nào gần đây.</p>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cảnh báo hết hàng -->
+        <div class="col-xl-4 col-lg-5 h-100">
+            <div class="card border-0 shadow-sm h-100 rounded-3 d-flex flex-column overflow-hidden">
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="fw-bold mb-4 text-danger flex-shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i> Cảnh báo hết hàng
+                    </h5>
+                    
+                    <div class="flex-grow-1 position-relative">
+                        <div class="stock-alerts" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-y: auto;">
+                        @if (ViewBag.CanhBaoHetHang != null && ((IEnumerable<dynamic>)ViewBag.CanhBaoHetHang).Any())
+                        {
+                            foreach (var sp in ViewBag.CanhBaoHetHang)
+                            {
+                                <div class="bg-danger bg-opacity-10 border-0 mb-3 d-flex align-items-center justify-content-between p-3 rounded-3">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-dark text-truncate" style="max-width: 180px;" title="@sp.TenSanPham">@sp.TenSanPham</h6>
+                                        <div class="text-danger" style="font-size: 0.85rem;">Chỉ còn @sp.TonKho cái</div>
+                                    </div>
+                                    <a href="/PhieuNhap/Create" class="btn btn-sm btn-outline-danger px-3 py-1 bg-white rounded-pill fw-bold">Nhập</a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center p-4">
+                                <div class="text-success fs-1 mb-2">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                                <h6 class="text-muted mb-0">Tuyệt vời, kho hàng ổn định!</h6>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .bg-opacity-10 {
+        --bs-bg-opacity: 0.1;
+    }
+
+    /* Scrollbar tùy chỉnh */
+    .activity-feed, .stock-alerts {
+        padding-right: 8px;
+    }
+    
+    .activity-feed::-webkit-scrollbar,
+    .stock-alerts::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .activity-feed::-webkit-scrollbar-track,
+    .stock-alerts::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 4px;
+    }
+    
+    .activity-feed::-webkit-scrollbar-thumb,
+    .stock-alerts::-webkit-scrollbar-thumb {
+        background: #ccc; 
+        border-radius: 4px;
+    }
+    
+    .activity-feed::-webkit-scrollbar-thumb:hover,
+    .stock-alerts::-webkit-scrollbar-thumb:hover {
+        background: #aaa; 
+    }
+</style>

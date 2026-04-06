@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
-
+using QuanLyKhoLinhKienPC.Helpers;
+using System.Security.Claims;
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     [Authorize]
@@ -212,6 +213,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             _context.Update(seri);
             await _context.SaveChangesAsync();
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Seri Sản Phẩm", $"Sửa trạng thái Seri: {seri.SoSeri}");
 
             // Trích xuất filter hiện tại để quay lại đúng trạng thái đang ở
             string referer = Request.Headers["Referer"].ToString();
@@ -258,6 +260,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 seri.IsDeleted = true;
                 _context.Update(seri);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Seri Sản Phẩm", $"Chuyển thùng rác Seri: {seri.SoSeri}");
                 TempData["Success"] = $"Đã chuyển Seri {seri.SoSeri} vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -302,6 +305,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             seri.IsDeleted = false;
             _context.Update(seri);
             await _context.SaveChangesAsync();
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Seri Sản Phẩm", $"Khôi phục Seri: {seri.SoSeri}");
             TempData["Success"] = $"Khôi phục Seri {seri.SoSeri} thành công.";
 
             return RedirectToAction(nameof(Trash));

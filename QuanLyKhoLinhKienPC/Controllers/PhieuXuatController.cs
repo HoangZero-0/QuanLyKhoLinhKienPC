@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
-
+using QuanLyKhoLinhKienPC.Helpers;
+using System.Security.Claims;
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     // DTO (Data Transfer Object) chuyên dụng để hứng dữ liệu "Giỏ hàng" từ Front-End gửi lên
@@ -159,6 +160,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     await _context.SaveChangesAsync();
 
                     // 4. CHỐT ĐƠN (COMMIT)
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Phiếu Xuất", $"Xuất kho: Đơn hàng PX-{phieuXuat.MaPhieuXuat}");
                     await transaction.CommitAsync();
 
                     TempData["Success"] = "Lập hóa đơn và rút kho Seri bán hàng thành công!";
@@ -218,6 +220,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(phieuXuat);
                     await _context.SaveChangesAsync();
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Xuất", $"Cập nhật thông tin phiếu PX-{phieuXuat.MaPhieuXuat}");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -361,6 +364,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 _context.Update(phieuXuat);
 
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Phiếu Xuất", $"Khôi phục phiếu PX-{phieuXuat.MaPhieuXuat}");
                 await transaction.CommitAsync();
 
                 TempData["Success"] = "Đã khôi phục hóa đơn và rút lại Seri thành công.";

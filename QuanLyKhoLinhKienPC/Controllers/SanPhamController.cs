@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyKhoLinhKienPC.Models;
+using QuanLyKhoLinhKienPC.Helpers;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyKhoLinhKienPC.Controllers
@@ -185,6 +187,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Add(sanPham);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Sản Phẩm", $"Thêm SP: {sanPham.TenSanPham}");
                 TempData["Success"] = "Thêm mới Sản Phẩm thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -295,6 +298,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                     _context.Update(sanPham);
                     await _context.SaveChangesAsync();
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Sản Phẩm", $"Cập nhật SP: {sanPham.TenSanPham}");
                     TempData["Success"] = "Cập nhật Sản Phẩm thành công!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -364,6 +368,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 sanPham.IsDeleted = true;
                 _context.Update(sanPham);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Sản Phẩm", $"Xóa SP: {sanPham.TenSanPham}");
                 TempData["Success"] = "Đã chuyển Sản Phẩm vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -424,6 +429,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             sanPham.IsDeleted = false;
             _context.Update(sanPham);
             await _context.SaveChangesAsync();
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Sản Phẩm", $"Khôi phục SP: {sanPham.TenSanPham}");
             TempData["Success"] = "Khôi phục Sản Phẩm thành công.";
             return RedirectToAction(nameof(Trash));
         }

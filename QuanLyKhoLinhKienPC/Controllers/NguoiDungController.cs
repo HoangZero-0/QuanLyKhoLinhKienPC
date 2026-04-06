@@ -101,6 +101,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                 _context.Add(nguoiDung);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Người Dùng", $"Thêm nhân viên: {nguoiDung.HoTen}");
                 TempData["Success"] = "Thêm mới Người Dùng thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -155,6 +156,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 nguoiDung.IsDeleted = true;
                 _context.Update(nguoiDung);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Người Dùng", $"Khóa nhân viên: {nguoiDung.HoTen}");
                 TempData["Success"] = "Đã chuyển Người Dùng vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -199,6 +201,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             nguoiDung.IsDeleted = false;
             _context.Update(nguoiDung);
             await _context.SaveChangesAsync();
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Người Dùng", $"Mở khóa nhân viên: {nguoiDung.HoTen}");
             TempData["Success"] = "Khôi phục Người Dùng thành công.";
             return RedirectToAction(nameof(Trash));
         }

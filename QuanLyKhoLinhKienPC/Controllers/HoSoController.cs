@@ -56,7 +56,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             }
 
             var nguoiDung = await _context.NguoiDung.FindAsync(maNguoiDung);
-            
+
             if (nguoiDung == null)
             {
                 TempData["Error"] = "Tài khoản không còn tồn tại trong hệ thống. Vui lòng đăng nhập lại!";
@@ -71,8 +71,9 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Update(nguoiDung);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, maNguoiDung, "Cập nhật", "Hồ Sơ", $"Cập nhật thông tin cá nhân");
                 TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
-                
+
                 // Lưu ý: Cập nhật CSDL thì Cookie tạm thời chưa cập nhật HoTen ngay lập tức (phải đăng nhập lại), 
                 // nhưng về mặt dữ liệu thì đã đúng. 
             }
@@ -111,7 +112,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             }
 
             var nguoiDung = await _context.NguoiDung.FindAsync(maNguoiDung);
-            
+
             if (nguoiDung == null)
             {
                 TempData["Error"] = "Tài khoản không còn tồn tại trong hệ thống. Vui lòng đăng nhập lại!";
@@ -132,6 +133,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Update(nguoiDung);
                 await _context.SaveChangesAsync();
+                await ActivityLogger.LogAsync(_context, maNguoiDung, "Cập nhật", "Hỗ Sơ", $"Đổi mật khẩu tài khoản");
                 TempData["Success"] = "Đổi mật khẩu thành công!";
             }
             catch (DbUpdateConcurrencyException)
