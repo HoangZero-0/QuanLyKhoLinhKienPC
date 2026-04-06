@@ -4,57 +4,104 @@
     ViewData["Title"] = "Truy Vết Lõi Seri";
 }
 
-<div class="container-fluid pt-4">
-    <div class="row align-items-center mb-4">
-        <div class="col-8">
-            <h3 class="fw-bold m-0 text-primary"><i class="fa-solid fa-route me-2"></i> Lịch Sử Truy Vết <span class="bg-primary text-white px-2 rounded font-monospace fs-4">#@Model.SoSeri</span></h3>
-        </div>
-        <div class="col-4 text-end">
-            <a asp-action="Index" class="btn btn-light border shadow-sm text-dark px-4 fw-bold">
-                <i class="fa-solid fa-arrow-left-long text-secondary"></i> Quay lại
-            </a>
-        </div>
+<style>
+    .letter-spacing-1 {
+        letter-spacing: 0.5px;
+    }
+    .timeline-premium {
+        position: relative;
+        padding-left: 2.5rem;
+    }
+    .timeline-premium::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 3px;
+        background: linear-gradient(to bottom, #d1d5db 0%, #f3f4f6 100%);
+        border-radius: 4px;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2.5rem;
+    }
+    .timeline-marker {
+        position: absolute;
+        top: 0;
+        left: -2.5rem;
+        width: 19px;
+        height: 19px;
+        border-radius: 50%;
+        background: #fff;
+        border: 4px solid #d1d5db;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+    .timeline-item:hover .timeline-marker {
+        transform: scale(1.2);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .timeline-item.active .timeline-marker {
+        border-color: #0d6efd;
+    }
+</style>
+
+<div class="container-fluid pt-4 h-100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0 text-dark">
+            <i class="fa-solid fa-route me-2 text-info"></i> Lịch Sử Truy Vết 
+            <span class="bg-light text-dark px-3 py-1 rounded-pill border ms-2 fs-5 font-monospace shadow-sm">#@Model.SoSeri</span>
+        </h3>
+        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-bold transition">
+            <i class="fa-solid fa-arrow-left me-1 text-secondary"></i> Quay lại
+        </a>
     </div>
 
     <div class="row g-4">
         <!-- Panel Trái: Thuộc tính Linh Kiện -->
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-body p-4 bg-white rounded-3">
-                    <p class="text-uppercase text-muted fw-bold small mb-3 letter-spacing-1"><i class="fa-solid fa-cube text-secondary"></i> Thông tin vật lý</p>
-                    <h5 class="fw-bold mb-3">@Model.MaSanPhamNavigation?.TenSanPham</h5>
-                    
+            <div class="card border-0 shadow rounded-4 overflow-hidden" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-body p-4 bg-white">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 rounded-circle mb-3" style="width: 70px; height: 70px;">
+                            <i class="fa-solid fa-microchip fa-2xl text-info"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1 text-dark">@Model.MaSanPhamNavigation?.TenSanPham</h5>
+                        <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 fw-bold">@Model.MaSanPhamNavigation?.HangSanXuat</span>
+                    </div>
+
+                    <p class="text-uppercase text-muted fw-bold small mb-3 letter-spacing-1 border-bottom pb-2">Thông tin vật lý</p>
                     <ul class="list-unstyled mb-4">
-                        <li class="mb-2 d-flex justify-content-between align-items-center border-bottom pb-2">
-                            <span class="text-muted">Nhà Sản Xuất</span>
+                        <li class="mb-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Nhà Sản Xuất:</span>
                             <span class="fw-bold text-dark">@Model.MaSanPhamNavigation?.HangSanXuat</span>
                         </li>
                         <li class="mb-0 d-flex justify-content-between align-items-center">
-                            <span class="text-muted">Hỗ Trợ BH</span>
+                            <span class="text-muted">Hỗ Trợ BH:</span>
                             <span class="fw-bold text-dark">@Model.MaSanPhamNavigation?.ThoiGianBaoHanh Tháng</span>
                         </li>
                     </ul>
 
-                    <p class="text-uppercase text-muted fw-bold small mb-2 letter-spacing-1 mt-4">Trạng thái hiện tại</p>
-                    
+                    <p class="text-uppercase text-muted fw-bold small mb-3 letter-spacing-1 border-bottom pb-2 mt-4">Trạng thái hiện tại</p>
                     <div class="mb-4">
                         @if (Model.TrangThai == 1)
                         {
-                            <span class="d-inline-flex align-items-center px-3 py-2 rounded bg-success text-white fw-bold w-100 justify-content-center">
-                                <i class="fa-solid fa-box-open me-2"></i> Tồn kho
-                            </span>
+                            <div class="d-flex align-items-center px-4 py-3 rounded-4 bg-success bg-opacity-10 text-success fw-bold border border-success border-opacity-10">
+                                <i class="fa-solid fa-box-open fa-lg me-3"></i> Tồn kho sẵn sàng
+                            </div>
                         }
                         else if (Model.TrangThai == 2)
                         {
-                            <span class="d-inline-flex align-items-center px-3 py-2 rounded bg-primary text-white fw-bold w-100 justify-content-center">
-                                <i class="fa-solid fa-cart-check me-2"></i> Đã bán
-                            </span>
+                            <div class="d-flex align-items-center px-4 py-3 rounded-4 bg-primary bg-opacity-10 text-primary fw-bold border border-primary border-opacity-10">
+                                <i class="fa-solid fa-cart-check fa-lg me-3"></i> Đã hoàn tất bán
+                            </div>
                         }
                         else if (Model.TrangThai == 3)
                         {
-                            <span class="d-inline-flex align-items-center px-3 py-2 rounded bg-danger text-white fw-bold w-100 justify-content-center">
-                                <i class="fa-solid fa-triangle-exclamation me-2"></i> Lỗi / Bảo hành
-                            </span>
+                            <div class="d-flex align-items-center px-4 py-3 rounded-4 bg-danger bg-opacity-10 text-danger fw-bold border border-danger border-opacity-10">
+                                <i class="fa-solid fa-triangle-exclamation fa-lg me-3"></i> Lỗi / Bảo hành
+                            </div>
                         }
                     </div>
 
@@ -62,11 +109,11 @@
                         onsubmit="return confirm('@(Model.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục: {Model.SoSeri}?" : $"Xác nhận báo lỗi cho {Model.SoSeri}?")');">
                         @if (Model.TrangThai == 3)
                         {
-                            <button type="submit" class="btn btn-success w-100 shadow-sm fw-bold"><i class="fa-solid fa-check-circle me-1"></i> Xác nhận đã sửa / bảo hành</button>
+                            <button type="submit" class="btn btn-success w-100 shadow rounded-pill py-2 fw-bold transition"><i class="fa-solid fa-check-circle me-1"></i> Hoàn tất bảo hành</button>
                         }
                         else
                         {
-                            <button type="submit" class="btn btn-outline-danger w-100 shadow-sm fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Báo lỗi / Bảo hành</button>
+                            <button type="submit" class="btn btn-outline-danger w-100 shadow-sm rounded-pill py-2 fw-bold transition"><i class="fa-solid fa-triangle-exclamation me-1"></i> Báo lỗi hệ thống</button>
                         }
                     </form>
                 </div>
@@ -75,36 +122,36 @@
 
         <!-- Panel Phải: Timeline -->
         <div class="col-md-8">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-body p-4 p-md-5 relative overflow-hidden bg-white rounded-3">
-                    <p class="text-uppercase text-primary fw-bold small mb-4 letter-spacing-1"><i class="fa-solid fa-clock-rotate-left me-1"></i> NHẬT KÝ</p>
+            <div class="card border-0 shadow rounded-4 overflow-hidden h-100" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <p class="text-uppercase text-primary fw-bold small mb-5 letter-spacing-1 border-bottom pb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i> Nhật Ký Vòng Đời Linh Kiện</p>
                     
-                    <div class="timeline-minimal">
+                    <div class="timeline-premium">
                         <!-- Giai đoạn 1 -->
-                        <div class="timeline-minimal-item pb-5">
-                            <div class="timeline-minimal-marker bg-success border border-white border-2" style="width: 14px; height: 14px; left: -2.2rem; top: 2px;"></div>
-                            <div class="timeline-minimal-content">
+                        <div class="timeline-item">
+                            <div class="timeline-marker" style="border-color: #198754;"></div>
+                            <div class="timeline-content">
                                 <h5 class="fw-bold mb-1 text-success">Nhập Kho Hàng Hóa</h5>
                                 @if (Model.MaPhieuNhapNavigation != null)
                                 {
-                                    <p class="text-muted small mb-3">Ngày lưu trữ: @Model.MaPhieuNhapNavigation.NgayNhap.ToString("dd/MM/yyyy • HH:mm")</p>
+                                    <p class="text-muted small mb-3">Ngày lưu trữ: <span class="fw-bold text-dark">@Model.MaPhieuNhapNavigation.NgayNhap.ToString("dd/MM/yyyy • HH:mm")</span></p>
                                     
-                                    <div class="p-4 bg-light rounded text-dark fs-6 d-flex flex-column gap-2 mb-2 border-start border-success border-4 shadow-sm">
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Chứng Từ</span>
-                                            <span class="fw-bold">Phiếu #PN-@Model.MaPhieuNhap?.ToString("D5")</span>
+                                    <div class="p-4 bg-light rounded-4 text-dark fs-6 d-flex flex-column gap-3 mb-2 border border-light shadow-sm transition hover-shadow">
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Chứng Từ:</span>
+                                            <span class="fw-bold bg-white px-2 py-1 rounded border">#PN-@Model.MaPhieuNhap?.ToString("D5")</span>
                                         </div>
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Nguồn Cung</span>
-                                            <span class="fw-bold text-success">@Model.MaPhieuNhapNavigation.MaNhaCungCapNavigation?.TenNhaCungCap</span>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Nguồn Cung:</span>
+                                            <span class="fw-bold text-success"><i class="fa-solid fa-building me-1"></i> @Model.MaPhieuNhapNavigation.MaNhaCungCapNavigation?.TenNhaCungCap</span>
                                         </div>
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Người Tạo Phiếu</span>
-                                            <span>@(Model.MaPhieuNhapNavigation.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</span>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Người Tạo:</span>
+                                            <span class="text-secondary fw-medium">@(Model.MaPhieuNhapNavigation.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</span>
                                         </div>
-                                        <div class="d-flex justify-content-between pt-2">
-                                            <span class="text-muted">Giá Nhập</span>
-                                            <span class="fw-bold fs-5 text-success">@string.Format("{0:N0}", ViewBag.DonGiaNhap) VNĐ</span>
+                                        <div class="d-flex justify-content-between align-items-center pt-2">
+                                            <span class="text-muted fw-bold">Giá Nhập:</span>
+                                            <span class="fw-bold fs-4 text-danger">@string.Format("{0:N0}", ViewBag.DonGiaNhap) <small class="fs-6">VNĐ</small></span>
                                         </div>
                                     </div>
                                 }
@@ -114,58 +161,56 @@
                         <!-- Giai đoạn 2 -->
                         @if ((Model.TrangThai == 2 || Model.TrangThai == 3) && Model.MaPhieuXuatNavigation != null)
                         {
-                            <div class="timeline-minimal-item">
-                                <div class="timeline-minimal-marker bg-primary border border-white border-2" style="width: 14px; height: 14px; left: -2.2rem; top: 2px;"></div>
-                                <div class="timeline-minimal-content">
+                            <div class="timeline-item active">
+                                <div class="timeline-marker" style="border-color: #0d6efd;"></div>
+                                <div class="timeline-content">
                                     <h5 class="fw-bold mb-1 text-primary">Xuất Bán Bán Lẻ</h5>
-                                    <p class="text-muted small mb-3">Ngày xuất hóa đơn: @Model.MaPhieuXuatNavigation.NgayXuat.ToString("dd/MM/yyyy • HH:mm")</p>
+                                    <p class="text-muted small mb-3">Ngày xuất hóa đơn: <span class="fw-bold text-dark">@Model.MaPhieuXuatNavigation.NgayXuat.ToString("dd/MM/yyyy • HH:mm")</span></p>
                                     
-                                    <div class="p-4 bg-light rounded text-dark fs-6 d-flex flex-column gap-2 border-start border-primary border-4 shadow-sm">
+                                    <div class="p-4 bg-light rounded-4 text-dark fs-6 d-flex flex-column gap-3 border border-light shadow-sm transition hover-shadow">
                                         
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Mã Hóa Đơn</span>
-                                            <span class="fw-bold">#PX-@Model.MaPhieuXuat?.ToString("D5")</span>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Hóa Đơn:</span>
+                                            <span class="fw-bold bg-white px-2 py-1 rounded border">#PX-@Model.MaPhieuXuat?.ToString("D5")</span>
                                         </div>
 
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Khách hàng sở hữu</span>
-                                            <span class="fw-bold text-primary">@Model.MaPhieuXuatNavigation.TenKhachHang</span>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Khách Hàng:</span>
+                                            <span class="fw-bold text-primary"><i class="fa-solid fa-user-check me-1"></i> @Model.MaPhieuXuatNavigation.TenKhachHang</span>
                                         </div>
 
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Liên hệ Khách Hàng</span>
-                                            <span class="fw-bold">@(string.IsNullOrEmpty(Model.MaPhieuXuatNavigation.SoDienThoaiKhach) ? "Không có" : Model.MaPhieuXuatNavigation.SoDienThoaiKhach)</span>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Số Điện Thoại:</span>
+                                            <span class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.MaPhieuXuatNavigation.SoDienThoaiKhach) ? "N/A" : Model.MaPhieuXuatNavigation.SoDienThoaiKhach)</span>
                                         </div>
                                         
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Nhân Viên Bán (Seller)</span>
-                                            <span>@(Model.MaPhieuXuatNavigation.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</span>
-                                        </div>
-
                                         @{
                                             int thoiGianBaoHanh = Model.MaSanPhamNavigation?.ThoiGianBaoHanh ?? 0;
                                             DateTime ngayHetHan = Model.MaPhieuXuatNavigation.NgayXuat.AddMonths(thoiGianBaoHanh);
                                             bool conBaoHanh = DateTime.Now <= ngayHetHan;
                                         }
-                                        <div class="d-flex justify-content-between border-bottom pb-2">
-                                            <span class="text-muted">Tình Trạng BH (@ngayHetHan.ToString("MM/yyyy"))</span>
-                                            @if (Model.TrangThai == 3)
-                                            {
-                                                <span class="badge bg-danger">Đang Xử Lý Lỗi</span>
-                                            }
-                                            else if (conBaoHanh)
-                                            {
-                                                <span class="badge bg-success">Còn Hiệu Lực</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">Hết Hạn</span>
-                                            }
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-10 pb-2">
+                                            <span class="text-muted">Bảo Hành Đến:</span>
+                                            <div class="text-end">
+                                                <span class="fw-bold d-block text-dark">@ngayHetHan.ToString("dd/MM/yyyy")</span>
+                                                @if (Model.TrangThai == 3)
+                                                {
+                                                    <span class="badge bg-danger rounded-pill px-2">Đang Xử Lý Lỗi</span>
+                                                }
+                                                else if (conBaoHanh)
+                                                {
+                                                    <span class="badge bg-success rounded-pill px-2">Còn Hiệu Lực</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary rounded-pill px-2">Hết Hạn</span>
+                                                }
+                                            </div>
                                         </div>
                                         
-                                        <div class="d-flex justify-content-between pt-2">
-                                            <span class="text-muted">Giá Bán</span>
-                                            <span class="fw-bold fs-5 text-primary">@string.Format("{0:N0}", ViewBag.DonGiaXuat) VNĐ</span>
+                                        <div class="d-flex justify-content-between align-items-center pt-2">
+                                            <span class="text-muted fw-bold">Giá Bán:</span>
+                                            <span class="fw-bold fs-4 text-primary">@string.Format("{0:N0}", ViewBag.DonGiaXuat) <small class="fs-6">VNĐ</small></span>
                                         </div>
 
                                     </div>
@@ -174,23 +219,27 @@
                         }
                         else if (Model.TrangThai == 3 && Model.MaPhieuXuatNavigation == null)
                         {
-                            <div class="timeline-minimal-item">
-                                <div class="timeline-minimal-marker bg-danger border border-white border-2" style="width: 14px; height: 14px; left: -2.2rem; top: 2px;"></div>
-                                <div class="timeline-minimal-content">
-                                    <h5 class="fw-bold mb-1 text-danger">Ghi Nhận Lỗi / Xử Lý Bảo Hành</h5>
-                                    <div class="p-3 mt-2 bg-light rounded border-start border-danger border-4 shadow-sm">
-                                        <p class="text-muted small mb-0">Linh kiện được ghi nhận có sự cố kỹ thuật hoặc lỗi ngay tại hệ thống kho lưu trữ nội bộ (chưa thực hiện xuất bán cho khách hàng). Quản trị viên cần tiến hành các thủ tục hoàn trả hoặc yêu cầu bảo hành đối với Nhà Cung Cấp.</p>
+                            <div class="timeline-item">
+                                <div class="timeline-marker" style="border-color: #dc3545;"></div>
+                                <div class="timeline-content">
+                                    <h5 class="fw-bold mb-1 text-danger">Sự Cố Kỹ Thuật Tại Kho</h5>
+                                    <div class="p-4 mt-2 bg-danger bg-opacity-10 rounded-4 border border-danger border-opacity-10 shadow-sm">
+                                        <p class="text-dark small mb-0 fw-medium">
+                                            <i class="fa-solid fa-circle-info text-danger me-2"></i> 
+                                            Linh kiện được ghi nhận có sự cố ngay tại hệ thống kho lưu trữ nội bộ. 
+                                            Hệ thống đã tự động khóa trạng thái xuất để chờ xử lý bảo hành với nhà cung cấp.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         }
                         else
                         {
-                            <div class="timeline-minimal-item">
-                                <div class="timeline-minimal-marker bg-light border border-secondary border-2"></div>
-                                <div class="timeline-minimal-content" style="opacity: 0.5;">
-                                    <h5 class="fw-bold mb-1 text-secondary">Chưa Ghi Nhận Xuất Kho</h5>
-                                    <p class="text-muted mt-2">Hàng hóa đang nằm sẵn sàng trong kho, chờ tạo phiếu xuất cho khách.</p>
+                            <div class="timeline-item">
+                                <div class="timeline-marker" style="border-color: #6c757d;"></div>
+                                <div class="timeline-content opacity-75">
+                                    <h5 class="fw-bold mb-1 text-secondary">Hành Trình Tiếp Theo</h5>
+                                    <p class="text-muted mt-2 small">Sản phẩm hiện đang sẵn sàng để phục vụ khách hàng. Các bước xuất kho và cài đặt sẽ được cập nhật tại đây khi có hóa đơn mới.</p>
                                 </div>
                             </div>
                         }
@@ -201,34 +250,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .letter-spacing-1 {
-        letter-spacing: 0.5px;
-    }
-    .timeline-minimal {
-        position: relative;
-        padding-left: 2rem;
-    }
-    .timeline-minimal::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 3px;
-        width: 2px;
-        background-color: #f1f3f5;
-    }
-    .timeline-minimal-item {
-        position: relative;
-    }
-    .timeline-minimal-marker {
-        position: absolute;
-        top: 4px;
-        left: -2rem;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        z-index: 1;
-    }
-</style>

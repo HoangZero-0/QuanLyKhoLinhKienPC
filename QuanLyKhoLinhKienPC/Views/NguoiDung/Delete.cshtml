@@ -1,41 +1,43 @@
 @model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Xóa Người Dùng";
+    ViewData["Title"] = "Khóa Nhân Viên";
 }
 
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Người Dùng</h4>
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-user-lock me-1"></i> Khóa Tài Khoản</h4>
                 </div>
-                <div class="card-body text-center">
-                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Người dùng này vào thùng rác?</h5>
+                <div class="card-body text-center p-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mb-4" style="width: 70px; height: 70px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-2x text-danger"></i>
+                    </div>
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn tạm khóa nhân viên này?</h5>
 
-                    <p class="text-muted small mb-4">
-                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác và tài khoản này sẽ không thể đăng nhập.
+                    <p class="text-muted small mb-4 px-3">
+                        Tài khoản này sẽ bị chuyển vào <b>Thùng rác</b> và không thể đăng nhập vào hệ thống cho đến khi được khôi phục lại.
                     </p>
 
-                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
-                        <dt class="col-sm-5 text-end text-muted">Tên đăng nhập:</dt>
-                        <dd class="col-sm-5 fw-bold">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start">
+                        <div class="row px-4 align-items-center">
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Nhân viên:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5">@Html.DisplayFor(model => model.HoTen)</div>
+                            
+                            <div class="col-sm-4 text-end text-danger fw-semibold mt-2">Tài khoản:</div>
+                            <div class="col-sm-8 text-secondary mt-2"><code>@@@Html.DisplayFor(model => model.TenDangNhap)</code></div>
+                        </div>
+                    </div>
 
-                        <dt class="col-sm-5 text-end text-muted">Họ và tên:</dt>
-                        <dd class="col-sm-5 fw-bold text-primary">@Html.DisplayFor(model => model.HoTen)</dd>
-
-                        <dt class="col-sm-5 text-end text-muted">Vai trò:</dt>
-                        <dd class="col-sm-5"><span class="badge bg-secondary">@Model.MaVaiTroNavigation?.TenVaiTro</span></dd>
-                    </dl>
-
-                    <form asp-action="Delete" class="mt-4">
+                    <form asp-action="Delete" class="mt-5">
                         <input type="hidden" asp-for="MaNguoiDung" />
-                        <a asp-action="Index" class="btn btn-secondary me-2">
-                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        <button type="submit" class="btn btn-danger shadow-sm rounded-pill px-5 fw-bold">
+                            <i class="fa-solid fa-lock me-1"></i> Đồng ý khóa
                         </button>
                     </form>
                 </div>

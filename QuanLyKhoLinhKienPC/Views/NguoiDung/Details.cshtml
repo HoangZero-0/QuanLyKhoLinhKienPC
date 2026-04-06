@@ -1,50 +1,78 @@
 @model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Chi Tiết Người Dùng";
+    ViewData["Title"] = "Chi Tiết Nhân Viên";
 }
 
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-circle-info"></i> Chi Tiết Người Dùng</h4>
+        <div class="col-md-8">
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-info fw-bold"><i class="fa-solid fa-eye me-1"></i> Chi Tiết Nhân Viên</h4>
                 </div>
-                <div class="card-body">
-                    <dl class="row mb-0">
-                        <dt class="col-sm-4 text-muted">Họ và tên:</dt>
-                        <dd class="col-sm-8 fw-bold text-primary">@Html.DisplayFor(model => model.HoTen)</dd>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-12 text-center mb-2">
+                             <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 rounded-circle mb-3" style="width: 80px; height: 80px;">
+                                 <i class="fa-solid fa-user-gear fa-3x text-info"></i>
+                             </div>
+                             <h3 class="fw-bold text-dark mb-0">@Html.DisplayFor(model => model.HoTen)</h3>
+                             <p class="text-muted"><code>@@@Html.DisplayFor(model => model.TenDangNhap)</code></p>
+                        </div>
 
-                        <dt class="col-sm-4 text-muted">Tên đăng nhập:</dt>
-                        <dd class="col-sm-8">@Html.DisplayFor(model => model.TenDangNhap)</dd>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 h-100">
+                                <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Thông tin tài khoản</label>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5 text-secondary fw-medium">Vai trò:</dt>
+                                    <dd class="col-sm-7 fw-bold text-info">@Model.MaVaiTroNavigation?.TenVaiTro</dd>
 
-                        <dt class="col-sm-4 text-muted">Email:</dt>
-                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+                                    <dt class="col-sm-5 text-secondary fw-medium">Trạng thái:</dt>
+                                    <dd class="col-sm-7">
+                                        @if (Model.IsDeleted)
+                                        {
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3">Bị khóa</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3">Đang hoạt động</span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
 
-                        <dt class="col-sm-4 text-muted">Vai trò:</dt>
-                        <dd class="col-sm-8">
-                            <span class="badge bg-secondary">@Model.MaVaiTroNavigation?.TenVaiTro</span>
-                        </dd>
-
-                        <dt class="col-sm-4 text-muted">Trạng thái:</dt>
-                        <dd class="col-sm-8">
-                            @if (Model.IsDeleted)
-                            {
-                                <span class="badge bg-danger">Đã khóa / Xóa</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">Đang hoạt động</span>
-                            }
-                        </dd>
-                    </dl>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 h-100">
+                                <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Thông tin liên hệ</label>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4 text-secondary fw-medium">Email:</dt>
+                                    <dd class="col-sm-8 text-dark">
+                                        @if (!string.IsNullOrEmpty(Model.Email))
+                                        {
+                                            <i class="fa-solid fa-envelope me-1 text-muted"></i> @Html.DisplayFor(model => model.Email)
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted italic">Chưa cập nhật</span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-footer text-end">
-                    <a asp-action="Index" class="btn btn-secondary me-2">
-                        <i class="fa-solid fa-arrow-left"></i> Quay lại
-                    </a>
-
+                <div class="card-footer bg-white border-top-0 p-4 pt-0">
+                    <div class="d-flex justify-content-between mt-3">
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                        
+                        <a asp-action="Delete" asp-route-id="@Model?.MaNguoiDung" class="btn btn-outline-danger shadow-sm rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-user-lock me-1"></i> Khóa tài khoản
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

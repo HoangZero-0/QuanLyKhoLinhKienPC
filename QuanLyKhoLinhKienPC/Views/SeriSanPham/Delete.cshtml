@@ -6,55 +6,54 @@
 
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Lõi Seri #@Model.SoSeri</h4>
+        <div class="col-md-6">
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-trash me-1"></i> Xóa Lõi Seri</h4>
                 </div>
-                <div class="card-body text-center">
+                <div class="card-body text-center p-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mb-4" style="width: 70px; height: 70px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-2xl text-danger"></i>
+                    </div>
                     <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Seri này vào thùng rác?</h5>
 
                     <p class="text-muted small mb-4">
-                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
+                         <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
-                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
-                        <dt class="col-sm-4 text-end">Mã Số Seri:</dt>
-                        <dd class="col-sm-8 fw-bold text-dark">@Model.SoSeri</dd>
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start">
+                        <div class="row px-4 align-items-center g-2">
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Số Seri:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5 font-monospace">#@Model.SoSeri</div>
+                            
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Sản phẩm:</div>
+                            <div class="col-sm-8 fw-bold text-primary">@Model.MaSanPhamNavigation?.TenSanPham</div>
+                            
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Trạng thái:</div>
+                            <div class="col-sm-8">
+                                @if (Model.TrangThai == 1)
+                                {
+                                    <span class="badge rounded-pill bg-success px-2 py-1">Tồn Kho</span>
+                                }
+                                else if (Model.TrangThai == 2)
+                                {
+                                    <span class="badge rounded-pill bg-secondary px-2 py-1">Đã Bán</span>
+                                }
+                                else if (Model.TrangThai == 3)
+                                {
+                                    <span class="badge rounded-pill bg-danger px-2 py-1">Lỗi/Bảo Hành</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
-                        <dt class="col-sm-4 text-end">Linh Kiện:</dt>
-                        <dd class="col-sm-8 fw-bold text-primary">@Model.MaSanPhamNavigation?.TenSanPham</dd>
-
-                        <dt class="col-sm-4 text-end">Hãng:</dt>
-                        <dd class="col-sm-8">@Model.MaSanPhamNavigation?.HangSanXuat</dd>
-
-                        <dt class="col-sm-4 text-end">Trạng Thái:</dt>
-                        <dd class="col-sm-8">
-                            @if (Model.TrangThai == 1)
-                            {
-                                <span class="badge bg-success">Tồn Kho</span>
-                            }
-                            else if (Model.TrangThai == 2)
-                            {
-                                <span class="badge bg-secondary">Đã Bán</span>
-                            }
-                            else if (Model.TrangThai == 3)
-                            {
-                                <span class="badge bg-danger">Lỗi/Bảo Hành</span>
-                            }
-                        </dd>
-
-                        <dt class="col-sm-4 text-end">Từ Phiếu Nhập:</dt>
-                        <dd class="col-sm-8 fw-bold"><a href="/PhieuNhap/Details/@Model.MaPhieuNhap" class="text-decoration-none">Lô #PN-@Model.MaPhieuNhap?.ToString("D5")</a></dd>
-                    </dl>
-
-                    <form asp-action="Delete" class="mt-4">
+                    <form asp-action="Delete" class="mt-5">
                         <input type="hidden" asp-for="MaSeri" />
-                        <a asp-action="Index" class="btn btn-secondary me-2">
-                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2 transition">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">
+                            <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>
                 </div>
