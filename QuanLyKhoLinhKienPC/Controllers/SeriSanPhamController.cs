@@ -22,7 +22,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 1. DANH SÁCH (Sắp xếp theo phiếu nhập mới nhất)
         // GET: SeriSanPham
-        public async Task<IActionResult> Index(int? trangThaiFilter, string searchString)
+        public async Task<IActionResult> Index(int? trangThaiFilter, string searchString, DateTime? fromDate, DateTime? toDate)
         {
             var seriList = _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
@@ -46,11 +46,58 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 seriList = seriList.Where(s => s.TrangThai == trangThaiFilter.Value);
             }
 
+            // Lọc theo khoảng ngày
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                // Kiểm tra logic thời gian cơ bản
+                if (fromDate.HasValue && toDate.HasValue && fromDate.Value.Date > toDate.Value.Date)
+                {
+                    TempData["Error"] = "Khoảng thời gian không hợp lệ (Từ Ngày lớn hơn Đến Ngày). Đã hủy lọc!";
+                    fromDate = null;
+                    toDate = null;
+                }
+                else
+                {
+                    DateTime? fDate = fromDate.HasValue ? fromDate.Value.Date : null;
+                    DateTime? tDate = toDate.HasValue ? toDate.Value.Date.AddDays(1).AddTicks(-1) : null;
+
+                    if (trangThaiFilter == 1)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value);
+                    }
+                    else if (trangThaiFilter == 2)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat <= tDate.Value);
+                    }
+                    else if (trangThaiFilter == 3)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s =>
+                            (s.MaPhieuXuat == null && s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value) ||
+                            (s.MaPhieuXuat != null && s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat >= fDate.Value)
+                        );
+                        if (tDate.HasValue) seriList = seriList.Where(s =>
+                            (s.MaPhieuXuat == null && s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value) ||
+                            (s.MaPhieuXuat != null && s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat <= tDate.Value)
+                        );
+                    }
+                    else
+                    {
+                        // Lọc mặc định theo NgayNhap nếu không chọn trạng thái
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value);
+                    }
+                }
+            }
+
             // Mặc định xem Seri mới nhất sinh ra
             seriList = seriList.OrderByDescending(s => s.MaPhieuNhap).ThenBy(s => s.SoSeri);
 
             ViewData["CurrentFilter"] = searchString;
             ViewData["TrangThaiFilter"] = trangThaiFilter;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
 
             return View(await seriList.ToListAsync());
         }
