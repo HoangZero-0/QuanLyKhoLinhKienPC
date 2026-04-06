@@ -97,7 +97,7 @@
 
                                     <td class="text-center py-4 pe-4">
                                         <div class="d-inline-flex gap-2">
-                                            <a asp-action="Details" asp-route-id="@item.MaDanhMuc" class="btn btn-sm btn-light border text-primary rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;" title="Xem chi tiết">
+                                            <a asp-action="Details" asp-route-id="@item.MaDanhMuc" class="btn btn-sm btn-light border text-info rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;" title="Xem chi tiết">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
                                             @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))

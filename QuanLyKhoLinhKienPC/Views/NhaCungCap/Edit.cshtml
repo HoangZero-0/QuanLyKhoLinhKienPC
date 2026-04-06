@@ -7,11 +7,11 @@
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fa-solid fa-pen-to-square"></i> Cập Nhật Nhà Cung Cấp</h4>
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-warning fw-bold"><i class="fa-solid fa-pen-to-square me-1"></i> Cập Nhật Nhà Cung Cấp</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Edit">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
@@ -21,28 +21,28 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="TenNhaCungCap" class="form-label fw-bold">Tên nhà cung cấp <span class="text-danger">*</span></label>
-                                <input asp-for="TenNhaCungCap" class="form-control" />
+                                <input asp-for="TenNhaCungCap" class="form-control form-control-lg bg-light border-0 rounded-3 fs-6" />
                                 <span asp-validation-for="TenNhaCungCap" class="text-danger"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="SoDienThoai" class="form-label fw-bold">Số điện thoại</label>
-                                <input asp-for="SoDienThoai" class="form-control" />
+                                <input asp-for="SoDienThoai" class="form-control form-control-lg bg-light border-0 rounded-3 fs-6" />
                                 <span asp-validation-for="SoDienThoai" class="text-danger"></span>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="DiaChi" class="form-label fw-bold">Địa chỉ</label>
-                            <textarea asp-for="DiaChi" class="form-control" rows="3"></textarea>
+                            <textarea asp-for="DiaChi" class="form-control form-control-lg bg-light border-0 rounded-3 fs-6" rows="3"></textarea>
                             <span asp-validation-for="DiaChi" class="text-danger"></span>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                        <div class="d-flex justify-content-between mt-5">
+                            <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
                             </a>
-                            <button type="submit" class="btn btn-warning fw-bold">
-                                <i class="fa-solid fa-save"></i> Cập nhật
+                            <button type="submit" class="btn btn-warning shadow-sm rounded-pill px-5 fw-bold text-dark">
+                                <i class="fa-solid fa-save me-1"></i> Cập nhật
                             </button>
                         </div>
                     </form>

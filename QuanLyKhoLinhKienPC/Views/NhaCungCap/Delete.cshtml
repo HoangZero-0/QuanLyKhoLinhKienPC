@@ -7,32 +7,41 @@
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Nhà Cung Cấp</h4>
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Xóa Nhà Cung Cấp</h4>
                 </div>
-                <div class="card-body text-center">
+                <div class="card-body text-center p-4">
                     <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Nhà cung cấp này vào thùng rác?</h5>
 
                     <p class="text-muted small mb-4">
                         <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
-                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
-                        <dt class="col-sm-4 text-end">Tên NCC:</dt>
-                        <dd class="col-sm-6 fw-bold">@Html.DisplayFor(model => model.TenNhaCungCap)</dd>
+                    <dl class="row mt-4 text-start justify-content-center bg-danger bg-opacity-10 py-4 rounded-4 mx-2">
+                        <dt class="col-sm-4 text-end text-danger fw-semibold mb-2">Tên NCC:</dt>
+                        <dd class="col-sm-6 fw-bold text-dark fs-5 mb-2">@Html.DisplayFor(model => model.TenNhaCungCap)</dd>
 
-                        <dt class="col-sm-4 text-end">SĐT:</dt>
-                        <dd class="col-sm-6">@Html.DisplayFor(model => model.SoDienThoai)</dd>
+                        <dt class="col-sm-4 text-end text-danger fw-semibold mb-0">SĐT:</dt>
+                        <dd class="col-sm-6 text-dark mb-0">
+                            @if (!string.IsNullOrEmpty(Model.SoDienThoai))
+                            {
+                                <span class="fw-medium">@Html.DisplayFor(model => model.SoDienThoai)</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">--- Chưa cập nhật ---</span>
+                            }
+                        </dd>
                     </dl>
 
-                    <form asp-action="Delete" class="mt-4">
+                    <form asp-action="Delete" class="mt-5">
                         <input type="hidden" asp-for="MaNhaCungCap" />
-                        <a asp-action="Index" class="btn btn-secondary me-2">
-                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        <button type="submit" class="btn btn-danger shadow-sm rounded-pill px-5 fw-bold">
+                            <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>
                 </div>
