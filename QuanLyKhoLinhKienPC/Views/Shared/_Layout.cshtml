@@ -13,9 +13,33 @@
             height: 100%;
             margin: 0;
             overflow: hidden;
-            background-color: #f5f7fa;
+            background-color: #f8fafc; /* Xám băng siêu nhạt */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        /* Gắn background họa tiết orbs ảo (Glassmorphism) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            right: -50px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
         /* Cấu trúc Flex dọc */
         body {
             display: flex;
@@ -37,25 +61,31 @@
             overflow: hidden; /* Ngăn tràn màn hình */
         }
 
-        /* 3. SIDEBAR */
+        /* 3. SIDEBAR GLASSMORPHISM */
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.8);
+            color: #334155;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+            overflow-x: hidden;
             flex-shrink: 0;
             transition: all 0.3s;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.02);
         }
 
             .sidebar .nav-link {
-                color: #b0bec5;
-                padding: 15px 20px;
+                color: #64748b;
+                padding: 12px 20px;
                 font-size: 15px;
-                transition: all 0.2s ease-in-out;
-                border-left: 4px solid transparent;
+                font-weight: 500;
+                transition: all 0.25s ease-in-out;
+                border-radius: 12px;
+                margin: 4px 12px;
                 display: flex;
                 align-items: center;
             }
@@ -65,30 +95,36 @@
                     width: 25px;
                     text-align: center;
                     font-size: 18px;
+                    color: #94a3b8;
+                    transition: color 0.25s ease-in-out;
                 }
 
                 /* Hiệu ứng Hover */
                 .sidebar .nav-link:hover {
-                    background: rgba(255,255,255,0.1);
-                    color: #fff;
-                    transform: translateX(5px);
-                    border-left-color: #3498db;
+                    background: rgba(241, 245, 249, 0.8);
+                    color: #0f172a;
+                    transform: translateX(4px);
+                }
+                .sidebar .nav-link:hover i {
+                    color: #3b82f6;
                 }
 
                 /* Active State */
                 .sidebar .nav-link.active {
-                    background: #3498db;
-                    color: #fff;
-                    font-weight: bold;
-                    border-left-color: #fff;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+                    color: #ffffff;
+                    font-weight: 600;
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                }
+                .sidebar .nav-link.active i {
+                    color: #ffffff;
                 }
 
         /* 4. CONTENT AREA */
         .content {
             flex: 1;
-            padding: 20px;
-            background: #ecf0f1;
+            padding: 24px 32px;
+            background: transparent;
             overflow-y: auto; /* Cho phép cuộn phần nội dung bên phải */
             display: flex;
             flex-direction: column;
@@ -109,27 +145,32 @@
         string currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
     }
 
-    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary px-4 shadow-sm">
-        <a class="navbar-brand fw-bold" href="/">
-            <i class="fa-solid fa-microchip text-warning"></i> KHO LINH KIỆN PC
+    <nav class="navbar navbar-expand bg-white border-bottom px-4 shadow-sm" style="background: rgba(255,255,255,0.85) !important; backdrop-filter: blur(12px);">
+        <a class="navbar-brand fw-bold text-dark" href="/">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary rounded px-2 py-1 me-2 shadow-sm">
+                    <i class="fa-solid fa-microchip text-white"></i>
+                </div>
+                <span style="letter-spacing: -0.5px;">KHO LINH KIỆN PC</span>
+            </div>
         </a>
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center ms-auto">
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                <span class="text-light me-3 small">
+                <span class="text-secondary me-4 fw-medium">
                     Xin chào, 
-                    <a asp-controller="HoSo" asp-action="Index" class="text-warning text-decoration-none fw-bold" title="Xem hồ sơ cá nhân">
+                    <a asp-controller="HoSo" asp-action="Index" class="text-primary text-decoration-none fw-bold mx-1" title="Xem hồ sơ cá nhân">
                         @User.FindFirst("HoTen")?.Value
                     </a>
-                    <span class="badge bg-secondary ms-1">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                    <span class="badge bg-light text-primary border border-primary-subtle rounded-pill ms-1 px-3">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
                 </span>
                 <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-warning"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+                    <button type="submit" class="btn btn-sm btn-light border shadow-sm text-danger fw-medium rounded-pill px-3 hover-shadow-sm transition"><i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất</button>
                 </form>
             }
             else
             {
-                <a asp-controller="Auth" asp-action="Login" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-right-to-bracket"></i> Đăng nhập</a>
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm fw-medium"><i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập</a>
             }
         </div>
     </nav>
