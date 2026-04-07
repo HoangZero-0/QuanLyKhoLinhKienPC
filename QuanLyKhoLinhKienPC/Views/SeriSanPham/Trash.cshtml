@@ -51,7 +51,7 @@
     <!-- DATA TABLE -->
     <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
-            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden;">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
                 <style>
                     .premium-table tbody tr {
                         transition: all 0.2s;
@@ -70,22 +70,23 @@
                         letter-spacing: 0.5px;
                     }
                 </style>
-                <table class="table premium-table mb-0 w-100 align-middle">
+                <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
                     <thead class="bg-white">
                         <tr>
                             <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Số Seri</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Sản Phẩm</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Phiếu Nhập</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Giá Nhập</th>
-                            <th class="py-4 text-center pe-4" style="width: 150px; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Số Seri</th>
+                            <th class="py-4" style="width: 35%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Sản Phẩm</th>
+                            <th class="py-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Phiếu Nhập</th>
+                            <th class="py-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Giá Nhập</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);"></th>
+                            <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
+                                <td colspan="7" class="text-center text-muted py-5">
                                     <div class="py-4">
                                         <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-25"></i>
                                         <p class="fs-5 fw-medium mb-1">Thùng rác trống</p>
@@ -133,6 +134,7 @@
                                             <span class="fw-bold text-danger">@string.Format("{0:N0}", giaNhap) VNĐ</span>
                                         }
                                     </td>
+                                    <td></td>
                                     <td class="text-center pe-4">
                                         <form asp-action="Restore" asp-route-id="@item.MaSeri" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">

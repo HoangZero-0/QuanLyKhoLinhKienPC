@@ -54,7 +54,7 @@
     <!-- DATA TABLE -->
     <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
-            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden;">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
                 <style>
                     .premium-table tbody tr {
                         transition: all 0.2s;
@@ -78,16 +78,16 @@
                         padding: 4px;
                     }
                 </style>
-                <table class="table premium-table mb-0 w-100 align-middle">
+                <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
                     <thead class="bg-white">
                         <tr>
                             <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
-                            <th class="py-4 text-center" style="width: 100px; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Hình</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tên Sản Phẩm</th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Danh Mục / Hãng</th>
-                            <th class="py-4 text-end" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Giá Bán</th>
-                            <th class="py-4 text-center" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tồn Kho</th>
-                            <th class="py-4 text-center pe-4" style="width: 150px; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
+                            <th class="py-4 text-center" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Hình</th>
+                            <th class="py-4" style="width: 30%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tên Sản Phẩm</th>
+                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Danh Mục / Hãng</th>
+                            <th class="py-4 text-end" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Giá Bán</th>
+                            <th class="py-4 text-center" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tồn Kho</th>
+                            <th class="py-4 text-center pe-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>

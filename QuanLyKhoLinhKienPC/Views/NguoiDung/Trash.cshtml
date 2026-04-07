@@ -65,16 +65,19 @@
                     <thead class="bg-white">
                         <tr>
                             <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
-                            <th class="py-4 ps-3" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                            <th class="py-4 ps-3" style="width: 25%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Họ tên
                             </th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Tên đăng nhập
                             </th>
-                            <th class="py-4" style="position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Vai trò
                             </th>
-                            <th class="text-center py-4 pe-4" style="width: 150px; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                                Email
+                            </th>
+                            <th class="text-center py-4 pe-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Thao tác
                             </th>
                         </tr>
@@ -90,20 +93,25 @@
                                     <td class="fw-bold text-dark ps-3 py-4 align-middle">
                                         @Html.DisplayFor(modelItem => item.HoTen)
                                     </td>
-                                    <td>
-                                        <code>@Html.DisplayFor(modelItem => item.TenDangNhap)</code>
+                                    <td class="text-secondary fw-normal">
+                                        @Html.DisplayFor(modelItem => item.TenDangNhap)
                                     </td>
                                     <td>
                                         <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3">
                                             @item.MaVaiTroNavigation?.TenVaiTro
                                         </span>
                                     </td>
-                                    <td class="py-4 d-flex justify-content-center pe-4">
-                                        <form asp-action="Restore" asp-route-id="@item.MaNguoiDung" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
-                                                <i class="fa-solid fa-rotate-left"></i>
-                                            </button>
-                                        </form>
+                                    <td class="fw-normal">
+                                        <span class="text-dark text-decoration-none" style="color: #000 !important;">@item.Email</span>
+                                    </td>
+                                    <td class="text-center py-4 pe-4">
+                                        <div class="d-inline-flex gap-2">
+                                            <form asp-action="Restore" asp-route-id="@item.MaNguoiDung" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
+                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -111,7 +119,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
+                                <td colspan="6" class="text-center text-muted py-5">
                                     <div class="py-4">
                                         <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-25"></i>
                                         <p class="fs-5 fw-medium mb-1">Thùng rác trống</p>
