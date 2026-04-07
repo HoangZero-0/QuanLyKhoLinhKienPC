@@ -1,7 +1,7 @@
 @model QuanLyKhoLinhKienPC.Models.NguoiDung
 
 @{
-    ViewData["Title"] = "Khóa Nhân Viên";
+    ViewData["Title"] = "Xóa Nhân Viên";
 }
 
 <div class="container-fluid pt-4">
@@ -9,16 +9,13 @@
         <div class="col-md-6">
             <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
                 <div class="card-header bg-white border-bottom border-light py-3">
-                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-user-lock me-1"></i> Khóa Tài Khoản</h4>
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Xóa Nhân Viên</h4>
                 </div>
                 <div class="card-body text-center p-4">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-circle mb-4" style="width: 70px; height: 70px;">
-                        <i class="fa-solid fa-triangle-exclamation fa-2x text-danger"></i>
-                    </div>
-                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn tạm khóa nhân viên này?</h5>
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Nhân viên này vào thùng rác?</h5>
 
                     <p class="text-muted small mb-4 px-3">
-                        Tài khoản này sẽ bị chuyển vào <b>Thùng rác</b> và không thể đăng nhập vào hệ thống cho đến khi được khôi phục lại.
+                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
                     <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start">
@@ -37,7 +34,7 @@
                             <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
                         <button type="submit" class="btn btn-danger shadow-sm rounded-pill px-5 fw-bold">
-                            <i class="fa-solid fa-lock me-1"></i> Đồng ý khóa
+                            <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>
                 </div>

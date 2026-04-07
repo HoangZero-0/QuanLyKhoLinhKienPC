@@ -13,7 +13,7 @@
             {
 
             }
-            <a asp-action="Index" class="btn btn-light border shadow-sm me-2 rounded-pill px-4">
+            <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-medium transition text-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
         </div>
@@ -98,7 +98,7 @@
                                     <td class="text-truncate py-4 align-middle text-secondary" style="max-width: 300px;">@Html.DisplayFor(modelItem => item.DiaChi)</td>
                                     <td class="py-4 d-flex justify-content-center">
                                         <form asp-action="Restore" asp-route-id="@item.MaNhaCungCap" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;" title="Khôi phục">
+                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
@@ -115,8 +115,10 @@
                         {
                             <tr>
                                 <td colspan="5" class="text-center text-muted py-5">
-                                    <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-50"></i><br>
-                                    Thùng rác trống.
+                                    <div class="py-4">
+                                        <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-25"></i>
+                                        <p class="fs-5 fw-medium mb-1">Thùng rác trống</p>
+                                    </div>
                                 </td>
                             </tr>
                         }

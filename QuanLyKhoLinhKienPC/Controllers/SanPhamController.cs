@@ -90,6 +90,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var sanPham = await _context.SanPham
                 .Include(s => s.MaDanhMucNavigation)
                 .Include(s => s.SeriSanPham)
+                    .ThenInclude(ss => ss.MaPhieuNhapNavigation)
                 .FirstOrDefaultAsync(m => m.MaSanPham == id);
 
             if (sanPham == null)
@@ -380,6 +381,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             var dsSanPham = _context.SanPham
                 .Include(s => s.MaDanhMucNavigation)
+                .Include(s => s.SeriSanPham) // Thêm để tính tồn kho
                 .Where(d => d.IsDeleted == true);
 
             if (!string.IsNullOrEmpty(searchString))
@@ -409,7 +411,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentHangSanXuat"] = HangSanXuat;
 
-            return View(await dsSanPham.ToListAsync());
+            var list = await dsSanPham.ToListAsync();
+
+            // Tính tồn kho ảo (cho trang Thùng rác)
+            foreach (var item in list)
+            {
+                item.SoLuongTon = item.SeriSanPham.Count(s => s.TrangThai == 1 && s.IsDeleted == false);
+            }
+
+            return View(list);
         }
 
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)

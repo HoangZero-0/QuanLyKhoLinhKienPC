@@ -11,8 +11,8 @@
         @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
         {
             <div>
-                <a asp-action="Trash" class="btn btn-outline-danger shadow-sm me-2 rounded-pill px-4" title="Thùng rác">
-                    <i class="fa-solid fa-trash-can me-1"></i> Thùng rác
+                <a asp-action="Trash" class="btn btn-light border shadow-sm rounded-pill px-3 transition text-danger" title="Thùng rác">
+                    <i class="fa-solid fa-trash-can"></i>
                 </a>
                 <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4">
                     <i class="fa-solid fa-plus me-1"></i> Thêm mới

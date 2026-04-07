@@ -4,51 +4,55 @@
     ViewData["Title"] = "Xóa Sản Phẩm";
 }
 
+<style>
+    .content { overflow-y: hidden !important; }
+</style>
+
 <div class="container-fluid pt-4">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center g-4">
         <div class="col-md-6">
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation"></i> Xóa Sản Phẩm</h4>
+            <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-white border-bottom border-light py-3">
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Xóa Sản Phẩm</h4>
                 </div>
-                <div class="card-body text-center">
-                    <h5 class="card-title text-danger mb-3">Bạn có chắc muốn chuyển Sản phẩm này vào thùng rác?</h5>
+                <div class="card-body text-center p-4">
+                    <h5 class="card-title text-danger mb-4 fw-bold fs-4">Bạn có chắc muốn chuyển Sản phẩm này vào thùng rác?</h5>
 
                     <p class="text-muted small mb-4">
-                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Sản phẩm sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
+                         <i class="fa-solid fa-circle-info text-secondary me-1"></i> <strong>Lưu ý:</strong> Sản phẩm sẽ được chuyển vào <strong>Thùng rác</strong> (có thể khôi phục lại khi cần).
                     </p>
 
-                    <div class="mb-3">
-                        <img src="@(string.IsNullOrEmpty(Model.HinhAnh) ? "/images/no-image.png" : Model.HinhAnh)"
-                             alt="@Model.TenSanPham"
-                             class="rounded shadow-sm border"
-                             style="width: 120px; height: 120px; object-fit: contain; background: #f8f9fa;">
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start shadow-inner border border-danger border-opacity-10">
+                        <div class="text-center mb-4">
+                            <div class="bg-white p-2 rounded-3 shadow-sm d-inline-block border">
+                                <img src="@(string.IsNullOrEmpty(Model.HinhAnh) ? "/images/no-image.png" : Model.HinhAnh)"
+                                     alt="@Model.TenSanPham"
+                                     class="img-fluid rounded"
+                                     style="width: 150px; height: 150px; object-fit: contain;">
+                            </div>
+                        </div>
+                        <div class="row px-4 align-items-center g-2 pb-2">
+                             <div class="col-sm-4 text-end text-danger fw-semibold">Tên sản phẩm:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5">@Model.TenSanPham</div>
+                            
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Danh mục:</div>
+                            <div class="col-sm-8 fw-bold text-primary">@(Model.MaDanhMucNavigation?.TenDanhMuc ?? "Chưa phân loại")</div>
+
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Hãng sản xuất:</div>
+                            <div class="col-sm-8 fw-bold text-secondary">@(string.IsNullOrEmpty(Model.HangSanXuat) ? "N/A" : Model.HangSanXuat)</div>
+                            
+                            <div class="col-sm-4 text-end text-danger fw-semibold">Giá niêm yết:</div>
+                            <div class="col-sm-8 text-danger fw-bold fs-5">@Model.GiaBan.ToString("N0") VNĐ</div>
+                        </div>
                     </div>
 
-                    <dl class="row mt-3 text-start justify-content-center bg-light py-3 rounded mx-3">
-                        <dt class="col-sm-4 text-end text-muted">Tên sản phẩm:</dt>
-                        <dd class="col-sm-7 fw-bold text-dark">@Html.DisplayFor(model => model.TenSanPham)</dd>
-
-                        <dt class="col-sm-4 text-end text-muted">Danh mục:</dt>
-                        <dd class="col-sm-7">
-                            <span class="badge bg-secondary">@(Model.MaDanhMucNavigation?.TenDanhMuc ?? "Chưa phân loại")</span>
-                        </dd>
-
-                        <dt class="col-sm-4 text-end text-muted">Hãng sản xuất:</dt>
-                        <dd class="col-sm-7 fw-bold text-info">@(string.IsNullOrEmpty(Model.HangSanXuat) ? "N/A" : Model.HangSanXuat)</dd>
-
-                        <dt class="col-sm-4 text-end text-muted">Giá bán:</dt>
-                        <dd class="col-sm-7 text-danger fw-bold">@Model.GiaBan.ToString("N0") VNĐ</dd>
-                    </dl>
-
-                    <form asp-action="Delete" class="mt-4">
+                    <form asp-action="Delete" class="mt-5">
                         <input type="hidden" asp-for="MaSanPham" />
-
-                        <a asp-action="Index" class="btn btn-secondary me-2">
-                            <i class="fa-solid fa-xmark"></i> Hủy bỏ
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-3 transition">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i> Đồng ý xóa
+                        <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">
+                            <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>
                 </div>

@@ -27,6 +27,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             var seriList = _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
+                    .ThenInclude(sp => sp.MaDanhMucNavigation)
                 .Include(s => s.MaPhieuNhapNavigation)
                     .ThenInclude(pn => pn.ChiTietPhieuNhap)
                 .Include(s => s.MaPhieuXuatNavigation)
@@ -45,6 +46,20 @@ namespace QuanLyKhoLinhKienPC.Controllers
             if (trangThaiFilter.HasValue)
             {
                 seriList = seriList.Where(s => s.TrangThai == trangThaiFilter.Value);
+            }
+
+            // Validate ngày hợp lệ cho SQL Server (phạm vi: 1753 -> 9999)
+            var sqlMinDate = new DateTime(1753, 1, 1);
+            var sqlMaxDate = new DateTime(9999, 12, 31);
+            if (fromDate.HasValue && (fromDate.Value < sqlMinDate || fromDate.Value > sqlMaxDate))
+            {
+                TempData["Error"] = "Thời gian bắt đầu không hợp lệ!";
+                fromDate = null;
+            }
+            if (toDate.HasValue && (toDate.Value < sqlMinDate || toDate.Value > sqlMaxDate))
+            {
+                TempData["Error"] = "Thời gian kết thúc không hợp lệ!";
+                toDate = null;
             }
 
             // Lọc theo khoảng ngày
@@ -273,6 +288,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         {
             var seriList = _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
+                    .ThenInclude(p => p.MaDanhMucNavigation)
                 .Include(s => s.MaPhieuNhapNavigation)
                     .ThenInclude(pn => pn.ChiTietPhieuNhap)
                 .Where(s => s.IsDeleted == true);

@@ -9,12 +9,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
         <h2 class="text-primary m-0"><i class="fa-solid fa-users"></i> Quản Lý Nhân Viên</h2>
         <div>
-            <a asp-action="Trash" class="btn btn-outline-danger shadow-sm me-2 rounded-pill px-4" title="Thùng rác">
-                <i class="fa-solid fa-trash-can me-1"></i> Thùng rác
+            <a asp-action="Trash" class="btn btn-light border shadow-sm rounded-pill px-3 transition text-danger" title="Thùng rác">
+                <i class="fa-solid fa-trash-can"></i>
             </a>
-            <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4">
-                <i class="fa-solid fa-user-plus me-1"></i> Thêm mới
-            </a>
+                <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4">
+                    <i class="fa-solid fa-plus me-1"></i> Thêm mới
+                </a>
         </div>
     </div>
 
@@ -130,8 +130,8 @@
                                             <a asp-action="Details" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-light border text-info rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Xem chi tiết">
                                                 <i class="fa-solid fa-eye"></i>
                                             </a>
-                                            <a asp-action="Delete" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-light border text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Khóa tài khoản">
-                                                <i class="fa-solid fa-user-lock"></i>
+                                            <a asp-action="Delete" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-light border text-danger rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Xóa">
+                                                <i class="fa-solid fa-trash"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -143,7 +143,7 @@
                             <tr>
                                 <td colspan="6" class="text-center text-muted py-5 font-italic">
                                     <i class="fa-solid fa-users fa-3x mb-3 text-secondary opacity-50"></i><br>
-                                    Không tìm thấy nhân viên nào phù hợp.
+                                    Không tìm thấy dữ liệu nào.
                                 </td>
                             </tr>
                         }
