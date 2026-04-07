@@ -32,7 +32,7 @@
                                     <dd class="col-sm-7">
                                         @if (Model.IsDeleted)
                                         {
-                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3">Bị khóa</span>
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3">Bị xoá</span>
                                         }
                                         else
                                         {
@@ -70,7 +70,7 @@
                         </a>
                         
                         <a asp-action="Delete" asp-route-id="@Model?.MaNguoiDung" class="btn btn-outline-danger shadow-sm rounded-pill px-4 fw-bold">
-                            <i class="fa-solid fa-user-lock me-1"></i> Khóa tài khoản
+                            <i class="fa-solid fa-user-lock me-1"></i> Xoá nhân viên
                         </a>
                     </div>
                 </div>
