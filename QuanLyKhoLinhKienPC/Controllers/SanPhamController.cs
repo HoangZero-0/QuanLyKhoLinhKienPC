@@ -41,7 +41,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                dsSanPham = dsSanPham.Where(d => d.TenSanPham.Contains(searchString) || d.HangSanXuat.Contains(searchString));
+                dsSanPham = dsSanPham.Where(d => d.TenSanPham.Contains(searchString));
             }
 
             if (MaDanhMuc.HasValue)
@@ -365,6 +365,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var sanPham = await _context.SanPham.FindAsync(id);
             if (sanPham != null)
             {
+                // Chốt chặn: Kiểm tra nếu còn Seri trong kho (1) hoặc Bảo hành (3)
+                bool hasActiveSerials = await _context.SeriSanPham
+                    .AnyAsync(s => s.MaSanPham == id && !s.IsDeleted && (s.TrangThai == 1 || s.TrangThai == 3));
+
+                if (hasActiveSerials)
+                {
+                    TempData["Error"] = "Không thể xoá Sản phẩm này vì vẫn còn hàng Trong kho hoặc đang Bảo hành! Vui lòng xử lý hết hàng tồn trước.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 // Logic xóa mềm
                 sanPham.IsDeleted = true;
                 _context.Update(sanPham);
@@ -429,10 +439,20 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
-            var sanPham = await _context.SanPham.FindAsync(id);
+            var sanPham = await _context.SanPham
+                .Include(s => s.MaDanhMucNavigation)
+                .FirstOrDefaultAsync(s => s.MaSanPham == id);
+
             if (sanPham == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn Khôi phục: Danh mục cha phải đang hoạt động
+            if (sanPham.MaDanhMucNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục sản phẩm này vì Danh mục '{sanPham.MaDanhMucNavigation.TenDanhMuc}' đang bị xoá. Vui lòng khôi phục Danh mục [{sanPham.MaDanhMucNavigation.TenDanhMuc}] trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

@@ -1,91 +1,189 @@
 @model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuNhap>
 
 @{
-    ViewData["Title"] = "Lịch Sử Nhập Kho";
+    ViewData["Title"] = "Quản Lý Nhập Kho";
 }
 
 <div class="d-flex flex-column h-100">
+    <!-- HEADER & ACTIONS -->
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-        <h2 class="text-primary m-0"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Lập Phiếu Nhập</h2>
+        <h2 class="text-primary m-0"><i class="fa-solid fa-file-import"></i> Quản Lý Nhập Kho</h2>
         @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
         {
             <div>
-                <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold">
-                    <i class="fa-solid fa-plus"></i> Tạo Phiếu Nhập Mới
-                </a>
                 <a asp-action="Trash" class="btn btn-light border shadow-sm rounded-pill px-3 transition text-danger" title="Thùng rác">
                     <i class="fa-solid fa-trash-can"></i>
+                </a>
+                <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4 transition">
+                    <i class="fa-solid fa-plus me-1"></i> Thêm mới
                 </a>
             </div>
         }
     </div>
 
-    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+    <!-- FILTER BAR -->
+    <div class="card mb-4 shadow rounded-4 flex-shrink-0 border-0" style="box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05) !important;">
+        <div class="card-body py-3 px-4">
+            <form asp-action="Index" method="get">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" name="searchId" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập mã phiếu, ghi chú..." value="@ViewBag.CurrentSearchId">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-industry"></i></span>
+                            <select name="MaNhaCungCap" class="form-select border-start-0 rounded-end-pill fs-6 ps-0 transition" asp-items="ViewBag.MaNhaCungCap" onchange="this.form.submit()">
+                                <option value="">-- Tất cả nhà cung cấp --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-user-gear"></i></span>
+                            <select name="MaNguoiDung" class="form-select border-start-0 rounded-end-pill fs-6 ps-0 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                                <option value="">-- Tất cả người nhập --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Từ Ngày</span>
+                            <input type="date" name="fromDate" id="fromDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewBag.FromDate" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Đến Ngày</span>
+                            <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewBag.ToDate" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm transition">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
-            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
-                <table class="table table-striped table-hover mb-0 w-100 align-middle">
-                    <thead class="table-primary">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
+                <style>
+                    .premium-table tbody tr {
+                        transition: all 0.2s;
+                        border-bottom: 1px solid #f1f5f9;
+                    }
+                    .premium-table tbody tr:hover {
+                        background-color: #f8fafc !important;
+                        transform: scale(1.002);
+                    }
+                    .premium-table th {
+                        border-bottom: 2px solid #e2e8f0 !important;
+                        color: #475569;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 0.85rem;
+                        letter-spacing: 0.5px;
+                    }
+                </style>
+                <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
+                    <thead class="bg-white">
                         <tr>
-                            <th class="py-3 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10;">STT</th>
-                            <th class="py-3 ps-4" style="position: sticky; top: 0; z-index: 10;">Mã Phiếu</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Ngày Lập</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Nhà Cung Cấp</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Người Lập</th>
-                            <th class="py-3 text-end" style="position: sticky; top: 0; z-index: 10;">Tổng Tiền (VNĐ)</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Ghi Chú</th>
-                            <th class="py-3 text-center pe-4" style="position: sticky; top: 0; z-index: 10;">Thao Tác</th>
+                            <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
+                            <th class="py-4 text-center" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Phiếu</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thời Gian</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Người Nhập</th>
+                            <th class="py-4" style="width: 18%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Nhà Cung Cấp</th>
+                            <th class="py-4" style="width: 17%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Ghi Chú</th>
+                            <th class="py-4 text-end" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tổng Tiền</th>
+                            <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-5">
-                                    <i class="fa-solid fa-file-import fa-3x mb-3 text-secondary opacity-50"></i><br>
-                                    Không tìm thấy dữ liệu nào.
-                                </td>
-                            </tr>
-                        }
-                        else
+                        @if (Model != null && Model.Any())
                         {
                             int stt = 1;
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="text-center text-muted fw-bold align-middle">@(stt++)</td>
-                                    <td class="ps-4 fw-bold text-primary align-middle">
-                                        #PN-@item.MaPhieuNhap.ToString("D5")
+                                    <td class="text-center text-secondary fw-medium ps-4">@(stt++)</td>
+                                    <td class="text-center">
+                                        <a asp-action="Details" asp-route-id="@item.MaPhieuNhap" class="text-decoration-none transition">
+                                            <span class="badge bg-light text-primary border border-primary border-opacity-10 rounded-pill px-3 py-2 fw-bold hover-scale">
+                                                #PN-@item.MaPhieuNhap.ToString("D5")
+                                            </span>
+                                        </a>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border">
-                                            <i class="fa-regular fa-calendar"></i> @item.NgayNhap.ToString("dd/MM/yyyy HH:mm")
-                                        </span>
-                                    </td>
-                                    <td class="fw-bold">
-                                        @item.MaNhaCungCapNavigation?.TenNhaCungCap
+                                        <div class="fw-bold text-dark fs-6 d-block">@item.NgayNhap.ToString("dd/MM/yyyy")</div>
+                                        <small class="text-muted font-monospace">@item.NgayNhap.ToString("HH:mm:ss")</small>
                                     </td>
                                     <td>
-                                        <i class="fa-solid fa-user-tie text-muted"></i> @(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")
+                                        <span class="fw-semibold text-dark">@item.MaNguoiDungNavigation?.HoTen</span>
                                     </td>
-                                    <td class="text-end fw-bold text-danger">
-                                        @string.Format("{0:N0}", item.TongTien) đ
+                                    <td>
+                                        <div class="fw-bold text-dark mb-0 text-truncate" title="@item.MaNhaCungCapNavigation?.TenNhaCungCap">
+                                            @item.MaNhaCungCapNavigation?.TenNhaCungCap
+                                        </div>
                                     </td>
-                                    <td class="text-truncate" style="max-width: 150px;" title="@item.GhiChu">
-                                        @(string.IsNullOrEmpty(item.GhiChu) ? "-" : item.GhiChu)
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.GhiChu))
+                                        {
+                                            <small class="text-muted text-truncate d-block" style="max-width: 180px;" title="@item.GhiChu">
+                                                @item.GhiChu
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted opacity-50">---</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold text-danger fs-6">
+                                        @item.TongTien.ToString("N0") <small>VNĐ</small>
                                     </td>
                                     <td class="text-center pe-4">
-                                        <a asp-action="Details" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-info text-white shadow-sm" title="Xem Hóa Đơn">
-                                            <i class="fa-solid fa-eye"></i> Chi Tiết
-                                        </a>
-                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
-                                        {
-                                            <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-danger text-white shadow-sm ms-1" title="Xóa vào thùng rác">
-                                                <i class="fa-solid fa-trash"></i> Xóa
+                                        <div class="d-inline-flex gap-2">
+                                            <a asp-action="Details" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-light border text-info rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Xem chi tiết">
+                                                <i class="fa-solid fa-eye"></i>
                                             </a>
-                                        }
+                                            @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+                                            {
+                                                <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-light border text-danger rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Xóa">
+                                                <i class="fa-solid fa-trash"></i>
+                                                </a>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
+                        }
+                        else
+                        {
+                            <style>
+                                .empty-state-row { height: 350px; }
+                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
+                            </style>
+                            <tr class="empty-state-row">
+                                <td colspan="8" class="text-center text-muted align-middle border-0">
+                                    <div class="py-5 w-100">
+                                        <i class="fa-solid fa-file-import fa-4x mb-4 text-secondary opacity-25 d-block"></i>
+                                        <div class="fs-4 fw-medium text-secondary">Không tìm thấy dữ liệu nào</div>
+                                    </div>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
@@ -93,3 +191,39 @@
         </div>
     </div>
 </div>
+
+<style>
+    .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; }
+    .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; }
+    .transition { transition: all 0.2s ease; }
+    .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
+    .hover-scale { transition: transform 0.2s; cursor: pointer; }
+    .hover-scale:hover { transform: scale(1.05); }
+</style>
+
+@section Scripts {
+    <script>
+        function validateAndSubmit(element) {
+            var fromStr = document.getElementById('fromDateInput').value;
+            var toStr = document.getElementById('toDateInput').value;
+
+            if (fromStr && toStr) {
+                var f = new Date(fromStr);
+                var t = new Date(toStr);
+
+                if (f > t) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thông tin không hợp lệ',
+                        text: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!',
+                        confirmButtonColor: '#0d6efd',
+                        confirmButtonText: 'Tôi hiểu'
+                    });
+                    element.value = '';
+                    return;
+                }
+            }
+            element.form.submit();
+        }
+    </script>
+}

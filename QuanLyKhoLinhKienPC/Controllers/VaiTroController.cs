@@ -166,6 +166,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var vaiTro = await _context.VaiTro.FindAsync(id);
             if (vaiTro != null)
             {
+                // Chốt chặn: Kiểm tra nếu còn Người dùng đang hoạt động mang vai trò này
+                bool hasUsers = await _context.NguoiDung.AnyAsync(u => u.MaVaiTro == id && !u.IsDeleted);
+                if (hasUsers)
+                {
+                    TempData["Error"] = "Không thể xoá Vai trò này vì vẫn còn Người dùng đang mang vai trò này! Vui lòng chuyển hoặc khoá tài khoản người dùng trước.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 // Logic xóa mềm
                 vaiTro.IsDeleted = true;
                 _context.Update(vaiTro);

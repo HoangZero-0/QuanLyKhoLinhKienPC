@@ -4,45 +4,63 @@
     ViewData["Title"] = "Thùng Rác Hóa Đơn Bán";
 }
 
-<div class="container-fluid pt-4 h-100 overflow-y-auto">
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-6">
-            <h3 class="text-secondary fw-bold"><i class="fa-solid fa-trash-can"></i> Hóa Đơn Đã Hủy / Khách Trả Hàng</h3>
-        </div>
-        <div class="col-md-6 text-end">
-            @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
-            {
-
-            }
-            <a asp-action="Index" class="btn btn-secondary shadow-sm fw-bold ms-2">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại
+<div class="d-flex flex-column h-100">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Hóa Đơn Đã Hủy / Khách Trả Hàng</h2>
+        <div>
+            <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-medium transition text-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
         </div>
     </div>
 
 
-    <div class="card shadow-sm flex-grow-1 overflow-hidden border-0">
+    <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
-            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
-                <table class="table table-hover align-middle mb-0 w-100">
-                    <thead class="table-secondary text-center">
+            <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
+                <style>
+                    .premium-table tbody tr {
+                        transition: all 0.2s;
+                        border-bottom: 1px solid #f1f5f9;
+                    }
+                    .premium-table tbody tr:hover {
+                        background-color: #fca5a510 !important;
+                        transform: scale(1.002);
+                    }
+                    .premium-table th {
+                        border-bottom: 2px solid #fecaca !important;
+                        color: #ef4444;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 0.85rem;
+                        letter-spacing: 0.5px;
+                    }
+                </style>
+                <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
+                    <thead class="bg-white">
                         <tr>
-                            <th class="py-3 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10;">STT</th>
-                            <th class="py-3 ps-4 text-start" style="position: sticky; top: 0; z-index: 10;">Mã Phiếu Xuất</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Ngày Hủy Yêu Cầu</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Khách Hàng</th>
-                            <th class="py-3" style="position: sticky; top: 0; z-index: 10;">Người Lập Phiếu</th>
-                            <th class="py-3 text-end" style="position: sticky; top: 0; z-index: 10;">Tiền Khách Trả (VNĐ)</th>
-                            <th class="py-3 text-center pe-4" style="position: sticky; top: 0; z-index: 10;">Thao Tác</th>
+                            <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
+                            <th class="py-4 ps-4 text-start" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Phiếu Xuất</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Ngày Hủy Yêu Cầu</th>
+                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Khách Hàng</th>
+                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Người Lập Phiếu</th>
+                            <th class="py-4 text-end" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tiền Khách Trả</th>
+                            <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Any())
                         {
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
-                                    <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-50"></i><br>
-                                    Thùng rác trống.
+                            <style>
+                                .empty-state-row { height: 350px; }
+                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
+                            </style>
+                            <tr class="empty-state-row">
+                                <td colspan="7" class="text-center text-muted align-middle border-0">
+                                    <div class="py-5">
+                                        <i class="fa-solid fa-trash-can fa-4x mb-4 text-secondary opacity-25 d-block"></i>
+                                        <p class="fs-4 fw-medium mb-1">Thùng rác trống</p>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -72,8 +90,8 @@
                                     </td>
                                     <td class="text-center pe-4">
                                         <form asp-action="Restore" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-success shadow-sm text-white" title="Khôi phục lại hóa đơn và rút lại hàng trong kho">
-                                                <i class="fa-solid fa-trash-arrow-up"></i> Khôi Phục
+                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục lại hóa đơn và rút lại hàng trong kho">
+                                                <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
 

@@ -272,6 +272,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var seri = await _context.SeriSanPham.FindAsync(id);
             if (seri != null)
             {
+                // Chốt chặn: Kiểm tra nếu Seri đã bán (2) hoặc đang bảo hành (3)
+                if (seri.TrangThai == 2 || seri.TrangThai == 3)
+                {
+                    string msg = seri.TrangThai == 2 ? "đã bán cho khách hàng" : "đang trong quá trình bảo hành/lỗi";
+                    TempData["Error"] = $"Không thể xoá mã Seri này vì máy {msg}! Vui lòng kiểm tra lại.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Logic xóa mềm
                 seri.IsDeleted = true;
                 _context.Update(seri);
                 await _context.SaveChangesAsync();
@@ -284,22 +293,63 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 5. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: SeriSanPham/Trash
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
-        public async Task<IActionResult> Trash(string searchString)
+        public async Task<IActionResult> Trash(string searchString, DateTime? fromDate, DateTime? toDate)
         {
             var seriList = _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
                     .ThenInclude(p => p.MaDanhMucNavigation)
                 .Include(s => s.MaPhieuNhapNavigation)
                     .ThenInclude(pn => pn.ChiTietPhieuNhap)
+                .Include(s => s.MaPhieuXuatNavigation)
+                    .ThenInclude(px => px.ChiTietPhieuXuat)
                 .Where(s => s.IsDeleted == true);
 
+            // Tìm kiếm theo chuỗi Seri
             if (!string.IsNullOrEmpty(searchString))
             {
                 seriList = seriList.Where(s => s.SoSeri.Contains(searchString) ||
-                                               s.MaSanPhamNavigation.TenSanPham.Contains(searchString));
+                                               s.MaSanPhamNavigation.TenSanPham.Contains(searchString) ||
+                                               s.MaSanPhamNavigation.HangSanXuat.Contains(searchString));
             }
 
+            // Validate ngày hợp lệ cho SQL Server
+            var sqlMinDate = new DateTime(1753, 1, 1);
+            var sqlMaxDate = new DateTime(9999, 12, 31);
+            if (fromDate.HasValue && (fromDate.Value < sqlMinDate || fromDate.Value > sqlMaxDate))
+            {
+                TempData["Error"] = "Thời gian bắt đầu không hợp lệ!";
+                fromDate = null;
+            }
+            if (toDate.HasValue && (toDate.Value < sqlMinDate || toDate.Value > sqlMaxDate))
+            {
+                TempData["Error"] = "Thời gian kết thúc không hợp lệ!";
+                toDate = null;
+            }
+
+            // Lọc theo khoảng ngày (Mặc định theo Ngày Nhập trong Thùng Rác)
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                if (fromDate.HasValue && toDate.HasValue && fromDate.Value.Date > toDate.Value.Date)
+                {
+                    TempData["Error"] = "Khoảng thời gian không hợp lệ (Từ Ngày lớn hơn Đến Ngày). Đã hủy lọc!";
+                    fromDate = null;
+                    toDate = null;
+                }
+                else
+                {
+                    DateTime? fDate = fromDate.HasValue ? fromDate.Value.Date : null;
+                    DateTime? tDate = toDate.HasValue ? toDate.Value.Date.AddDays(1).AddTicks(-1) : null;
+
+                    if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value);
+                    if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value);
+                }
+            }
+
+            seriList = seriList.OrderByDescending(s => s.MaPhieuNhap).ThenBy(s => s.SoSeri);
+
             ViewData["CurrentFilter"] = searchString;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
 
             return View(await seriList.ToListAsync());
         }
@@ -311,10 +361,28 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
-            var seri = await _context.SeriSanPham.FindAsync(id);
+            var seri = await _context.SeriSanPham
+                .Include(s => s.MaSanPhamNavigation)
+                .Include(s => s.MaPhieuNhapNavigation)
+                .FirstOrDefaultAsync(s => s.MaSeri == id);
+
             if (seri == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn 1: Kiểm tra Sản phẩm cha
+            if (seri.MaSanPhamNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục mã máy này vì Sản phẩm '{seri.MaSanPhamNavigation.TenSanPham}' đang bị xoá. Vui lòng khôi phục Sản phẩm [{seri.MaSanPhamNavigation.TenSanPham}] trước.";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn 2: Kiểm tra Phiếu nhập cha (nếu có)
+            if (seri.MaPhieuNhapNavigation != null && seri.MaPhieuNhapNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục mã máy này vì Phiếu nhập mã '{seri.MaPhieuNhapNavigation.MaPhieuNhap}' đang nằm trong thùng rác. Vui lòng khôi phục Phiếu nhập trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

@@ -26,7 +26,7 @@
                 <div class="col-md-10">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" name="searchString" class="form-control border-start-0 rounded-end-pill fs-6" placeholder="Nhập tên danh mục để tìm kiếm..." value="@ViewData["CurrentFilter"]">
+                        <input type="text" name="searchString" class="form-control border-start-0 rounded-end-pill fs-6" placeholder="Nhập tên danh mục..." value="@ViewData["CurrentFilter"]">
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -97,11 +97,15 @@
                         }
                         else
                         {
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-5">
-                                    <div class="py-4">
-                                        <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-25"></i>
-                                        <p class="fs-5 fw-medium mb-1">Thùng rác trống</p>
+                            <style>
+                                .empty-state-row { height: 350px; }
+                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
+                            </style>
+                            <tr class="empty-state-row">
+                                <td colspan="3" class="text-center text-muted align-middle border-0">
+                                    <div class="py-5">
+                                        <i class="fa-solid fa-trash-can fa-4x mb-4 text-secondary opacity-25 d-block"></i>
+                                        <p class="fs-4 fw-medium mb-1">Thùng rác trống</p>
                                     </div>
                                 </td>
                             </tr>

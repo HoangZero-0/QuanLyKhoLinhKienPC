@@ -87,24 +87,27 @@
     - Lọc theo Vai trò.
     - Chi tiết người dùng.
     - Thêm mới: Kiểm tra trùng Tên đăng nhập, mã hóa mật khẩu **BCrypt**.
-    - Xóa mềm: Chống tự xóa tài khoản chính mình.
+    - Xóa mềm: Chốt chặn an toàn (Chống tự xóa tài khoản chính mình).
     - Thùng rác & Khôi phục tài khoản.
   - [x] `Quản lý Vai trò (VaiTro)`:
     - Danh sách & Tìm kiếm (Tên vai trò).
     - Chi tiết, Thêm mới, Chỉnh sửa vai trò.
-    - Xóa mềm, Thùng rác & Khôi phục.
+    - Xóa mềm: Chốt chặn ràng buộc (Ngăn xoá nếu còn Người dùng hoạt động).
+    - Thùng rác & Khôi phục.
 
 - **Danh mục & Sản phẩm:**
   - [x] `Quản lý Danh mục (DanhMuc)`:
     - Danh sách & Tìm kiếm (Tên danh mục).
     - Chi tiết, Thêm mới, Chỉnh sửa thông tin.
-    - Xóa mềm, Thùng rác & Khôi phục.
+    - Xóa mềm: Chốt chặn an toàn (Ngăn xoá nếu còn Sản phẩm hoạt động bên trong).
+    - Thùng rác & Khôi phục.
   - [x] `Quản lý Sản phẩm (SanPham)`:
     - Danh sách & Tìm kiếm (Tên sản phẩm, Hãng sản xuất).
     - Lọc theo Danh mục và Hãng sản xuất.
     - Chi tiết sản phẩm: Tự động tính số lượng tồn thực tế từ kho Seri.
     - Thêm mới & Chỉnh sửa: Xử lý hình ảnh chuyên sâu (**ImageSharp**) -> Resize 800x800, lót nền trắng, chuyển định dạng **WebP**, tự động xóa file ảnh cũ khi cập nhật.
-    - Xóa mềm, Thùng rác & Khôi phục.
+    - Xóa mềm: Chốt chặn thông minh (Chặn xoá khi còn hàng tồn Kho hoặc đang Bảo hành; cho phép ẩn nếu đã bán hết).
+    - Thùng rác & Khôi phục.
   - [x] `Quản lý Nhà cung cấp (NhaCungCap)`:
     - Danh sách & Tìm kiếm (Tên nhà cung cấp, Số điện thoại).
     - Chi tiết, Thêm mới, Chỉnh sửa thông tin.
@@ -117,21 +120,22 @@
     - Lọc theo Khoảng ngày (chọn ngày Nhập hoặc ngày Xuất).
     - Chi tiết truy vết: Xem lịch sử (Nhập từ NCC nào, ngày nào, giá nào; Bán cho ai, ngày nào, giá nào).
     - Quản lý Bảo hành: Chuyển trạng thái Lỗi/Bảo hành, tự động đối soát thời hạn bảo hành từ ngày bán.
-    - Xóa mềm, Thùng rác & Khôi phục.
+    - Xóa mềm: Chốt chặn an toàn (Chặn xoá nếu mã máy đã bán hoặc đang bảo hành).
+    - Thùng rác & Khôi phục.
     - In thống kê thông tin đã lọc
   - [x] `Nhập kho (PhieuNhap)`:
     - Danh sách phiếu (Xem NCC, Người nhập, Ngày nhập).
     - Chi tiết phiếu: Hiển thị danh sách sản phẩm và các mã Seri tương ứng đã sinh.
     - Thêm mới (Create): Giao diện JS thêm dòng sản phẩm, tự động tính tổng tiền, **Tự động sinh mã Seri** ngẫu nhiên theo quy tắc.
-    - Xóa mềm: Đồng bộ ẩn cả Phiếu nhập và các Seri liên quan.
-    - Thùng rác & Khôi phục: Đồng bộ hiện lại cả Phiếu và Seri.
+    - Xóa mềm: Chốt chặn an toàn (Chặn xoá nếu có mã máy đã Bán/Bảo hành) + Cascade đồng bộ ẩn các Seri liên quan.
+    - Thùng rác & Khôi phục: Đồng bộ khôi phục cả Phiếu và các Seri con.
     - Bảo mật: Sử dụng **Transaction** cấp cơ sở dữ liệu để bảo vệ tính toàn vẹn khi sinh Seri hàng loạt.
   - [x] `Xuất kho (PhieuXuat)`:
     - Danh sách phiếu (Xem khách hàng, SĐT, Người lập, Ngày xuất).
     - Chi tiết phiếu: Hiển thị danh sách Seri đã bán.
     - Thêm mới (Create): Giao diện JS, hiển thị tồn kho thực tế, **Tự động rút Seri từ kho** theo số lượng bán.
-    - Xóa mềm: Đồng bộ ẩn Phiếu xuất và **Hoàn trả Seri về trạng thái Tồn kho**.
-    - Thùng rác & Khôi phục: Rút lại Seri từ kho (nếu Seri chưa bị bán lại đơn khác).
+    - Xóa mềm: Cascade hoàn trả Seri về kho (Trạng thái 1) và gỡ liên kết phiếu xuất.
+    - Thùng rác & Khôi phục: Rút lại Seri từ kho (Chốt chặn: Chặn khôi phục nếu hàng đã bán lại cho khách khác).
     - Bảo mật: Sử dụng **Transaction** bảo vệ luồng rút/trả kho.
   - [x] `Cảnh báo tồn kho & Hoạt động`: Module Dashboard hiện thống kê cảnh báo hết hàng (khi số seri < 3) và hiển thị hoạt động nhập xuất gần đây.
 

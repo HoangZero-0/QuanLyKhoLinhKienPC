@@ -9,6 +9,7 @@ using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
 using QuanLyKhoLinhKienPC.Helpers;
 using System.Security.Claims;
+using QuanLyKhoLinhKienPC.ViewModels;
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     // DTO (Data Transfer Object) chuyên dụng để hứng dữ liệu "Giỏ hàng" từ Front-End gửi lên
@@ -80,7 +81,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     MaSanPham = s.MaSanPham,
                     TenSanPham = s.TenSanPham,
                     GiaBan = s.GiaBan,
-                    TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) // Điểm thực tế thẻ seri
+                    // Lấy danh sách Seri đang "Trong kho" (TrangThai = 1)
+                    AvailableSeris = s.SeriSanPham
+                        .Where(seri => seri.TrangThai == 1 && !seri.IsDeleted)
+                        .Select(seri => new { seri.MaSeri, seri.SoSeri })
+                        .ToList()
                 }).ToList();
 
             ViewBag.SanPhamList = dsSanPham;
@@ -88,97 +93,108 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View();
         }
 
-        // POST: PhieuXuat/Create
         [HttpPost]
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TenKhachHang,SoDienThoaiKhach,GhiChu,MaNguoiDung")] PhieuXuat phieuXuat, List<ChiTietBanHang> ChiTietXuat)
+        public async Task<IActionResult> Create(PhieuXuatVM model)
         {
-            ModelState.Remove("MaNguoiDungNavigation");
-            ModelState.Remove("SeriSanPham");
-            ModelState.Remove("ChiTietPhieuXuat");
-
-            if (ChiTietXuat == null || ChiTietXuat.Count == 0)
-            {
-                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 Sản Phẩm vào hóa đơn!");
-            }
-
             if (ModelState.IsValid)
             {
-                using var transaction = await _context.Database.BeginTransactionAsync();
-                try
+                if (model.Items == null || !model.Items.Any(i => i.SelectedSeriIds != null && i.SelectedSeriIds.Any()))
                 {
-                    phieuXuat.NgayXuat = DateTime.Now;
-                    phieuXuat.IsDeleted = false;
-
-                    // Server tự tính tổng tiền từ giỏ hàng thực tế
-                    phieuXuat.TongTien = ChiTietXuat.Sum(x => x.SoLuong * x.GiaTien);
-
-                    // 1. LƯU VỎ PHIẾU XUẤT ĐỂ LẤY ID
-                    _context.Add(phieuXuat);
-                    await _context.SaveChangesAsync();
-
-                    // 2. RÚT SERI KHO TỰ ĐỘNG (XUẤT KHO)
-                    var lstChiTietMoi = new List<ChiTietPhieuXuat>();
-                    var lstSeriThayDoi = new List<SeriSanPham>();
-
-                    foreach (var mon in ChiTietXuat)
-                    {
-                        // Quét Database lấy n Seri Đang Tồn Kho của SP này (Take = SoLuong)
-                        var nhungSeriRutRa = await _context.SeriSanPham
-                            .Where(s => s.MaSanPham == mon.MaSanPham && s.TrangThai == 1 && !s.IsDeleted)
-                            .Take(mon.SoLuong)
-                            .ToListAsync();
-
-                        if (nhungSeriRutRa.Count < mon.SoLuong)
-                        {
-                            throw new Exception($"Không đủ Số lượng Seri Tồn tại Kho cho mã sản phẩm [{mon.MaSanPham}] !");
-                        }
-
-                        // Lặp qua những seri cầm trên tay, lột xác chúng
-                        foreach (var sr in nhungSeriRutRa)
-                        {
-                            // Đánh dấu là đã Bán & Thuộc về Phiếu xuất nào (Tracking)
-                            sr.TrangThai = 2;
-                            sr.MaPhieuXuat = phieuXuat.MaPhieuXuat;
-                            lstSeriThayDoi.Add(sr);
-
-                            // Tạo 1 dòng chứng từ Hóa Đơn Detail kẹp chung với Seri đó
-                            var ctt = new ChiTietPhieuXuat
-                            {
-                                MaSeri = sr.MaSeri,
-                                MaPhieuXuat = phieuXuat.MaPhieuXuat,
-                                GiaTien = mon.GiaTien
-                            };
-                            lstChiTietMoi.Add(ctt);
-                        }
-                    }
-
-                    // 3. ĐỔ TOÀN BỘ LIST SỰ THAY ĐỔI VÀO DB
-                    _context.SeriSanPham.UpdateRange(lstSeriThayDoi);
-                    _context.ChiTietPhieuXuat.AddRange(lstChiTietMoi);
-                    await _context.SaveChangesAsync();
-
-                    // 4. CHỐT ĐƠN (COMMIT)
-                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Phiếu Xuất", $"Xuất kho: Đơn hàng PX-{phieuXuat.MaPhieuXuat}");
-                    await transaction.CommitAsync();
-
-                    TempData["Success"] = "Lập hóa đơn và rút kho Seri bán hàng thành công!";
-                    return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("", "Vui lòng chọn ít nhất một mã máy (Seri) để xuất kho!");
                 }
-                catch (Exception ex)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    ModelState.AddModelError("", "Lỗi Rút Kho Thực Tế: " + ex.Message + " Toàn bộ giao dịch ảo đã được Rollback. Không có dữ liệu nào bị thay đổi.");
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    try
+                    {
+                        var phieuXuat = new PhieuXuat
+                        {
+                            TenKhachHang = model.TenKhachHang,
+                            SoDienThoaiKhach = model.SoDienThoaiKhach,
+                            NgayXuat = DateTime.Now,
+                            IsDeleted = false,
+                            // Lấy mã người dùng từ Claims (Account/Login)
+                            MaNguoiDung = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1")
+                        };
+
+                        // Tính tổng tiền dựa trên đơn giá và số lượng Seri chọn
+                        phieuXuat.TongTien = model.Items.Sum(i => (i.SelectedSeriIds?.Count ?? 0) * i.DonGiaXuat);
+
+                        _context.PhieuXuat.Add(phieuXuat);
+                        await _context.SaveChangesAsync();
+
+                        var lstChiTietXuat = new List<ChiTietPhieuXuat>();
+                        var lstSeriUpdate = new List<SeriSanPham>();
+
+                        foreach (var item in model.Items)
+                        {
+                            if (item.SelectedSeriIds == null || !item.SelectedSeriIds.Any()) continue;
+
+                            // Lấy danh sách Seri thực tế từ DB để kiểm tra trạng thái
+                            var serisFromDb = await _context.SeriSanPham
+                                .Where(s => item.SelectedSeriIds.Contains(s.MaSeri))
+                                .ToListAsync();
+
+                            foreach (var sId in item.SelectedSeriIds)
+                            {
+                                var seriObj = serisFromDb.FirstOrDefault(s => s.MaSeri == sId);
+                                if (seriObj == null || seriObj.TrangThai != 1 || seriObj.IsDeleted)
+                                {
+                                    throw new Exception($"Mã máy (Seri) ID {sId} không khả dụng hoặc đã bị bán/xóa!");
+                                }
+
+                                // Cập nhật trạng thái Seri
+                                seriObj.TrangThai = 2; // Đã bán
+                                seriObj.MaPhieuXuat = phieuXuat.MaPhieuXuat;
+                                lstSeriUpdate.Add(seriObj);
+
+                                // Tạo chi tiết phiếu xuất
+                                lstChiTietXuat.Add(new ChiTietPhieuXuat
+                                {
+                                    MaPhieuXuat = phieuXuat.MaPhieuXuat,
+                                    MaSeri = sId,
+                                    GiaTien = item.DonGiaXuat
+                                });
+                            }
+                        }
+
+                        _context.ChiTietPhieuXuat.AddRange(lstChiTietXuat);
+                        _context.SeriSanPham.UpdateRange(lstSeriUpdate);
+
+                        await _context.SaveChangesAsync();
+
+                        await ActivityLogger.LogAsync(_context, phieuXuat.MaNguoiDung, "Thêm mới", "Phiếu Xuất", $"Lập phiếu xuất kho #{phieuXuat.MaPhieuXuat} cho khách {phieuXuat.TenKhachHang} với {lstSeriUpdate.Count} mã máy.");
+
+                        await transaction.CommitAsync();
+
+                        TempData["Success"] = $"Lập phiếu xuất thành công! Tổng cộng {lstSeriUpdate.Count} mã máy đã xuất kho.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError("", "Lỗi nghiệp vụ: " + ex.Message);
+                    }
                 }
             }
 
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuXuat.MaNguoiDung);
+            // Load lại dữ liệu nếu lỗi
+            ViewBag.SanPhamList = _context.SanPham
+                .Where(s => !s.IsDeleted)
+                .Select(s => new
+                {
+                    MaSanPham = s.MaSanPham,
+                    TenSanPham = s.TenSanPham,
+                    GiaBan = s.GiaBan,
+                    AvailableSeris = s.SeriSanPham
+                        .Where(seri => seri.TrangThai == 1 && !seri.IsDeleted)
+                        .Select(seri => new { seri.MaSeri, seri.SoSeri })
+                        .ToList()
+                }).ToList();
 
-            var dsSanPham = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham, GiaBan = s.GiaBan, TonKho = s.SeriSanPham.Count(seri => seri.TrangThai == 1 && !seri.IsDeleted) }).ToList();
-            ViewBag.SanPhamList = dsSanPham;
-
-            return View(phieuXuat);
+            return View(model);
         }
 
         // 4. CHỈNH SỬA
@@ -272,6 +288,17 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuXuat = await _context.PhieuXuat.FindAsync(id);
             if (phieuXuat != null)
             {
+                // Chốt chặn: Kiểm tra nếu có mã máy (Seri) trong hóa đơn đã bị xóa lẻ thủ công trước đó
+                bool hasDeletedSerials = await _context.ChiTietPhieuXuat
+                    .Include(ct => ct.MaSeriNavigation)
+                    .AnyAsync(ct => ct.MaPhieuXuat == id && ct.MaSeriNavigation.IsDeleted);
+
+                if (hasDeletedSerials)
+                {
+                    TempData["Error"] = "Không thể hủy hóa đơn này vì có một số mã máy (Seri) trong đơn đã bị xóa lẻ khỏi hệ thống trước đó! Vui lòng khôi phục mã máy trước khi hủy hóa đơn.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
@@ -325,10 +352,20 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
-            var phieuXuat = await _context.PhieuXuat.FindAsync(id);
+            var phieuXuat = await _context.PhieuXuat
+                .Include(p => p.MaNguoiDungNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhieuXuat == id);
+
             if (phieuXuat == null)
             {
                 TempData["Error"] = "Không tìm thấy Phiếu Xuất!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn: Kiểm tra Người lập phiếu (Nhân viên)
+            if (phieuXuat.MaNguoiDungNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục hoá đơn này vì Nhân viên lập phiếu '{phieuXuat.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá nhân viên trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

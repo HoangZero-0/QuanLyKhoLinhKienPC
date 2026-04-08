@@ -160,7 +160,7 @@
                     <div class="col-md-6">
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
-                            <input type="text" name="SearchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Tìm tên sản phẩm, mã Seri..." value="@ViewData["CurrentFilter"]">
+                            <input type="text" name="SearchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập số seri, tên sản phẩm, hãng sản xuất..." value="@ViewData["CurrentFilter"]">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -218,10 +218,16 @@
                     <tbody>
                         @if (!Model.Any())
                         {
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-5 font-italic">
-                                    <i class="fa-solid fa-barcode fa-3x mb-3 text-secondary opacity-50"></i><br>
-                                    Không tìm thấy dữ liệu nào.
+                            <style>
+                                .empty-state-row { height: 350px; }
+                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
+                            </style>
+                            <tr class="empty-state-row">
+                                <td colspan="7" class="text-center text-muted align-middle border-0">
+                                    <div class="py-5">
+                                        <i class="fa-solid fa-barcode fa-4x mb-4 text-secondary opacity-25 d-block"></i>
+                                        <p class="fs-4 fw-medium mb-1">Không tìm thấy dữ liệu nào</p>
+                                    </div>
                                 </td>
                             </tr>
                         }

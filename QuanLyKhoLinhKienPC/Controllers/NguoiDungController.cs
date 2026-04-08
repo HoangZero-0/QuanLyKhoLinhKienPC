@@ -192,12 +192,23 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
-            var nguoiDung = await _context.NguoiDung.FindAsync(id);
+            var nguoiDung = await _context.NguoiDung
+                .Include(u => u.MaVaiTroNavigation)
+                .FirstOrDefaultAsync(u => u.MaNguoiDung == id);
+
             if (nguoiDung == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
                 return RedirectToAction(nameof(Trash));
             }
+
+            // Chốt chặn Khôi phục: Vai trò cha phải đang hoạt động
+            if (nguoiDung.MaVaiTroNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục người dùng này vì Vai trò '{nguoiDung.MaVaiTroNavigation.TenVaiTro}' đang bị xoá. Vui lòng khôi phục Vai trò trước.";
+                return RedirectToAction(nameof(Trash));
+            }
+
             nguoiDung.IsDeleted = false;
             _context.Update(nguoiDung);
             await _context.SaveChangesAsync();

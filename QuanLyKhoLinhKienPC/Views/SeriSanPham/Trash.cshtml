@@ -34,15 +34,31 @@
     <!-- FILTER BAR -->
     <div class="card mb-4 shadow rounded-4 flex-shrink-0 border-0" style="box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body py-3 px-4">
-            <form asp-action="Trash" method="get" class="row g-3 align-items-center">
-                <div class="col-md-10">
-                    <div class="input-group input-group-lg">
-                        <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input type="text" name="SearchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Tìm tên sản phẩm, mã Seri trong thùng rác..." value="@ViewData["CurrentFilter"]">
+            <form asp-action="Trash" method="get">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-10">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" name="SearchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập số seri, tên sản phẩm, hãng sản xuất..." value="@ViewData["CurrentFilter"]">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm">Tìm kiếm</button>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Từ Ngày</span>
+                            <input type="date" name="fromDate" id="fromDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["FromDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Đến Ngày</span>
+                            <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["ToDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -83,18 +99,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
-                                    <div class="py-4">
-                                        <i class="fa-regular fa-trash-can fa-3x mb-3 text-secondary opacity-25"></i>
-                                        <p class="fs-5 fw-medium mb-1">Thùng rác trống</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        else
+                        @if (Model != null && Model.Any())
                         {
                             int stt = 1;
                             @foreach (var item in Model)
@@ -145,9 +150,51 @@
                                 </tr>
                             }
                         }
+                        else
+                        {
+                            <style>
+                                .empty-state-row { height: 350px; }
+                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
+                            </style>
+                            <tr class="empty-state-row">
+                                <td colspan="7" class="text-center text-muted align-middle border-0">
+                                    <div class="py-5">
+                                        <i class="fa-solid fa-trash-can fa-4x mb-4 text-secondary opacity-25 d-block"></i>
+                                        <p class="fs-4 fw-medium mb-1">Thùng rác trống</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function validateAndSubmit(element) {
+            var fromStr = document.getElementById('fromDateInput').value;
+            var toStr = document.getElementById('toDateInput').value;
+
+            if (fromStr && toStr) {
+                var f = new Date(fromStr);
+                var t = new Date(toStr);
+
+                if (f > t) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thông tin không hợp lệ',
+                        text: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!',
+                        confirmButtonColor: '#0d6efd',
+                        confirmButtonText: 'Tôi hiểu'
+                    });
+                    element.value = '';
+                    return;
+                }
+            }
+            element.form.submit();
+        }
+    </script>
+}

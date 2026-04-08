@@ -172,6 +172,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var danhMuc = await _context.DanhMuc.FindAsync(id);
             if (danhMuc != null)
             {
+                // Chốt chặn: Kiểm tra nếu còn Sản phẩm hoạt động thuộc danh mục này
+                bool hasProducts = await _context.SanPham.AnyAsync(p => p.MaDanhMuc == id && !p.IsDeleted);
+                if (hasProducts)
+                {
+                    TempData["Error"] = "Không thể xoá Danh mục này vì vẫn còn Sản phẩm đang hoạt động bên trong! Vui lòng xoá hoặc chuyển Sản phẩm trước.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 // Logic xóa mềm
                 danhMuc.IsDeleted = true;
                 _context.Update(danhMuc);

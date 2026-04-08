@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,8 @@ using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
 using QuanLyKhoLinhKienPC.Helpers;
 using System.Security.Claims;
+using QuanLyKhoLinhKienPC.ViewModels;
+
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     [Authorize]
@@ -23,14 +27,67 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 1. DANH SÁCH
         // GET: PhieuNhap
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchId, int? MaNhaCungCap, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
-            var data = _context.PhieuNhap
+            var query = _context.PhieuNhap
                 .Where(p => !p.IsDeleted)
                 .Include(p => p.MaNguoiDungNavigation)
                 .Include(p => p.MaNhaCungCapNavigation)
-                .OrderByDescending(p => p.NgayNhap);
-            return View(await data.ToListAsync());
+                .Include(p => p.ChiTietPhieuNhap)
+                .AsQueryable();
+
+            // Lọc theo Mã phiếu (Nhập trên thanh tìm kiếm)
+            if (!string.IsNullOrEmpty(searchId))
+            {
+                // Hỗ trợ cả định dạng "PN-00001" hoặc chỉ số "1"
+                string idStr = searchId.Replace("PN-", "").Replace("#", "").Trim();
+                if (int.TryParse(idStr, out int id))
+                {
+                    query = query.Where(p => p.MaPhieuNhap == id);
+                }
+                else
+                {
+                    // Nếu không phải số, tìm theo Ghi chú
+                    query = query.Where(p => p.GhiChu.Contains(searchId));
+                }
+            }
+
+            // Lọc theo Nhà cung cấp (Dropdown)
+            if (MaNhaCungCap.HasValue)
+            {
+                query = query.Where(p => p.MaNhaCungCap == MaNhaCungCap);
+            }
+
+            // Lọc theo Người nhập (Dropdown)
+            if (MaNguoiDung.HasValue)
+            {
+                query = query.Where(p => p.MaNguoiDung == MaNguoiDung);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(p => p.NgayNhap >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                var searchToDate = toDate.Value.AddDays(1);
+                query = query.Where(p => p.NgayNhap < searchToDate);
+            }
+
+            // Chuẩn bị SelectList cho Dropdown lọc
+            ViewBag.MaNhaCungCap = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
+            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+
+            // Lưu trạng thái tìm kiếm
+            ViewBag.CurrentSearchId = searchId;
+            ViewBag.CurrentMaNhaCungCap = MaNhaCungCap;
+            ViewBag.CurrentMaNguoiDung = MaNguoiDung;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+
+            var data = await query.OrderByDescending(p => p.NgayNhap).ToListAsync();
+            return View(data);
         }
 
         // 2. CHI TIẾT
@@ -48,6 +105,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .Include(p => p.MaNhaCungCapNavigation)
                 .Include(p => p.ChiTietPhieuNhap)
                     .ThenInclude(ct => ct.MaSanPhamNavigation)
+                .Include(p => p.SeriSanPham) // Thêm dòng này để lấy danh sách mã Seri
                 .FirstOrDefaultAsync(m => m.MaPhieuNhap == id);
             if (phieuNhap == null)
             {
@@ -81,89 +139,192 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [HttpPost]
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GhiChu,MaNhaCungCap,MaNguoiDung,ChiTietPhieuNhap")] PhieuNhap phieuNhap)
+        public async Task<IActionResult> Create(PhieuNhapVM model)
         {
-            // Bỏ qua Validate cho các thuộc tính tự tính và Khóa ngoại Navigation
-            ModelState.Remove("MaNguoiDungNavigation");
-            ModelState.Remove("MaNhaCungCapNavigation");
-            ModelState.Remove("SeriSanPham");
-
-            if (phieuNhap.ChiTietPhieuNhap == null || phieuNhap.ChiTietPhieuNhap.Count == 0)
+            if (model.Items == null || !model.Items.Any())
             {
-                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 Sản Phẩm vào Phiếu Nhập!");
+                ModelState.AddModelError("", "Vui lòng thêm ít nhất 1 linh kiện vào Phiếu Nhập!");
             }
 
             if (ModelState.IsValid)
             {
-                // Bổ sung các trường tự động
-                phieuNhap.NgayNhap = DateTime.Now;
-                phieuNhap.IsDeleted = false;
-
-                // Server tự tính lại Tổng Tiền phòng Front-end bị thay đổi
-                phieuNhap.TongTien = phieuNhap.ChiTietPhieuNhap.Sum(ct => ct.SoLuong * ct.DonGiaNhap);
-
-                // DÙNG TRANSACTION ĐỂ BẢO VỆ DỮ LIỆU
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
                     try
                     {
-                        // 1. Lưu Phiếu Nhập và Chi Tiết cùng 1 lúc
-                        _context.Add(phieuNhap);
-                        await _context.SaveChangesAsync();
+                        var phieuNhap = new PhieuNhap
+                        {
+                            MaNhaCungCap = model.MaNhaCungCap,
+                            GhiChu = model.GhiChu,
+                            NgayNhap = DateTime.Now,
+                            MaNguoiDung = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"),
+                            IsDeleted = false
+                        };
 
-                        // 2. SINH SERI SẢN PHẨM TỰ ĐỘNG
-                        var random = new Random();
-                        string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                        _context.PhieuNhap.Add(phieuNhap);
+                        await _context.SaveChangesAsync(); // Để lấy MaPhieuNhap
+
+                        // --- BƯỚC 1: THU THẬP VÀ KIỂM TRA TRÙNG TRONG LÔ (BATCH-SIDE) ---
+                        var allIncomingSeris = model.Items!
+                            .SelectMany(item => (item.RawSeris ?? "").Replace("|||", "\n")
+                                .Split(new[] { '\n', '\r', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(s => s.Trim().ToUpper()) // Chuẩn hóa: Trim và chữ Hoa
+                                .Where(s => !string.IsNullOrEmpty(s)))
+                            .ToList();
+
+                        var batchDuplicates = allIncomingSeris
+                            .GroupBy(s => s, StringComparer.OrdinalIgnoreCase)
+                            .Where(g => g.Count() > 1)
+                            .Select(g => g.Key)
+                            .ToList();
+
+                        if (batchDuplicates.Any())
+                        {
+                            throw new Exception($"Phát hiện {batchDuplicates.Count} mã Seri bị nhập trùng lặp trong chính phiếu này: {string.Join(", ", batchDuplicates)}");
+                        }
+
+                        // --- BƯỚC 2: KIỂM TRA TRÙNG VỚI DATABASE (DB-SIDE) ---
+                        var dbDuplicates = await _context.SeriSanPham
+                            .Where(s => allIncomingSeris.Contains(s.SoSeri) && !s.IsDeleted)
+                            .Select(s => s.SoSeri)
+                            .ToListAsync();
+
+                        if (dbDuplicates.Any())
+                        {
+                            throw new Exception($"Phát hiện {dbDuplicates.Count} mã máy đã tồn tại trong hệ thống: {string.Join(", ", dbDuplicates)}");
+                        }
+
+                        // --- BƯỚC 3: XỬ LÝ LƯU DỮ LIỆU ---
+                        var lstChiTiet = new List<ChiTietPhieuNhap>();
                         var lstSeriMoi = new List<SeriSanPham>();
 
-                        foreach (var chitiet in phieuNhap.ChiTietPhieuNhap)
+                        foreach (var item in model.Items!)
                         {
-                            for (int i = 0; i < chitiet.SoLuong; i++)
+                            var raw = (item.RawSeris ?? "").Replace("|||", "\n");
+                            var seris = raw.Split(new[] { '\n', '\r', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(s => s.Trim().ToUpper())
+                                           .Where(s => !string.IsNullOrEmpty(s))
+                                           .Distinct()
+                                           .ToList();
+
+                            if (seris.Count == 0) continue;
+
+                            var chiTiet = new ChiTietPhieuNhap
                             {
-                                // Tạo chuỗi ngẫu nhiên 3 ký tự gắn mác tránh trùng lặp
-                                string randomEnd = new string(Enumerable.Repeat(chars, 4).Select(s => s[random.Next(s.Length)]).ToArray());
+                                MaPhieuNhap = phieuNhap.MaPhieuNhap,
+                                MaSanPham = item.MaSanPham,
+                                SoLuong = seris.Count,
+                                DonGiaNhap = item.DonGiaNhap
+                            };
+                            lstChiTiet.Add(chiTiet);
 
-                                // Format: [Mã PhieuNhap]-[Mã SP]-[NgayNhap]-[ChuoiRandom] (Ví dụ: PN7-SP2-26032026-X8Y1)
-                                string soSeriPhatSinh = $"PN{phieuNhap.MaPhieuNhap}-SP{chitiet.MaSanPham}-{DateTime.Now:ddMM}-{randomEnd}";
-
-                                var seriMoi = new SeriSanPham
+                            foreach (var s in seris)
+                            {
+                                lstSeriMoi.Add(new SeriSanPham
                                 {
-                                    SoSeri = soSeriPhatSinh,
-                                    TrangThai = 1, // 1 = Chưa Bán (Trong Kho)
-                                    MaSanPham = chitiet.MaSanPham,
+                                    SoSeri = s,
+                                    TrangThai = (int)SeriStatus.TrongKho,
+                                    MaSanPham = item.MaSanPham,
                                     MaPhieuNhap = phieuNhap.MaPhieuNhap,
                                     IsDeleted = false
-                                };
-                                lstSeriMoi.Add(seriMoi);
+                                });
                             }
                         }
 
-                        // 3. Đổ kho Seri vào Lưu hàng loạt (Tốc độ cao)
+                        // Tính lại tổng tiền phiếu
+                        phieuNhap.TongTien = lstChiTiet.Sum(c => c.SoLuong * c.DonGiaNhap);
+
+                        _context.ChiTietPhieuNhap.AddRange(lstChiTiet);
                         _context.SeriSanPham.AddRange(lstSeriMoi);
+
                         await _context.SaveChangesAsync();
 
-                        // Hoàn tất 3 Cấp độ lưu trữ (Commit)
-                        await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Phiếu Nhập", $"Nhập kho: Lô hàng PN-{phieuNhap.MaPhieuNhap}");
+                        await ActivityLogger.LogAsync(_context, phieuNhap.MaNguoiDung, "Thêm mới", "Phiếu Nhập", $"Lập phiếu nhập kho #{phieuNhap.MaPhieuNhap} với {lstSeriMoi.Count} mã máy.");
+
                         await transaction.CommitAsync();
 
-                        TempData["Success"] = "Tạo Phiếu Nhập và sinh mã Seri thành công!";
+                        TempData["Success"] = $"Lập phiếu nhập thành công! Đã nhập {lstSeriMoi.Count} mã máy vào kho.";
                         return RedirectToAction(nameof(Index));
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // Nếu lỡ rớt mạng hoặc đứt đoạn, Hủy toàn bộ Phiếu Nhập, Chi Tiết và Seri vừa tạo
                         await transaction.RollbackAsync();
-                        ModelState.AddModelError("", "Đã có lỗi xảy ra trong quá trình sinh mã Seri. Hệ thống đã hủy tác vụ để bảo vệ dữ liệu nền.");
+                        ModelState.AddModelError("", "Lỗi nghiệp vụ: " + ex.Message);
                     }
                 }
             }
 
-            TempData["Error"] = "Vui lòng xem lại thông tin!";
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", phieuNhap.MaNguoiDung);
-            ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", phieuNhap.MaNhaCungCap);
-            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { MaSanPham = s.MaSanPham, TenSanPham = s.TenSanPham }).ToList();
+            // Nếu lỗi, load lại dữ liệu dropdown
+            ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", model.MaNhaCungCap);
+            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { s.MaSanPham, s.TenSanPham }).ToList();
 
-            return View(phieuNhap);
+            return View(model);
+        }
+
+        // Action nhận file Excel và trả về JSON để điền vào Grid
+        [HttpPost]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        public async Task<IActionResult> ImportExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return Json(new { success = false, message = "Chưa chọn file!" });
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Bỏ qua header
+
+                var result = new List<object>();
+                var errorRows = new List<string>();
+
+                foreach (var row in rows)
+                {
+                    string maSP = "";
+                    decimal donGia = 0;
+                    string rawSeris = "";
+
+                    try
+                    {
+                        maSP = row.Cell(1).GetValue<string>()?.Trim() ?? "";
+                        var donGiaObj = row.Cell(2).Value;
+                        if (!decimal.TryParse(donGiaObj.ToString(), out donGia)) donGia = 0;
+                        rawSeris = row.Cell(3).GetValue<string>() ?? "";
+                    }
+                    catch { continue; }
+
+                    if (string.IsNullOrEmpty(maSP)) continue;
+
+                    var sp = await _context.SanPham.FirstOrDefaultAsync(s => s.MaSanPham.ToString() == maSP || s.TenSanPham == maSP);
+                    if (sp != null)
+                    {
+                        result.Add(new
+                        {
+                            MaSanPham = sp.MaSanPham,
+                            TenSanPham = sp.TenSanPham,
+                            DonGiaNhap = donGia,
+                            RawSeris = string.Join("\n", rawSeris.Split(new[] { ',', ';', '|', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                                                .Select(s => s.Trim().ToUpper())
+                                                                .Where(s => !string.IsNullOrEmpty(s)))
+                        });
+                    }
+                    else
+                    {
+                        errorRows.Add($"Dòng {row.RowNumber()}: Không tìm thấy sản phẩm '{maSP}'");
+                    }
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    data = result,
+                    warnings = errorRows.Any() ? string.Join("<br/>", errorRows) : null
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi đọc file: " + ex.Message });
+            }
         }
 
         // 4. CHỈNH SỬA
@@ -260,6 +421,16 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuNhap = await _context.PhieuNhap.FindAsync(id);
             if (phieuNhap != null)
             {
+                // Chốt chặn: Kiểm tra nếu có bất kỳ mã máy (Seri) trong phiếu đã bán (2) hoặc báo lỗi (3)
+                bool hasSoldOrDefective = await _context.SeriSanPham
+                    .AnyAsync(s => s.MaPhieuNhap == id && !s.IsDeleted && (s.TrangThai == 2 || s.TrangThai == 3));
+
+                if (hasSoldOrDefective)
+                {
+                    TempData["Error"] = "Không thể xoá Phiếu Nhập này vì có sản phẩm trong phiếu đã được Xuất bán hoặc đang trong quá trình bảo hành/lỗi!";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
@@ -298,14 +469,45 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 6. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: PhieuNhap/Trash
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
-        public async Task<IActionResult> Trash()
+        public async Task<IActionResult> Trash(string searchString, int? MaNhaCungCap, int? MaNguoiDung)
         {
-            var data = _context.PhieuNhap
+            var query = _context.PhieuNhap
                 .Where(p => p.IsDeleted)
                 .Include(p => p.MaNguoiDungNavigation)
                 .Include(p => p.MaNhaCungCapNavigation)
-                .OrderByDescending(p => p.NgayNhap);
-            return View(await data.ToListAsync());
+                .AsQueryable();
+
+            // Tìm kiếm nhanh (searchId hoặc Ghi chú)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                string idStr = searchString.Replace("PN-", "").Replace("#", "").Trim();
+                if (int.TryParse(idStr, out int id))
+                {
+                    query = query.Where(p => p.MaPhieuNhap == id);
+                }
+                else
+                {
+                    query = query.Where(p => p.GhiChu.Contains(searchString));
+                }
+            }
+
+            // Lọc theo NCC
+            if (MaNhaCungCap.HasValue)
+            {
+                query = query.Where(p => p.MaNhaCungCap == MaNhaCungCap);
+            }
+
+            // Lọc theo Người dùng
+            if (MaNguoiDung.HasValue)
+            {
+                query = query.Where(p => p.MaNguoiDung == MaNguoiDung);
+            }
+
+            ViewBag.MaNhaCungCap = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
+            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung.Where(u => !u.IsDeleted), "MaNguoiDung", "HoTen", MaNguoiDung);
+            ViewData["CurrentFilter"] = searchString;
+
+            return View(await query.OrderByDescending(p => p.NgayNhap).ToListAsync());
         }
 
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)
@@ -315,10 +517,28 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
-            var phieuNhap = await _context.PhieuNhap.FindAsync(id);
+            var phieuNhap = await _context.PhieuNhap
+                .Include(p => p.MaNhaCungCapNavigation)
+                .Include(p => p.MaNguoiDungNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhieuNhap == id);
+
             if (phieuNhap == null)
             {
                 TempData["Error"] = "Không tìm thấy Phiếu Nhập!";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn 1: Kiểm tra Nhà cung cấp
+            if (phieuNhap.MaNhaCungCapNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục phiếu nhập này vì Nhà cung cấp '{phieuNhap.MaNhaCungCapNavigation.TenNhaCungCap}' đang bị xoá. Vui lòng khôi phục Nhà cung cấp trước.";
+                return RedirectToAction(nameof(Trash));
+            }
+
+            // Chốt chặn 2: Kiểm tra Người lập phiếu (Nhân viên)
+            if (phieuNhap.MaNguoiDungNavigation.IsDeleted)
+            {
+                TempData["Error"] = $"Không thể khôi phục phiếu nhập này vì Nhân viên lập phiếu '{phieuNhap.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá nhân viên trước.";
                 return RedirectToAction(nameof(Trash));
             }
 
@@ -353,9 +573,46 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return RedirectToAction(nameof(Trash));
         }
 
+        // 6. KHÔI PHỤC (Đã xử lý ở trên)
+
+        // --- Giữ nguyên các hàm bổ trợ cũ ---
         private bool PhieuNhapExists(int id)
         {
             return _context.PhieuNhap.Any(e => e.MaPhieuNhap == id);
+        }
+
+        // 7. TẢI FILE MẪU EXCEL
+        [HttpGet]
+        public IActionResult DownloadTemplate()
+        {
+            using (var workbook = new ClosedXML.Excel.XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("MauNhapKho");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "MaSanPham";
+                worksheet.Cell(1, 2).Value = "DonGia";
+                worksheet.Cell(1, 3).Value = "Seri";
+
+                // Format header
+                var headerRange = worksheet.Range("A1:C1");
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+
+                // Dữ liệu mẫu (Vàng)
+                worksheet.Cell(2, 1).Value = "CPU001";
+                worksheet.Cell(2, 2).Value = 1500000;
+                worksheet.Cell(2, 3).Value = "SERI123, SERI456, SERI789";
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new System.IO.MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_Nhap_Kho.xlsx");
+                }
+            }
         }
     }
 }

@@ -142,6 +142,7 @@
             color: #6c757d;
         }
     </style>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     @{
@@ -280,7 +281,7 @@
     </div>
 
     <footer class="footer">
-        &copy; 2026 - Quản lý kho linh kiện PC - Design by @ViewData["Title"]
+        &copy; 2026 - Hệ thống Quản lý kho linh kiện PC - HoangZero
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
