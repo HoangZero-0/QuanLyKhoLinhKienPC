@@ -106,7 +106,7 @@
                     </div>
 
                     <form asp-action="ToggleDefect" asp-route-id="@Model.MaSeri" method="post"
-                        onsubmit="return confirm('@(Model.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục: {Model.SoSeri}?" : $"Xác nhận báo lỗi cho {Model.SoSeri}?")');">
+                        onsubmit="event.preventDefault(); const _form = this; confirmAction('Xác nhận', '@(Model.TrangThai == 3 ? $"Bạn muốn xác nhận hoàn tất bảo hành / khôi phục cho Seri: {Model.SoSeri}?" : $"Bạn muốn xác nhận báo lỗi cho Seri {Model.SoSeri}?")', 'question', () => _form.submit());">
                         @if (Model.TrangThai == 3)
                         {
                             <button type="submit" class="btn btn-success w-100 shadow rounded-pill py-2 fw-bold transition"><i class="fa-solid fa-check-circle me-1"></i> Hoàn tất bảo hành</button>

@@ -213,13 +213,7 @@
                 var t = new Date(toStr);
 
                 if (f > t) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Thông tin không hợp lệ',
-                        text: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!',
-                        confirmButtonColor: '#0d6efd',
-                        confirmButtonText: 'Tôi hiểu'
-                    });
+                    showToast('Ngày bắt đầu không thể lớn hơn ngày kết thúc!', 'error');
                     element.value = '';
                     return;
                 }

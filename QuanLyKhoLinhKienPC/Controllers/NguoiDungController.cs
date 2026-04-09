@@ -205,7 +205,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Chốt chặn Khôi phục: Vai trò cha phải đang hoạt động
             if (nguoiDung.MaVaiTroNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục người dùng này vì Vai trò '{nguoiDung.MaVaiTroNavigation.TenVaiTro}' đang bị xoá. Vui lòng khôi phục Vai trò trước.";
+                TempData["Error"] = $"Không thể khôi phục Người Dùng này vì Vai Trò '{nguoiDung.MaVaiTroNavigation.TenVaiTro}' đang bị xoá. Vui lòng khôi phục Vai Trò trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

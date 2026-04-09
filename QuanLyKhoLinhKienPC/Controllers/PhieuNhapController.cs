@@ -172,6 +172,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
                                 .Where(s => !string.IsNullOrEmpty(s)))
                             .ToList();
 
+                        if (allIncomingSeris.Count == 0)
+                        {
+                            throw new Exception("Vui lòng nhập ít nhất một mã Seri cho các sản phẩm!");
+                        }
+
                         var batchDuplicates = allIncomingSeris
                             .GroupBy(s => s, StringComparer.OrdinalIgnoreCase)
                             .Where(g => g.Count() > 1)
@@ -191,7 +196,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                         if (dbDuplicates.Any())
                         {
-                            throw new Exception($"Phát hiện {dbDuplicates.Count} mã máy đã tồn tại trong hệ thống: {string.Join(", ", dbDuplicates)}");
+                            throw new Exception($"Phát hiện {dbDuplicates.Count} mã Seri đã tồn tại trong hệ thống: {string.Join(", ", dbDuplicates)}");
                         }
 
                         // --- BƯỚC 3: XỬ LÝ LƯU DỮ LIỆU ---
@@ -239,11 +244,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                         await _context.SaveChangesAsync();
 
-                        await ActivityLogger.LogAsync(_context, phieuNhap.MaNguoiDung, "Thêm mới", "Phiếu Nhập", $"Lập phiếu nhập kho #{phieuNhap.MaPhieuNhap} với {lstSeriMoi.Count} mã máy.");
+                        await ActivityLogger.LogAsync(_context, phieuNhap.MaNguoiDung, "Thêm mới", "Phiếu Nhập", $"Lập Phiếu Nhập kho #{phieuNhap.MaPhieuNhap} với {lstSeriMoi.Count} mã Seri.");
 
                         await transaction.CommitAsync();
 
-                        TempData["Success"] = $"Lập phiếu nhập thành công! Đã nhập {lstSeriMoi.Count} mã máy vào kho.";
+                        TempData["Success"] = $"Lập Phiếu Nhập thành công! Đã nhập {lstSeriMoi.Count} mã Seri vào kho.";
                         return RedirectToAction(nameof(Index));
                     }
                     catch (Exception ex)
@@ -310,7 +315,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     }
                     else
                     {
-                        errorRows.Add($"Dòng {row.RowNumber()}: Không tìm thấy sản phẩm '{maSP}'");
+                        errorRows.Add($"Dòng {row.RowNumber()}: Không tìm thấy Sản Phẩm '{maSP}'");
                     }
                 }
 
@@ -371,6 +376,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     _context.Update(phieuNhap);
                     await _context.SaveChangesAsync();
                     await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Nhập", $"Cập nhật thông tin phiếu PN-{phieuNhap.MaPhieuNhap}");
+                    TempData["Success"] = "Cập nhật thông tin Phiếu Nhập thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -424,13 +430,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuNhap = await _context.PhieuNhap.FindAsync(id);
             if (phieuNhap != null)
             {
-                // Chốt chặn: Kiểm tra nếu có bất kỳ mã máy (Seri) trong phiếu đã bán (2) hoặc báo lỗi (3)
+                // Chốt chặn: Kiểm tra nếu có bất kỳ mã Seri trong phiếu đã bán (2) hoặc báo lỗi (3)
                 bool hasSoldOrDefective = await _context.SeriSanPham
                     .AnyAsync(s => s.MaPhieuNhap == id && !s.IsDeleted && (s.TrangThai == 2 || s.TrangThai == 3));
 
                 if (hasSoldOrDefective)
                 {
-                    TempData["Error"] = "Không thể xoá Phiếu Nhập này vì có sản phẩm trong phiếu đã được Xuất bán hoặc đang trong quá trình bảo hành/lỗi!";
+                    TempData["Error"] = "Không thể xoá Phiếu Nhập này vì có Sản Phẩm trong phiếu đã được xuất bán hoặc đang trong quá trình bảo hành/lỗi!";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -534,14 +540,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Chốt chặn 1: Kiểm tra Nhà cung cấp
             if (phieuNhap.MaNhaCungCapNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục phiếu nhập này vì Nhà cung cấp '{phieuNhap.MaNhaCungCapNavigation.TenNhaCungCap}' đang bị xoá. Vui lòng khôi phục Nhà cung cấp trước.";
+                TempData["Error"] = $"Không thể khôi phục Phiếu Nhập này vì Nhà Cung Cấp '{phieuNhap.MaNhaCungCapNavigation.TenNhaCungCap}' đang bị xoá. Vui lòng khôi phục Nhà Cung Cấp trước.";
                 return RedirectToAction(nameof(Trash));
             }
 
             // Chốt chặn 2: Kiểm tra Người lập phiếu (Nhân viên)
             if (phieuNhap.MaNguoiDungNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục phiếu nhập này vì Nhân viên lập phiếu '{phieuNhap.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá nhân viên trước.";
+                TempData["Error"] = $"Không thể khôi phục Phiếu Nhập này vì Nhân Viên lập phiếu '{phieuNhap.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá Nhân Viên trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

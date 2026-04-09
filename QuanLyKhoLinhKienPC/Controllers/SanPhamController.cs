@@ -371,7 +371,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                 if (hasActiveSerials)
                 {
-                    TempData["Error"] = "Không thể xoá Sản phẩm này vì vẫn còn hàng Trong kho hoặc đang Bảo hành! Vui lòng xử lý hết hàng tồn trước.";
+                    TempData["Error"] = "Không thể xoá Sản phẩm này vì vẫn còn hàng trong kho hoặc đang bảo hành! Vui lòng xử lý hết hàng tồn trước.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -452,7 +452,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Chốt chặn Khôi phục: Danh mục cha phải đang hoạt động
             if (sanPham.MaDanhMucNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục sản phẩm này vì Danh mục '{sanPham.MaDanhMucNavigation.TenDanhMuc}' đang bị xoá. Vui lòng khôi phục Danh mục [{sanPham.MaDanhMucNavigation.TenDanhMuc}] trước.";
+                TempData["Error"] = $"Không thể khôi phục Sản Phẩm này vì Danh Mục '{sanPham.MaDanhMucNavigation.TenDanhMuc}' đang bị xoá. Vui lòng khôi phục Danh Mục [{sanPham.MaDanhMucNavigation.TenDanhMuc}] trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

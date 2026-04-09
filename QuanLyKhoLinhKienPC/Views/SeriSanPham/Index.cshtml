@@ -233,7 +233,7 @@
                                             <a asp-action="Details" asp-route-id="@item.MaSeri" class="btn btn-sm btn-light border text-info rounded-circle d-inline-flex align-items-center justify-content-center transition" style="width: 32px; height: 32px;" title="Truy Vết">
                                                 <i class="fa-solid fa-route"></i>
                                             </a>
-                                            <form asp-action="ToggleDefect" asp-route-id="@item.MaSeri" method="post" class="d-inline m-0" onsubmit="return confirm('@(item.TrangThai == 3 ? $"Xác nhận hoàn tất bảo hành / khôi phục: {item.SoSeri}?" : $"Xác nhận báo lỗi cho: {item.SoSeri}?")');">
+                                            <form asp-action="ToggleDefect" asp-route-id="@item.MaSeri" method="post" class="d-inline m-0" onsubmit="event.preventDefault(); const _form = this; confirmAction('Xác nhận', '@(item.TrangThai == 3 ? $"Bạn muốn xác nhận hoàn tất bảo hành / khôi phục cho Seri: {item.SoSeri}?" : $"Bạn muốn xác nhận báo lỗi cho Seri: {item.SoSeri}?")', 'question', () => _form.submit());">
                                                 @if (item.TrangThai == 3)
                                                 {
                                                     <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition" style="width: 32px; height: 32px;" title="Đã Sửa/Bảo Hành Xong"><i class="fa-solid fa-check"></i></button>
@@ -292,13 +292,7 @@
                 var t = new Date(toStr);
 
                 if (f > t) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Thông tin không hợp lệ',
-                        text: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!',
-                        confirmButtonColor: '#0d6efd',
-                        confirmButtonText: 'Tôi hiểu'
-                    });
+                    showToast('Ngày bắt đầu không thể lớn hơn ngày kết thúc!', 'error');
                     element.value = '';
                     return;
                 }

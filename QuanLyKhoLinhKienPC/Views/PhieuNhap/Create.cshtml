@@ -20,7 +20,7 @@
     </div>
 
     <form asp-action="Create" id="frmPhieuNhap">
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert" style="display:none;"></div>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert"></div>
         
         <div class="row g-4">
             <!-- CỘT TRÁI: THÔNG TIN CHUNG -->
@@ -129,8 +129,16 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         var dsSanPham = @Html.Raw(Json.Serialize(ViewBag.SanPhamList));
-        var chiTietList = []; 
+        var rawData = @Html.Raw(Json.Serialize(Model?.Items ?? new List<QuanLyKhoLinhKienPC.ViewModels.SeriImportItem>()));
+        // Chuẩn hóa dữ liệu sang PascalCase để đồng bộ với logic JS hiện tại
+        var chiTietList = rawData.map(item => ({
+            MaSanPham: item.maSanPham || item.MaSanPham || '',
+            RawSeris: (item.rawSeris || item.RawSeris || '').replace(/\|\|\|/g, '\n'),
+            SoLuong: item.soLuong || item.SoLuong || 0,
+            DonGiaNhap: item.donGiaNhap || item.DonGiaNhap || 0
+        }));
         var currentIndexForModal = -1;
+        
 
         function renderTable() {
             var tbody = $('#tblChiTiet tbody');
@@ -253,14 +261,22 @@
                             }
                         });
                         renderTable();
-                    } else { alert(res.message); }
+                    } else { 
+                    showToast(res.message, 'error');
+                    }
                 }
             });
         }
 
         function submitForm() {
-            if(!$('#MaNhaCungCap').val()) { alert('Lỗi: Vui lòng chọn Nhà Cung Cấp!'); return; }
-            if(chiTietList.length === 0) { alert('Lỗi: Vui lòng thêm ít nhất một linh kiện!'); return; }
+            if(!$('#MaNhaCungCap').val()) { 
+                showToast('Vui lòng chọn Nhà Cung Cấp!', 'warning');
+                return; 
+            }
+            if(chiTietList.length === 0) { 
+                showToast('Vui lòng thêm ít nhất một linh kiện!', 'warning');
+                return; 
+            }
             var hiddenContainer = $('#hiddenInputsContainer');
             hiddenContainer.empty();
             chiTietList.forEach(function(item, index) {

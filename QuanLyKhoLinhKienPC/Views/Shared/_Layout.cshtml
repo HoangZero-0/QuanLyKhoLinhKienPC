@@ -147,7 +147,7 @@
 </head>
 <body>
     @{
-        string currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+        string? currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
     }
 
     <nav class="navbar navbar-expand bg-white border-bottom px-4 shadow-sm" style="background: rgba(255,255,255,0.85) !important; backdrop-filter: blur(12px);">
@@ -289,7 +289,46 @@
     
     <script>
         $(document).ready(function () {
-            // Chuyển đối các Alert tĩnh thành SweetAlert Toast hiện đại
+            // 1. Định nghĩa hàm Toast toàn cục để dùng ở mọi nơi
+            window.showToast = function(message, type = 'info') {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+
+                Toast.fire({
+                    icon: type,
+                    title: message
+                });
+            };
+
+            // 2. Hàm xác nhận hành động chuyên nghiệp
+            window.confirmAction = function(title, text, icon = 'question', callback) {
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: icon,
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy',
+                    heightAuto: false // Ngăn cuộn trang lên đầu khi hiện modal
+                }).then((result) => {
+                    if (result.isConfirmed && typeof callback === 'function') {
+                        callback();
+                    }
+                });
+            };
+
+            // 3. Chuyển đối các Alert tĩnh thành SweetAlert Toast hiện đại
             $('.alert').each(function () {
                 var $alert = $(this);
                 
@@ -306,25 +345,9 @@
                 // Ẩn bảng HTML Alert cứng đi (Chỉ dùng dữ liệu tạo Toast)
                 $alert.hide();
 
-                // Tạo đối tượng Toast
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top', // 'top' sẽ hiển thị ở giữa trên cùng
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
-                    }
-                });
-
                 // Kích hoạt Toast sau 100ms
                 setTimeout(function() {
-                     Toast.fire({
-                        icon: iconType,
-                        title: message
-                    });
+                    showToast(message, iconType);
                 }, 100);
             });
 

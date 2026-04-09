@@ -72,7 +72,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Add(vaiTro);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Vai Trò", $"Thêm vai trò: {vaiTro.TenVaiTro}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Vai Trò", $"Thêm Vai Trò: {vaiTro.TenVaiTro}");
                 TempData["Success"] = "Thêm mới Vai Trò thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -116,7 +116,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(vaiTro);
                     await _context.SaveChangesAsync();
-                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Vai Trò", $"Cập nhật vai trò: {vaiTro.TenVaiTro}");
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Vai Trò", $"Cập nhật Vai Trò: {vaiTro.TenVaiTro}");
                     TempData["Success"] = "Cập nhật Vai Trò thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -170,7 +170,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 bool hasUsers = await _context.NguoiDung.AnyAsync(u => u.MaVaiTro == id && !u.IsDeleted);
                 if (hasUsers)
                 {
-                    TempData["Error"] = "Không thể xoá Vai trò này vì vẫn còn Người dùng đang mang vai trò này! Vui lòng chuyển hoặc khoá tài khoản người dùng trước.";
+                    TempData["Error"] = "Không thể xoá Vai Trò này vì vẫn còn Người Dùng đang mang Vai Trò này!";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -178,7 +178,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 vaiTro.IsDeleted = true;
                 _context.Update(vaiTro);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Vai Trò", $"Xóa vai trò: {vaiTro.TenVaiTro}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Vai Trò", $"Xóa Vai Trò: {vaiTro.TenVaiTro}");
                 TempData["Success"] = "Đã chuyển Vai Trò vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -212,7 +212,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             vaiTro.IsDeleted = false;
             _context.Update(vaiTro);
             await _context.SaveChangesAsync();
-            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Vai Trò", $"Khôi phục vai trò: {vaiTro.TenVaiTro}");
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Vai Trò", $"Khôi phục Vai Trò: {vaiTro.TenVaiTro}");
             TempData["Success"] = "Khôi phục Vai Trò thành công.";
             return RedirectToAction(nameof(Trash));
         }

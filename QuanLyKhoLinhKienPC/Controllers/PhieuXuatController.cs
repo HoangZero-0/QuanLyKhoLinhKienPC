@@ -102,7 +102,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 if (model.Items == null || !model.Items.Any(i => i.SelectedSeriIds != null && i.SelectedSeriIds.Any()))
                 {
-                    ModelState.AddModelError("", "Vui lòng chọn ít nhất một mã máy (Seri) để xuất kho!");
+                    ModelState.AddModelError("", "Vui lòng chọn ít nhất một mã Seri để xuất kho!");
                 }
                 else
                 {
@@ -142,7 +142,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                                 var seriObj = serisFromDb.FirstOrDefault(s => s.MaSeri == sId);
                                 if (seriObj == null || seriObj.TrangThai != 1 || seriObj.IsDeleted)
                                 {
-                                    throw new Exception($"Mã máy (Seri) ID {sId} không khả dụng hoặc đã bị bán/xóa!");
+                                    throw new Exception($"Mã Seri {sId} không khả dụng hoặc đã bị bán/xóa!");
                                 }
 
                                 // Cập nhật trạng thái Seri
@@ -165,11 +165,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
                         await _context.SaveChangesAsync();
 
-                        await ActivityLogger.LogAsync(_context, phieuXuat.MaNguoiDung, "Thêm mới", "Phiếu Xuất", $"Lập phiếu xuất kho #{phieuXuat.MaPhieuXuat} cho khách {phieuXuat.TenKhachHang} với {lstSeriUpdate.Count} mã máy.");
+                        await ActivityLogger.LogAsync(_context, phieuXuat.MaNguoiDung, "Thêm mới", "Phiếu Xuất", $"Lập Phiếu Xuất kho #{phieuXuat.MaPhieuXuat} cho khách {phieuXuat.TenKhachHang} với {lstSeriUpdate.Count} mã Seri.");
 
                         await transaction.CommitAsync();
 
-                        TempData["Success"] = $"Lập phiếu xuất thành công! Tổng cộng {lstSeriUpdate.Count} mã máy đã xuất kho.";
+                        TempData["Success"] = $"Lập Phiếu Xuất thành công! Tổng cộng {lstSeriUpdate.Count} mã Seri đã xuất kho.";
                         return RedirectToAction(nameof(Index));
                     }
                     catch (Exception ex)
@@ -237,6 +237,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     _context.Update(phieuXuat);
                     await _context.SaveChangesAsync();
                     await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Xuất", $"Cập nhật thông tin phiếu PX-{phieuXuat.MaPhieuXuat}");
+                    TempData["Success"] = "Cập nhật thông tin Phiếu Xuất thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -288,14 +289,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuXuat = await _context.PhieuXuat.FindAsync(id);
             if (phieuXuat != null)
             {
-                // Chốt chặn: Kiểm tra nếu có mã máy (Seri) trong hóa đơn đã bị xóa lẻ thủ công trước đó
+                // Chốt chặn: Kiểm tra nếu có mã Seri trong hóa đơn đã bị xóa lẻ thủ công trước đó
                 bool hasDeletedSerials = await _context.ChiTietPhieuXuat
                     .Include(ct => ct.MaSeriNavigation)
                     .AnyAsync(ct => ct.MaPhieuXuat == id && ct.MaSeriNavigation.IsDeleted);
 
                 if (hasDeletedSerials)
                 {
-                    TempData["Error"] = "Không thể hủy hóa đơn này vì có một số mã máy (Seri) trong đơn đã bị xóa lẻ khỏi hệ thống trước đó! Vui lòng khôi phục mã máy trước khi hủy hóa đơn.";
+                    TempData["Error"] = "Không thể hủy Phiếu Xuất này vì có một số mã Seri trong đơn đã bị xóa lẻ khỏi hệ thống trước đó! Vui lòng khôi phục mã Seri trước khi hủy Phiếu Xuất.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -321,7 +322,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    TempData["Success"] = "Đã chuyển hóa đơn xuất vào thùng rác và hoàn trả Seri về kho hàng.";
+                    TempData["Success"] = "Đã chuyển Phiếu Xuất vào thùng rác và hoàn trả mã Seri về kho hàng.";
                 }
                 catch (Exception ex)
                 {
@@ -365,7 +366,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Chốt chặn: Kiểm tra Người lập phiếu (Nhân viên)
             if (phieuXuat.MaNguoiDungNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục hoá đơn này vì Nhân viên lập phiếu '{phieuXuat.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá nhân viên trước.";
+                TempData["Error"] = $"Không thể khôi phục Phiếu Xuất này vì Nhân Viên lập phiếu '{phieuXuat.MaNguoiDungNavigation.HoTen}' đang bị khoá. Vui lòng mở khoá Nhân Viên trước.";
                 return RedirectToAction(nameof(Trash));
             }
 
@@ -404,7 +405,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Phiếu Xuất", $"Khôi phục phiếu PX-{phieuXuat.MaPhieuXuat}");
                 await transaction.CommitAsync();
 
-                TempData["Success"] = "Đã khôi phục hóa đơn và rút lại Seri thành công.";
+                TempData["Success"] = "Đã khôi phục Phiếu Xuất và rút lại mã Seri thành công.";
             }
             catch (Exception ex)
             {

@@ -53,7 +53,7 @@
 
                         <!-- DETAILS CAART -->
                         <div class="d-flex justify-content-between align-items-center border-bottom border-success pb-2 mb-3">
-                            <h5 class="text-success mb-0"><i class="fa-solid fa-2"></i> Chi Tiết Sản Phẩm & Mã Máy (Seri)</h5>
+                            <h5 class="text-success mb-0"><i class="fa-solid fa-2"></i> Chi Tiết Sản Phẩm & Mã Seri</h5>
                             <button type="button" class="btn btn-sm btn-outline-success shadow-sm fw-bold" onclick="themDong()">
                                 <i class="fa-solid fa-plus"></i> Thêm Linh Kiện
                             </button>
@@ -64,7 +64,7 @@
                                 <thead class="table-success text-center">
                                     <tr>
                                         <th style="width: 25%">Linh Kiện <span class="text-danger">*</span></th>
-                                        <th>Chọn Mã Máy (Seri) - Tối đa tồn kho</th>
+                                        <th>Chọn Mã Seri - Tối đa tồn kho</th>
                                         <th style="width: 10%">Số Lượng</th>
                                         <th style="width: 15%">Đơn Giá Bán</th>
                                         <th style="width: 15%">Thành Tiền</th>
@@ -100,7 +100,14 @@
     
     <script>
         var dsSanPham = @Html.Raw(Json.Serialize(ViewBag.SanPhamList));
-        var chiTietList = [];
+        var rawData = @Html.Raw(Json.Serialize(Model?.Items ?? new List<QuanLyKhoLinhKienPC.ViewModels.XuatKhoItemVM>()));
+        // Chuẩn hóa dữ liệu sang PascalCase để đồng bộ với logic JS hiện tại
+        var chiTietList = rawData.map(item => ({
+            MaSanPham: item.maSanPham || item.MaSanPham || '',
+            SelectedSeriIds: item.selectedSeriIds || item.SelectedSeriIds || [],
+            SoLuong: item.soLuong || item.SoLuong || 0,
+            DonGiaXuat: item.donGiaXuat || item.DonGiaXuat || 0
+        }));
 
         function renderTable() {
             var tbody = $('#tblChiTiet tbody');
@@ -182,7 +189,7 @@
             }
 
             selectSeri.select2({
-                placeholder: "-- Chọn mã máy --",
+                placeholder: "-- Chọn mã Seri --",
                 allowClear: true,
                 closeOnSelect: false
             });
@@ -224,11 +231,11 @@
 
         function submitForm() {
             if(!$('#TenKhachHang').val() || !$('#SoDienThoaiKhach').val()) {
-                Swal.fire('Thiếu thông tin', 'Vui lòng điền đầy đủ Tên và SĐT khách hàng!', 'warning');
+                showToast('Vui lòng điền đầy đủ Tên và SĐT khách hàng!', 'warning');
                 return;
             }
             if(chiTietList.length === 0) {
-                Swal.fire('Giỏ hàng trống', 'Vui lòng thêm ít nhất một sản phẩm!', 'warning');
+                showToast('Vui lòng thêm ít nhất một sản phẩm!', 'warning');
                 return;
             }
 
@@ -238,7 +245,7 @@
             });
 
             if(!hopLe) {
-                Swal.fire('Dữ liệu không hợp lệ', 'Mỗi dòng phải chọn ít nhất 1 mã máy (Seri).', 'error');
+                showToast('Mỗi dòng phải chọn ít nhất 1 mã Seri.', 'error');
                 return;
             }
 

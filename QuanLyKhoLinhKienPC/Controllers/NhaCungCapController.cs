@@ -74,7 +74,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Add(nhaCungCap);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Nhà Cung Cấp", $"Thêm nhà cung cấp: {nhaCungCap.TenNhaCungCap}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Nhà Cung Cấp", $"Thêm Nhà Cung Cấp: {nhaCungCap.TenNhaCungCap}");
                 TempData["Success"] = "Thêm mới Nhà Cung Cấp thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -120,7 +120,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(nhaCungCap);
                     await _context.SaveChangesAsync();
-                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Nhà Cung Cấp", $"Cập nhật nhà cung cấp: {nhaCungCap.TenNhaCungCap}");
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Nhà Cung Cấp", $"Cập nhật Nhà Cung Cấp: {nhaCungCap.TenNhaCungCap}");
                     TempData["Success"] = "Cập nhật Nhà Cung Cấp thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -176,7 +176,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 nhaCungCap.IsDeleted = true;
                 _context.Update(nhaCungCap);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Nhà Cung Cấp", $"Xóa nhà cung cấp: {nhaCungCap.TenNhaCungCap}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Nhà Cung Cấp", $"Xóa Nhà Cung Cấp: {nhaCungCap.TenNhaCungCap}");
                 TempData["Success"] = "Đã chuyển Nhà Cung Cấp vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -212,7 +212,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             nhaCungCap.IsDeleted = false;
             _context.Update(nhaCungCap);
             await _context.SaveChangesAsync();
-            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Nhà Cung Cấp", $"Khôi phục nhà cung cấp: {nhaCungCap.TenNhaCungCap}");
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Nhà Cung Cấp", $"Khôi phục Nhà Cung Cấp: {nhaCungCap.TenNhaCungCap}");
             TempData["Success"] = "Khôi phục Nhà Cung Cấp thành công.";
             return RedirectToAction(nameof(Trash));
         }

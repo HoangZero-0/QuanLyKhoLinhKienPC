@@ -388,14 +388,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Chốt chặn 1: Kiểm tra Sản phẩm cha
             if (seri.MaSanPhamNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục mã máy này vì Sản phẩm '{seri.MaSanPhamNavigation.TenSanPham}' đang bị xoá. Vui lòng khôi phục Sản phẩm [{seri.MaSanPhamNavigation.TenSanPham}] trước.";
+                TempData["Error"] = $"Không thể khôi phục mã Seri này vì Sản Phẩm '{seri.MaSanPhamNavigation.TenSanPham}' đang bị xoá. Vui lòng khôi phục Sản Phẩm [{seri.MaSanPhamNavigation.TenSanPham}] trước.";
                 return RedirectToAction(nameof(Trash));
             }
 
             // Chốt chặn 2: Kiểm tra Phiếu nhập cha (nếu có)
             if (seri.MaPhieuNhapNavigation != null && seri.MaPhieuNhapNavigation.IsDeleted)
             {
-                TempData["Error"] = $"Không thể khôi phục mã máy này vì Phiếu nhập mã '{seri.MaPhieuNhapNavigation.MaPhieuNhap}' đang nằm trong thùng rác. Vui lòng khôi phục Phiếu nhập trước.";
+                TempData["Error"] = $"Không thể khôi phục mã Seri này vì Phiếu Nhập mã '{seri.MaPhieuNhapNavigation.MaPhieuNhap}' đang nằm trong thùng rác. Vui lòng khôi phục Phiếu Nhập trước.";
                 return RedirectToAction(nameof(Trash));
             }
 

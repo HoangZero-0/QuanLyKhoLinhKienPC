@@ -74,7 +74,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Add(danhMuc);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Danh Mục", $"Thêm danh mục: {danhMuc.TenDanhMuc}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Thêm mới", "Danh Mục", $"Thêm Danh Mục: {danhMuc.TenDanhMuc}");
                 TempData["Success"] = "Thêm mới Danh Mục thành công!";
                 return RedirectToAction(nameof(Index));
             }
@@ -120,7 +120,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 {
                     _context.Update(danhMuc);
                     await _context.SaveChangesAsync();
-                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Danh Mục", $"Cập nhật danh mục: {danhMuc.TenDanhMuc}");
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Danh Mục", $"Cập nhật Danh Mục: {danhMuc.TenDanhMuc}");
                     TempData["Success"] = "Cập nhật Danh Mục thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -176,7 +176,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 bool hasProducts = await _context.SanPham.AnyAsync(p => p.MaDanhMuc == id && !p.IsDeleted);
                 if (hasProducts)
                 {
-                    TempData["Error"] = "Không thể xoá Danh mục này vì vẫn còn Sản phẩm đang hoạt động bên trong! Vui lòng xoá hoặc chuyển Sản phẩm trước.";
+                    TempData["Error"] = "Không thể xoá Danh Mục này vì vẫn còn Sản Phẩm đang hoạt động bên trong!";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -184,7 +184,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 danhMuc.IsDeleted = true;
                 _context.Update(danhMuc);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Danh Mục", $"Xóa danh mục: {danhMuc.TenDanhMuc}");
+                await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Xóa", "Danh Mục", $"Xóa Danh Mục: {danhMuc.TenDanhMuc}");
                 TempData["Success"] = "Đã chuyển Danh Mục vào thùng rác.";
             }
             return RedirectToAction(nameof(Index));
@@ -220,7 +220,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             danhMuc.IsDeleted = false;
             _context.Update(danhMuc);
             await _context.SaveChangesAsync();
-            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Danh Mục", $"Khôi phục danh mục: {danhMuc.TenDanhMuc}");
+            await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Khôi phục", "Danh Mục", $"Khôi phục Danh Mục: {danhMuc.TenDanhMuc}");
             TempData["Success"] = "Khôi phục Danh Mục thành công.";
             return RedirectToAction(nameof(Trash));
         }
