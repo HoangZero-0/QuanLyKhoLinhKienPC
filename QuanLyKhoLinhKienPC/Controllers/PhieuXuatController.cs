@@ -32,13 +32,47 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 1. DANH SÁCH
         // GET: PhieuXuat
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
-            var data = _context.PhieuXuat
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+
+            var query = _context.PhieuXuat
                 .Where(p => !p.IsDeleted)
                 .Include(p => p.MaNguoiDungNavigation)
-                .OrderByDescending(p => p.NgayXuat);
-            return View(await data.ToListAsync());
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                string searchLower = searchString.ToLower().Trim();
+                int searchId = -1;
+                string numberPart = searchLower.Replace("px", "").Replace("-", "").Trim();
+                int.TryParse(numberPart, out searchId);
+
+                query = query.Where(p => p.MaPhieuXuat == searchId ||
+                                         (p.TenKhachHang != null && p.TenKhachHang.ToLower().Contains(searchLower)) ||
+                                         (p.SoDienThoaiKhach != null && p.SoDienThoaiKhach.Contains(searchLower)));
+            }
+
+            if (MaNguoiDung.HasValue)
+            {
+                query = query.Where(p => p.MaNguoiDung == MaNguoiDung.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(p => p.NgayXuat >= fromDate.Value.Date);
+            }
+
+            if (toDate.HasValue)
+            {
+                var endOfDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(p => p.NgayXuat <= endOfDate);
+            }
+
+            return View(await query.OrderByDescending(p => p.NgayXuat).ToListAsync());
         }
 
         // 2. CHI TIẾT
@@ -208,13 +242,14 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var phieuXuat = await _context.PhieuXuat.FindAsync(id);
+            var phieuXuat = await _context.PhieuXuat
+                .Include(p => p.MaNguoiDungNavigation)
+                .FirstOrDefaultAsync(p => p.MaPhieuXuat == id);
             if (phieuXuat == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau", phieuXuat.MaNguoiDung);
             return View(phieuXuat);
         }
 
@@ -222,7 +257,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [HttpPost]
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MaPhieuXuat,NgayXuat,TenKhachHang,SoDienThoaiKhach,TongTien,MaNguoiDung,IsDeleted")] PhieuXuat phieuXuat)
+        public async Task<IActionResult> Edit(int id, [Bind("MaPhieuXuat,TenKhachHang,SoDienThoaiKhach")] PhieuXuat phieuXuat)
         {
             if (id != phieuXuat.MaPhieuXuat)
             {
@@ -232,29 +267,41 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (ModelState.IsValid)
             {
+                using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    _context.Update(phieuXuat);
-                    await _context.SaveChangesAsync();
-                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Xuất", $"Cập nhật thông tin phiếu PX-{phieuXuat.MaPhieuXuat}");
-                    TempData["Success"] = "Cập nhật thông tin Phiếu Xuất thành công!";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PhieuXuatExists(phieuXuat.MaPhieuXuat))
+                    var pxFromDb = await _context.PhieuXuat.FirstOrDefaultAsync(p => p.MaPhieuXuat == id);
+                    if (pxFromDb == null)
                     {
-                        TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
+                        TempData["Error"] = "Không tìm thấy Phiếu Xuất!";
                         return RedirectToAction(nameof(Index));
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    // Chỉ cho phép cập nhật thông tin khách hàng, tránh can thiệp Ngày Xuất, Người Lập, Tổng Tiền
+                    pxFromDb.TenKhachHang = phieuXuat.TenKhachHang;
+                    pxFromDb.SoDienThoaiKhach = phieuXuat.SoDienThoaiKhach;
+
+                    _context.Update(pxFromDb);
+                    await _context.SaveChangesAsync();
+
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Cập nhật", "Phiếu Xuất", $"Cập nhật thông tin khách hàng tại phiếu PX-{phieuXuat.MaPhieuXuat}");
+
+                    await transaction.CommitAsync();
+                    TempData["Success"] = "Cập nhật thông tin Phiếu Xuất thành công!";
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Lỗi khi cập nhật phiếu xuất: " + ex.Message;
+                }
             }
-            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "MatKhau", phieuXuat.MaNguoiDung);
-            return View(phieuXuat);
+            // Nếu lỗi trả về View, cần truyền đủ thuộc tính ẩn
+            var fallbackPx = await _context.PhieuXuat
+                .Include(p => p.MaNguoiDungNavigation)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MaPhieuXuat == phieuXuat.MaPhieuXuat);
+            return View(fallbackPx ?? phieuXuat);
         }
 
         // 5. XÓA MỀM (Chuyển vào thùng rác)
@@ -289,7 +336,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             var phieuXuat = await _context.PhieuXuat.FindAsync(id);
             if (phieuXuat != null)
             {
-                // Chốt chặn: Kiểm tra nếu có mã Seri trong hóa đơn đã bị xóa lẻ thủ công trước đó
+                // Chốt chặn 1: Kiểm tra nếu có mã Seri trong hóa đơn đã bị xóa lẻ thủ công trước đó
                 bool hasDeletedSerials = await _context.ChiTietPhieuXuat
                     .Include(ct => ct.MaSeriNavigation)
                     .AnyAsync(ct => ct.MaPhieuXuat == id && ct.MaSeriNavigation.IsDeleted);
@@ -297,6 +344,17 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 if (hasDeletedSerials)
                 {
                     TempData["Error"] = "Không thể hủy Phiếu Xuất này vì có một số mã Seri trong đơn đã bị xóa lẻ khỏi hệ thống trước đó! Vui lòng khôi phục mã Seri trước khi hủy Phiếu Xuất.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Chốt chặn 2: Kiểm tra nếu có mã Seri đang bảo hành
+                bool hasWarrantySerials = await _context.ChiTietPhieuXuat
+                    .Include(ct => ct.MaSeriNavigation)
+                    .AnyAsync(ct => ct.MaPhieuXuat == id && ct.MaSeriNavigation.TrangThai == 3);
+
+                if (hasWarrantySerials)
+                {
+                    TempData["Error"] = "Không thể hủy Phiếu Xuất này vì có Sản phẩm đang trong quá trình bảo hành/xử lý (Trạng thái 3). Vui lòng hoàn tất bảo hành trước khi hủy!";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -320,9 +378,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     _context.UpdateRange(seriXuatList);
 
                     await _context.SaveChangesAsync();
+                    await ActivityLogger.LogAsync(_context, int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1"), "Hủy phiếu", "Phiếu Xuất", $"Hủy lệnh xuất kho #PX-{phieuXuat.MaPhieuXuat} và tự động rút Seri về kho.");
                     await transaction.CommitAsync();
 
-                    TempData["Success"] = "Đã chuyển Phiếu Xuất vào thùng rác và hoàn trả mã Seri về kho hàng.";
+                    TempData["Success"] = "Đã chuyển Phiếu Xuất vào lịch sử hủy và hoàn trả mã Seri nguyên vẹn về kho hàng.";
                 }
                 catch (Exception ex)
                 {
@@ -337,13 +396,47 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 6. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: PhieuXuat/Trash
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
-        public async Task<IActionResult> Trash()
+        public async Task<IActionResult> Trash(string searchString, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
-            var data = _context.PhieuXuat
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+
+            var query = _context.PhieuXuat
                 .Where(p => p.IsDeleted)
                 .Include(p => p.MaNguoiDungNavigation)
-                .OrderByDescending(p => p.NgayXuat);
-            return View(await data.ToListAsync());
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                string searchLower = searchString.ToLower().Trim();
+                int searchId = -1;
+                string numberPart = searchLower.Replace("px", "").Replace("-", "").Trim();
+                int.TryParse(numberPart, out searchId);
+
+                query = query.Where(p => p.MaPhieuXuat == searchId ||
+                                         (p.TenKhachHang != null && p.TenKhachHang.ToLower().Contains(searchLower)) ||
+                                         (p.SoDienThoaiKhach != null && p.SoDienThoaiKhach.Contains(searchLower)));
+            }
+
+            if (MaNguoiDung.HasValue)
+            {
+                query = query.Where(p => p.MaNguoiDung == MaNguoiDung.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(p => p.NgayXuat >= fromDate.Value.Date);
+            }
+
+            if (toDate.HasValue)
+            {
+                var endOfDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(p => p.NgayXuat <= endOfDate);
+            }
+
+            return View(await query.OrderByDescending(p => p.NgayXuat).ToListAsync());
         }
 
         // 7. KHÔI PHỤC (Hồi sinh từ thùng rác)

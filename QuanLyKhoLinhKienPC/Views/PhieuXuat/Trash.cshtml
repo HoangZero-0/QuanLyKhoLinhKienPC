@@ -14,37 +14,65 @@
         </div>
     </div>
 
+    <!-- FILTER BAR -->
+    <div class="card mb-4 shadow rounded-4 flex-shrink-0 border-0" style="box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05) !important;">
+        <div class="card-body py-3 px-4">
+            <form asp-action="Trash" method="get">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" name="searchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập mã phiếu, tên khách hàng, số điện thoại..." value="@ViewData["CurrentFilter"]">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                                <option value="">-- Người lập phiếu --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Từ Ngày</span>
+                            <input type="date" name="fromDate" id="fromDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["FromDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Đến Ngày</span>
+                            <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["ToDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm transition">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
             <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
-                <style>
-                    .premium-table tbody tr {
-                        transition: all 0.2s;
-                        border-bottom: 1px solid #f1f5f9;
-                    }
-                    .premium-table tbody tr:hover {
-                        background-color: #fca5a510 !important;
-                        transform: scale(1.002);
-                    }
-                    .premium-table th {
-                        border-bottom: 2px solid #fecaca !important;
-                        color: #ef4444;
-                        font-weight: 600;
-                        text-transform: uppercase;
-                        font-size: 0.85rem;
-                        letter-spacing: 0.5px;
-                    }
-                </style>
                 <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
                     <thead class="bg-white">
                         <tr>
                             <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
-                            <th class="py-4 ps-4 text-start" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Phiếu Xuất</th>
-                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Ngày Hủy Yêu Cầu</th>
-                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Khách Hàng</th>
-                            <th class="py-4" style="width: 20%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Người Lập Phiếu</th>
-                            <th class="py-4 text-end" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tiền Khách Trả</th>
+                            <th class="py-4 text-center" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Phiếu</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thời Gian</th>
+                            <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Người Lập Phiếu</th>
+                            <th class="py-4" style="width: 18%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Khách Hàng</th>
+                            <th class="py-4" style="width: 17%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Số Điện Thoại</th>
+                            <th class="py-4 text-end" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tổng Tiền</th>
                             <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao Tác</th>
                         </tr>
                     </thead>
@@ -56,7 +84,7 @@
                                 @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
                             </style>
                             <tr class="empty-state-row">
-                                <td colspan="7" class="text-center text-muted align-middle border-0">
+                                <td colspan="8" class="text-center text-muted align-middle border-0">
                                     <div class="py-5">
                                         <i class="fa-solid fa-trash-can fa-4x mb-4 text-secondary opacity-25 d-block"></i>
                                         <p class="fs-4 fw-medium mb-1">Thùng rác trống</p>
@@ -70,35 +98,43 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td class="text-center text-muted fw-bold">@(stt++)</td>
-                                    <td class="ps-4 fw-bold text-secondary">
-                                        #PX-@item.MaPhieuXuat.ToString("D5")
-                                    </td>
+                                    <td class="text-center text-secondary fw-medium ps-4">@(stt++)</td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-dark border">
-                                            <i class="fa-regular fa-calendar"></i> @item.NgayXuat.ToString("dd/MM/yyyy HH:mm")
+                                        <span class="badge bg-light text-secondary border border-secondary border-opacity-10 rounded-pill px-3 py-2 fw-bold">
+                                            #PX-@item.MaPhieuXuat.ToString("D5")
                                         </span>
                                     </td>
-                                    <td class="text-center fw-bold text-muted">
-                                        <del>@item.TenKhachHang</del>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6 d-block text-muted"><del>@item.NgayXuat.ToString("dd/MM/yyyy")</del></div>
+                                        <small class="text-muted font-monospace"><del>@item.NgayXuat.ToString("HH:mm:ss")</del></small>
                                     </td>
-                                    <td class="text-center text-muted">
-                                        <i class="fa-solid fa-user-pen text-muted"></i> @(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")
+                                    <td>
+                                        <span class="fw-semibold text-muted"><del>@(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</del></span>
                                     </td>
-                                    <td class="text-end fw-bold text-muted">
-                                        <del>@string.Format("{0:N0}", item.TongTien) đ</del>
+                                    <td>
+                                        <div class="fw-bold text-muted mb-0 text-truncate" title="@item.TenKhachHang">
+                                            <del>@item.TenKhachHang</del>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.SoDienThoaiKhach))
+                                        {
+                                            <span class="text-muted"><del>@item.SoDienThoaiKhach</del></span>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted opacity-50">---</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold text-muted fs-6">
+                                        <del>@string.Format("{0:N0}", item.TongTien) <small>VNĐ</small></del>
                                     </td>
                                     <td class="text-center pe-4">
                                         <form asp-action="Restore" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục lại hóa đơn và rút lại hàng trong kho">
+                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục lại hóa đơn và xuất lại hàng khỏi kho">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
-
-                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
-                                        {
-
-                                        }
                                     </td>
                                 </tr>
                             }
@@ -109,3 +145,43 @@
         </div>
     </div>
 </div>
+
+<style>
+    .premium-table tbody tr {
+        transition: all 0.2s;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .premium-table tbody tr:hover {
+        background-color: #fca5a510 !important;
+        transform: scale(1.002);
+    }
+    .premium-table th {
+        border-bottom: 2px solid #fecaca !important;
+        color: #ef4444;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function validateAndSubmit(element) {
+            var fromStr = document.getElementById('fromDateInput').value;
+            var toStr = document.getElementById('toDateInput').value;
+
+            if (fromStr && toStr) {
+                var f = new Date(fromStr);
+                var t = new Date(toStr);
+
+                if (f > t) {
+                    showToast('Ngày bắt đầu không thể lớn hơn ngày kết thúc!', 'error');
+                    element.value = '';
+                    return;
+                }
+            }
+            element.form.submit();
+        }
+    </script>
+}

@@ -1,59 +1,95 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.PhieuXuat
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Cập Nhật Phiếu Xuất";
 }
 
-<h1>Edit</h1>
+<style>
+    .transition { transition: all 0.2s ease; }
+    .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+    .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
+</style>
 
-<h4>PhieuXuat</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="MaPhieuXuat" />
-            <div class="form-group">
-                <label asp-for="NgayXuat" class="control-label"></label>
-                <input asp-for="NgayXuat" class="form-control" />
-                <span asp-validation-for="NgayXuat" class="text-danger"></span>
+<div class="container-fluid pt-2">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card shadow rounded-4 border-0 mb-4" style="box-shadow: 0 15px 30px -5px rgb(0 0 0 / 0.05) !important;">
+                <div class="card-header bg-warning bg-opacity-10 py-3 border-bottom-0">
+                    <h4 class="mb-0 text-warning fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i> Cập Nhật Phiếu Xuất</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert" style="display:none;"></div>
+                        
+                        <input type="hidden" asp-for="MaPhieuXuat" />
+                        <input type="hidden" asp-for="NgayXuat" />
+                        <input type="hidden" asp-for="MaNguoiDung" />
+                        <input type="hidden" asp-for="TongTien" />
+                        <input type="hidden" asp-for="IsDeleted" />
+
+                        <div class="row g-3">
+                            <div class="col-md-4 mb-1">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Mã Phiếu Xuất</label>
+                                <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 font-monospace text-dark shadow-xs" 
+                                       value="#PX-@Model.MaPhieuXuat.ToString("D5")" readonly />
+                            </div>
+
+                            <div class="col-md-4 mb-1">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Thời Gian Xuất</label>
+                                <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 text-dark shadow-xs" 
+                                       value="@Model.NgayXuat.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+
+                            <div class="col-md-4 mb-1">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Người Lập Phiếu</label>
+                                <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 text-dark shadow-xs" 
+                                       value="@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")" readonly />
+                            </div>
+
+                            <div class="col-md-6 mb-1 mt-3">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Khách Hàng</label>
+                                <input asp-for="TenKhachHang" class="form-control form-control-lg rounded-pill fs-6 bg-white border-light-subtle text-dark shadow-xs transition" placeholder="Tên khách hàng..." />
+                                <span asp-validation-for="TenKhachHang" class="text-danger small ms-2"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-1 mt-3">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Số Điện Thoại</label>
+                                <input asp-for="SoDienThoaiKhach" class="form-control form-control-lg rounded-pill fs-6 bg-white border-light-subtle text-dark shadow-xs transition" placeholder="SĐT khách..." />
+                                <span asp-validation-for="SoDienThoaiKhach" class="text-danger small ms-2"></span>
+                            </div>
+
+                            <div class="col-md-12 mb-1 mt-3">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Tổng Giá Trị Phiếu (VNĐ)</label>
+                                <div class="input-group">
+                                    <input class="form-control form-control-lg rounded-pill-start fs-5 bg-light border-0 fw-bold text-danger shadow-xs ps-4" 
+                                           value="@Model.TongTien.ToString("N0")" readonly />
+                                    <span class="input-group-text bg-light border-0 rounded-pill-end fw-bold text-danger pe-4">VNĐ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4 pt-4 border-top">
+                            <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-warning shadow rounded-pill px-5 fw-bold transition">
+                                <i class="fa-solid fa-save me-1"></i> Cập nhật
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="TenKhachHang" class="control-label"></label>
-                <input asp-for="TenKhachHang" class="form-control" />
-                <span asp-validation-for="TenKhachHang" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SoDienThoaiKhach" class="control-label"></label>
-                <input asp-for="SoDienThoaiKhach" class="form-control" />
-                <span asp-validation-for="SoDienThoaiKhach" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TongTien" class="control-label"></label>
-                <input asp-for="TongTien" class="form-control" />
-                <span asp-validation-for="TongTien" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaNguoiDung" class="control-label"></label>
-                <select asp-for="MaNguoiDung" class="form-control" asp-items="ViewBag.MaNguoiDung"></select>
-                <span asp-validation-for="MaNguoiDung" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<style>
+    .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; }
+    .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; }
+    .form-control:focus { border-color: #ffc107; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25); }
+</style>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
