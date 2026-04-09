@@ -32,23 +32,23 @@
                             </div>
                         </div>
                         <div class="row px-4 align-items-center g-2 pb-2">
-                             <div class="col-sm-4 text-end text-danger fw-semibold">Tên sản phẩm:</div>
+                             <div class="col-sm-4 text-danger fw-semibold">Tên Sản Phẩm:</div>
                             <div class="col-sm-8 fw-bold text-dark fs-5">@Model.TenSanPham</div>
                             
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Danh mục:</div>
-                            <div class="col-sm-8 fw-bold text-primary">@(Model.MaDanhMucNavigation?.TenDanhMuc ?? "Chưa phân loại")</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Danh Mục:</div>
+                            <div class="col-sm-8 text-dark">@(Model.MaDanhMucNavigation?.TenDanhMuc ?? "Chưa phân loại")</div>
 
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Hãng sản xuất:</div>
-                            <div class="col-sm-8 fw-bold text-secondary">@(string.IsNullOrEmpty(Model.HangSanXuat) ? "N/A" : Model.HangSanXuat)</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Hãng Sản Xuất:</div>
+                            <div class="col-sm-8 text-dark">@(string.IsNullOrEmpty(Model.HangSanXuat) ? "N/A" : Model.HangSanXuat)</div>
                             
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Giá niêm yết:</div>
-                            <div class="col-sm-8 text-danger fw-bold fs-5">@Model.GiaBan.ToString("N0") VNĐ</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Giá Niêm Yết:</div>
+                            <div class="col-sm-8 text-dark">@Model.GiaBan.ToString("N0") VNĐ</div>
                         </div>
                     </div>
 
-                    <form asp-action="Delete" class="mt-5">
+                    <form asp-action="Delete" class="mt-5 d-flex justify-content-between px-2">
                         <input type="hidden" asp-for="MaSanPham" />
-                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-3 transition">
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold transition">
                             <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
                         <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">

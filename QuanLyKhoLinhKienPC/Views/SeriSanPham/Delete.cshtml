@@ -18,15 +18,35 @@
                          <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
-                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start">
-                        <div class="row px-4 align-items-center g-2">
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Số Seri:</div>
-                            <div class="col-sm-8 fw-bold text-dark fs-5 font-monospace">#@Model.SoSeri</div>
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start shadow-inner border border-danger border-opacity-10">
+                        <div class="row px-4 align-items-center g-3 pb-2">
+                            <div class="col-sm-4 text-danger fw-semibold">Mã Số Seri:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5">#@Model.SoSeri</div>
                             
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Sản phẩm:</div>
-                            <div class="col-sm-8 fw-bold text-primary">@Model.MaSanPhamNavigation?.TenSanPham</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Sản Phẩm:</div>
+                            <div class="col-sm-8 text-dark">@Model.MaSanPhamNavigation?.TenSanPham</div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">Phiếu Nhập:</div>
+                            <div class="col-sm-8 text-dark">
+                                @if(Model.MaPhieuNhapNavigation != null)
+                                {
+                                    <text>#PN-@Model.MaPhieuNhap.Value.ToString("D5") (@Model.MaPhieuNhapNavigation.NgayNhap.ToString("dd/MM/yyyy"))</text>
+                                }
+                                else
+                                {
+                                    <text>N/A</text>
+                                }
+                            </div>
                             
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Trạng thái:</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Giá Nhập:</div>
+                            <div class="col-sm-8 text-dark">
+                                @{
+                                    decimal donGiaNhap = ViewBag.DonGiaNhap != null ? (decimal)ViewBag.DonGiaNhap : 0;
+                                }
+                                @donGiaNhap.ToString("N0") VNĐ
+                            </div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">Trạng Thái:</div>
                             <div class="col-sm-8">
                                 @if (Model.TrangThai == 1)
                                 {
@@ -44,9 +64,9 @@
                         </div>
                     </div>
 
-                    <form asp-action="Delete" class="mt-5">
+                    <form asp-action="Delete" class="mt-5 d-flex justify-content-between px-2">
                         <input type="hidden" asp-for="MaSeri" />
-                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2 transition">
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold transition">
                             <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
                         <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">

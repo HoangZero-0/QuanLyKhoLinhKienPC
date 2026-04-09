@@ -12,11 +12,11 @@
                     <h4 class="mb-0 text-info fw-bold"><i class="fa-solid fa-eye me-1"></i> Chi Tiết Danh Mục</h4>
                 </div>
                 <div class="card-body p-4">
-                    <dl class="row mb-0">
-                        <dt class="col-sm-4 text-muted fw-semibold">Tên danh mục:</dt>
-                        <dd class="col-sm-8 fw-bold text-dark fs-5">@Html.DisplayFor(model => model.TenDanhMuc)</dd>
+                    <dl class="row mb-0 mt-2">
+                        <dt class="col-sm-4 text-muted fw-semibold mb-3">Tên danh mục:</dt>
+                        <dd class="col-sm-8 fw-bold text-dark fs-5 mb-3">@Html.DisplayFor(model => model.TenDanhMuc)</dd>
 
-                        <dt class="col-sm-4 text-muted">Trạng thái:</dt>
+                        <dt class="col-sm-4 text-muted fw-semibold">Trạng thái:</dt>
                         <dd class="col-sm-8">
                             @if (Model.IsDeleted)
                             {
@@ -29,8 +29,8 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="card-footer bg-white border-0 text-end pe-4 pb-4 pt-0">
-                    <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2">
+                <div class="card-footer bg-white border-top-0 p-4 pt-0 d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold">
                         <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
                     </a>
                     <a asp-action="Edit" asp-route-id="@Model?.MaDanhMuc" class="btn btn-warning shadow-sm rounded-pill px-4 fw-bold text-dark">

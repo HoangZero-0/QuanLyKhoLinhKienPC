@@ -4,82 +4,9 @@
     ViewData["Title"] = "Quản Lý Kho Seri";
 }
 
+<link rel="stylesheet" href="~/css/print-invoice.css" />
+
 <style>
-    @@media print {
-        /* Ẩn các thành phần của Layout */
-        .navbar, .sidebar, .footer { 
-            display: none !important; 
-        }
-        
-        /* Trải rộng vùng Content */
-        .wrapper, .content {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            display: block !important;
-        }
-
-        /* Xoá format của trang để in trắng tinh */
-        body, html {
-            background-color: white !important;
-            zoom: 1 !important; /* Bỏ zoom 0.8 của layout */
-            height: auto !important;
-            overflow: visible !important;
-            padding-top: 10mm !important; 
-            padding-bottom: 10mm !important;
-            padding-left: 15mm !important; 
-            padding-right: 15mm !important;
-        }
-
-        /* Khắc phục bảng biến mất do absolute/fixed height */
-        .h-100, .flex-column, .card:not(.d-print-none), .card-body, .table-responsive {
-            height: auto !important;
-            display: block !important;
-            position: static !important;
-            min-height: auto !important;
-            overflow: visible !important;
-        }
-
-        /* Ẩn triệt để thanh cuộn (Scrollbar) Windows bị dính vào khi in */
-        ::-webkit-scrollbar {
-            display: none !important;
-        }
-        * {
-            -ms-overflow-style: none !important;
-            scrollbar-width: none !important;
-        }
-        
-        .table-responsive {
-            top: auto !important;
-            bottom: auto !important;
-            left: auto !important;
-            right: auto !important;
-        }
-
-        /* Xoá bóng râm và viền của thẻ Card */
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Khắc phục lỗi "Vạch dọc ảo" của Trình duyệt khi in Bootstrap Table */
-        .table > tbody > tr > *,
-        .table > thead > tr > * {
-            box-shadow: none !important;
-            border-left: none !important;
-            border-right: none !important;
-            background-clip: padding-box !important;
-        }
-        
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #f2f2f2 !important; /* Dùng màu thật thay thế bóng đổ nội bộ */
-        }
-
-        /* Đẩy nội dung in ra trọn trang giấy, giấu tiêu đề phụ do trình duyệt sinh ra (Ngày tháng, URL) */
-        @Html.Raw("@page { margin: 0; }")
-    }
-
     /* Custom hover effect */
     .premium-table tbody tr {
         transition: all 0.2s;
@@ -113,19 +40,33 @@
     </div>
 
     <!-- TIÊU ĐỀ IN ẤN (Chỉ hiển thị khi in) -->
-    <div class="d-none d-print-block text-center mb-4">
-        <h2 class="text-uppercase fw-bold">BÁO CÁO THỐNG KÊ KHO SERI</h2>
-        <p class="text-muted">
-            Ngày in: @DateTime.Now.ToString("dd/MM/yyyy HH:mm") <br/>
-            @if(ViewData["FromDate"] != null || ViewData["ToDate"] != null)
-            {
-                <span>Thời gian: @(ViewData["FromDate"]?.ToString() ?? "...") đến @(ViewData["ToDate"]?.ToString() ?? "...")</span> <br/>
-            }
-            Trạng thái: 
-            @(ViewData["TrangThaiFilter"]?.ToString() == "1" ? "Tồn Kho" : 
-              ViewData["TrangThaiFilter"]?.ToString() == "2" ? "Đã Bán" : 
-              ViewData["TrangThaiFilter"]?.ToString() == "3" ? "Lỗi/Bảo Hành" : "Tất cả")
-        </p>
+    <!-- TIÊU ĐỀ IN ẤN (Chỉ hiển thị khi in) -->
+    <div class="d-none d-print-block mb-4">
+        <div class="row border-bottom border-2 border-dark pb-3 mb-4 align-items-center">
+            <div class="col-6 text-start">
+                <h5 class="fw-bold mb-1 text-uppercase text-dark">Cửa Hàng Linh Kiện PC</h5>
+                <p class="mb-0 small text-dark">Địa chỉ: Long Xuyên, An Giang</p>
+                <p class="mb-0 small text-dark">Điện thoại: 0123 456 789</p>
+            </div>
+            <div class="col-6 text-end">
+                <h5 class="fw-bold mb-1 text-uppercase text-dark">Thống Kê Kho Seri</h5>
+                <p class="mb-0 small text-dark">Ngày in: <strong>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</strong></p>
+                @if(ViewData["FromDate"] != null && ViewData["FromDate"].ToString() != "" || ViewData["ToDate"] != null && ViewData["ToDate"].ToString() != "")
+                {
+                    string fStr = ViewData["FromDate"]?.ToString();
+                    string tStr = ViewData["ToDate"]?.ToString();
+                    string fDate = !string.IsNullOrEmpty(fStr) && DateTime.TryParse(fStr, out var f) ? f.ToString("dd/MM/yyyy") : "...";
+                    string tDate = !string.IsNullOrEmpty(tStr) && DateTime.TryParse(tStr, out var t) ? t.ToString("dd/MM/yyyy") : "...";
+                    
+                    <p class="mb-0 small text-dark" style="white-space: nowrap;">Kỳ báo cáo: <strong>@fDate</strong> đến <strong>@tDate</strong></p>
+                }
+                <p class="mb-0 small text-dark">Trạng thái: <strong>
+                    @(ViewData["TrangThaiFilter"]?.ToString() == "1" ? "Tồn Kho" : 
+                      ViewData["TrangThaiFilter"]?.ToString() == "2" ? "Đã Bán" : 
+                      ViewData["TrangThaiFilter"]?.ToString() == "3" ? "Lỗi/Bảo Hành" : "Tất cả")
+                </strong></p>
+            </div>
+        </div>
     </div>
 
     <div class="flex-shrink-0 d-print-none">
@@ -165,9 +106,9 @@
                     </div>
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-filter"></i></span>
-                            <select name="TrangThaiFilter" class="form-select border-start-0 rounded-end-pill fs-6 ps-0" onchange="this.form.submit()">
-                                <option value="">-- Tất cả trạng thái --</option>
+
+                            <select name="TrangThaiFilter" class="form-select rounded-pill fs-6 ps-3 transition" onchange="this.form.submit()">
+                                <option value="">-- Trạng thái --</option>
                                 <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Tồn Kho (Chưa Bán)</option>
                                 <option value="2" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "2")">Đã Bán</option>
                                 <option value="3" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "3")">Lỗi/Bảo Hành</option>
@@ -208,7 +149,7 @@
                         <tr>
                             <th class="py-4 ps-4 text-center" style="width: 5%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">STT</th>
                             <th class="py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Mã Số Seri</th>
-                            <th class="py-4" style="width: 35%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Sản Phẩm</th>
+                            <th class="py-4" style="width: 35%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Linh Kiện</th>
                             <th class="py-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Phiếu Nhập</th>
                             <th class="py-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Giá Nhập</th>
                             <th class="py-4 text-center" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Trạng Thái Kho</th>
@@ -316,6 +257,24 @@
                         }
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHỮ KÝ IN ẤN (Chỉ hiển thị khi in) -->
+    <div class="d-none d-print-block mt-5 pt-3" style="page-break-inside: avoid;">
+        <div class="row text-center">
+            <div class="col-4">
+                <p class="fw-bold mb-0 text-dark">Người Lập Báo Cáo</p>
+                <p class="small fst-italic mb-5 text-dark">(Ký, ghi rõ họ tên)</p>
+            </div>
+            <div class="col-4">
+                <p class="fw-bold mb-0 text-dark">Thủ Kho</p>
+                <p class="small fst-italic mb-5 text-dark">(Ký, ghi rõ họ tên)</p>
+            </div>
+            <div class="col-4">
+                <p class="fw-bold mb-0 text-dark">Giám Đốc / Quản Lý</p>
+                <p class="small fst-italic mb-5 text-dark">(Ký, ghi rõ họ tên)</p>
             </div>
         </div>
     </div>

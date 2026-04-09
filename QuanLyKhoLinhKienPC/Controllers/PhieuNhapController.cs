@@ -338,7 +338,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var phieuNhap = await _context.PhieuNhap.FindAsync(id);
+            var phieuNhap = await _context.PhieuNhap
+                .Include(p => p.MaNguoiDungNavigation)
+                .Include(p => p.MaNhaCungCapNavigation)
+                .FirstOrDefaultAsync(m => m.MaPhieuNhap == id);
             if (phieuNhap == null)
             {
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";

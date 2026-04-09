@@ -60,7 +60,7 @@
                             <th class="py-4 ps-3" style="width: 80%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Tên vai trò
                             </th>
-                            <th class="text-center py-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
+                            <th class="text-center py-4 pe-4" style="width: 15%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">
                                 Thao tác
                             </th>
                         </tr>
@@ -76,12 +76,14 @@
                                     <td class="fw-bold text-dark ps-3 py-4 align-middle">
                                         @Html.DisplayFor(modelItem => item.TenVaiTro)
                                     </td>
-                                    <td class="py-4 d-flex justify-content-center">
-                                        <form asp-action="Restore" asp-route-id="@item.MaVaiTro" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
-                                                <i class="fa-solid fa-rotate-left"></i>
-                                            </button>
-                                        </form>
+                                    <td class="text-center py-4 pe-4">
+                                        <div class="d-inline-flex gap-2">
+                                            <form asp-action="Restore" asp-route-id="@item.MaVaiTro" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
+                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }

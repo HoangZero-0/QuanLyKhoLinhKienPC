@@ -35,18 +35,18 @@
 
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-industry"></i></span>
-                            <select name="MaNhaCungCap" class="form-select border-start-0 rounded-end-pill fs-6 ps-0 transition" asp-items="ViewBag.MaNhaCungCap" onchange="this.form.submit()">
-                                <option value="">-- Tất cả nhà cung cấp --</option>
+
+                            <select name="MaNhaCungCap" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNhaCungCap" onchange="this.form.submit()">
+                                <option value="">-- Nhà cung cấp --</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-user-gear"></i></span>
-                            <select name="MaNguoiDung" class="form-select border-start-0 rounded-end-pill fs-6 ps-0 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
-                                <option value="">-- Tất cả người nhập --</option>
+
+                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                                <option value="">-- Người nhập --</option>
                             </select>
                         </div>
                     </div>
@@ -161,8 +161,11 @@
                                             </a>
                                             @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
                                             {
+                                                <a asp-action="Edit" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-light border text-warning rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Sửa">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
                                                 <a asp-action="Delete" asp-route-id="@item.MaPhieuNhap" class="btn btn-sm btn-light border text-danger rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Xóa">
-                                                <i class="fa-solid fa-trash"></i>
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </a>
                                             }
                                         </div>
@@ -172,10 +175,6 @@
                         }
                         else
                         {
-                            <style>
-                                .empty-state-row { height: 350px; }
-                                @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
-                            </style>
                             <tr class="empty-state-row">
                                 <td colspan="8" class="text-center text-muted align-middle border-0">
                                     <div class="py-5 w-100">
@@ -193,6 +192,8 @@
 </div>
 
 <style>
+    .empty-state-row { height: 350px; }
+    @@media (min-height: 800px) { .empty-state-row { height: 450px; } }
     .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; }
     .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; }
     .transition { transition: all 0.2s ease; }

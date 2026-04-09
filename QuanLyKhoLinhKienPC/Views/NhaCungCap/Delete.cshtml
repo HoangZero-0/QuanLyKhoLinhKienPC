@@ -4,6 +4,11 @@
     ViewData["Title"] = "Xóa Nhà Cung Cấp";
 }
 
+<style>
+    .transition { transition: all 0.2s ease; }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+</style>
+
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -18,29 +23,31 @@
                         <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
-                    <dl class="row mt-4 text-start justify-content-center bg-danger bg-opacity-10 py-4 rounded-4 mx-2">
-                        <dt class="col-sm-4 text-end text-danger fw-semibold mb-2">Tên NCC:</dt>
-                        <dd class="col-sm-6 fw-bold text-dark fs-5 mb-2">@Html.DisplayFor(model => model.TenNhaCungCap)</dd>
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start shadow-inner border border-danger border-opacity-10">
+                        <div class="row px-4 align-items-center g-3 pb-2">
+                            <div class="col-sm-4 text-danger fw-semibold">Tên Nhà Cung Cấp:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5">@Model.TenNhaCungCap</div>
 
-                        <dt class="col-sm-4 text-end text-danger fw-semibold mb-0">SĐT:</dt>
-                        <dd class="col-sm-6 text-dark mb-0">
-                            @if (!string.IsNullOrEmpty(Model.SoDienThoai))
-                            {
-                                <span class="fw-medium">@Html.DisplayFor(model => model.SoDienThoai)</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted fst-italic">--- Chưa cập nhật ---</span>
-                            }
-                        </dd>
-                    </dl>
+                            <div class="col-sm-4 text-danger fw-semibold">Số Điện Thoại:</div>
+                            <div class="col-sm-8 text-dark">
+                                @if (!string.IsNullOrEmpty(Model.SoDienThoai))
+                                {
+                                    @Model.SoDienThoai
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">--- Chưa cập nhật ---</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
-                    <form asp-action="Delete" class="mt-5">
+                    <form asp-action="Delete" class="mt-5 d-flex justify-content-between px-2">
                         <input type="hidden" asp-for="MaNhaCungCap" />
-                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2">
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold transition">
                             <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger shadow-sm rounded-pill px-5 fw-bold">
+                        <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">
                             <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>

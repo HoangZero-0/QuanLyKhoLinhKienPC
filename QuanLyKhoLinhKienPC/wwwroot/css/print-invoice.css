@@ -1,0 +1,110 @@
+/* ======================================================
+   CSS In Ấn chuyên dụng cho Phiếu Nhập Kho & Thống Kê Seri
+   ====================================================== */
+
+@media print {
+  @page { margin: 15mm; }
+
+  /* Reset cơ bản cho bản in (Mở khoá Pagination bị kẹt 1 trang do _Layout.cshtml) */
+  html, body {
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    zoom: 1 !important; /* Trả về thực tế, bỏ zoom 0.8 của Web */
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #000 !important;
+  }
+
+  /* Nới lỏng line-height cho các dòng tiêu đề in hoa chứa ký tự tiếng Việt kép (Ế, Ố, Ử) để không bị xén mất dấu */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.5 !important;
+    padding-top: 4px !important;
+    overflow: visible !important;
+  }
+
+  .navbar, .sidebar, .footer, .no-print, body::before, body::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Reset các Layout Blocks cứng để ngăn cản lỗi Crash Ngắt Trang (Pagination Bug) và xoá padding cồng kềnh */
+  .wrapper, .content, .container-fluid, .h-100, .flex-column, .card:not(.d-print-none), .card-body, .table-responsive, .invoice-container {
+    display: block !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    top: auto !important; bottom: auto !important; left: auto !important; right: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Định dạng Bảng in chuẩn Hóa đơn */
+  .table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    table-layout: auto !important; /* Xoá fixed layout của Web để cột tự động co giãn vừa vặn chữ */
+  }
+  
+  .table th, .table td {
+    padding: 3px 5px !important; /* Ép mỏng khoảng cách tối đa để tăng sức chứa */
+    vertical-align: middle !important;
+    white-space: normal !important;
+    font-size: 10pt !important;
+  }
+
+  /* Siết chặt kích thước chữ và lề của thành phần trong bảng */
+  .table h6, .table p, .table div, .table span, .table small {
+    margin: 0 !important;
+    line-height: 1.2 !important;
+  }
+  .table h6 { font-size: 10pt !important; font-weight: 600 !important; }
+  .table small { font-size: 8.5pt !important; }
+  .table i { font-size: 8pt !important; margin-right: 2px !important; }
+  
+  .table:not(.table-borderless) { border: 1px solid #000 !important; }
+  .table:not(.table-borderless) th,
+  .table:not(.table-borderless) td,
+  .table-bordered,
+  .table-bordered td,
+  .table-bordered th {
+    border: 1px solid #000 !important;
+  }
+
+  /* Đen trắng toàn bộ văn bản nhưng loại bỏ selector * để tránh tràn bộ nhớ lúc kết xuất PDF */
+  .table span, .table a, .table i, .table div, .table p, .table td, .table h6, .table small { 
+    color: #000 !important; 
+  }
+  .table th, .table td {
+    background: transparent !important; 
+  }
+  
+  /* Cứu Headers bị tàng hình VÀ Crash Chrome do Sticky Position + Blur Filter */
+  .table th {
+    background-color: #f8f9fa !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    position: static !important; 
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Chống lỗi Chrome Box-shadow nội tuyến */
+  .table > tbody > tr > *, .table > thead > tr > * {
+    box-shadow: none !important;
+    background-clip: padding-box !important;
+  }
+
+  a { text-decoration: none !important; color: #000 !important; }
+
+  /* Đảm bảo d-print-none luôn ẩn trên mọi mặt trận */
+  .d-print-none { display: none !important; }
+}

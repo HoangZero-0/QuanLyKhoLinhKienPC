@@ -252,6 +252,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             var seri = await _context.SeriSanPham
                 .Include(s => s.MaSanPhamNavigation)
+                .Include(s => s.MaPhieuNhapNavigation)
                 .FirstOrDefaultAsync(m => m.MaSeri == id);
 
             if (seri == null)
@@ -259,6 +260,18 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 TempData["Error"] = "Không tìm thấy dữ liệu yêu cầu!";
                 return RedirectToAction(nameof(Index));
             }
+
+            decimal donGiaNhap = 0;
+            if (seri.MaPhieuNhap != null)
+            {
+                var chiTiet = await _context.ChiTietPhieuNhap
+                    .FirstOrDefaultAsync(ct => ct.MaPhieuNhap == seri.MaPhieuNhap && ct.MaSanPham == seri.MaSanPham);
+                if (chiTiet != null)
+                {
+                    donGiaNhap = chiTiet.DonGiaNhap;
+                }
+            }
+            ViewBag.DonGiaNhap = donGiaNhap;
 
             return View(seri);
         }

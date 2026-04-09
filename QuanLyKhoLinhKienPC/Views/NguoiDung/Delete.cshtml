@@ -4,6 +4,11 @@
     ViewData["Title"] = "Xóa Nhân Viên";
 }
 
+<style>
+    .transition { transition: all 0.2s ease; }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+</style>
+
 <div class="container-fluid pt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -18,22 +23,28 @@
                         <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
-                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start">
-                        <div class="row px-4 align-items-center">
-                            <div class="col-sm-4 text-end text-danger fw-semibold">Nhân viên:</div>
-                            <div class="col-sm-8 fw-bold text-dark fs-5">@Html.DisplayFor(model => model.HoTen)</div>
+                    <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start shadow-inner border border-danger border-opacity-10">
+                        <div class="row px-4 align-items-center g-3 pb-2">
+                            <div class="col-sm-4 text-danger fw-semibold">Tên Nhân Viên:</div>
+                            <div class="col-sm-8 fw-bold text-dark fs-5">@Model.HoTen</div>
                             
-                            <div class="col-sm-4 text-end text-danger fw-semibold mt-2">Tài khoản:</div>
-                            <div class="col-sm-8 text-secondary mt-2"><code>@@@Html.DisplayFor(model => model.TenDangNhap)</code></div>
+                            <div class="col-sm-4 text-danger fw-semibold">Tài Khoản:</div>
+                            <div class="col-sm-8 text-dark">@Model.TenDangNhap</div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">Email:</div>
+                            <div class="col-sm-8 text-dark">@(string.IsNullOrEmpty(Model.Email) ? "N/A" : Model.Email)</div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">Vai Trò:</div>
+                            <div class="col-sm-8 text-dark">@(Model.MaVaiTroNavigation?.TenVaiTro ?? "N/A")</div>
                         </div>
                     </div>
 
-                    <form asp-action="Delete" class="mt-5">
+                    <form asp-action="Delete" class="mt-5 d-flex justify-content-between px-2">
                         <input type="hidden" asp-for="MaNguoiDung" />
-                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold me-2">
+                        <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold transition">
                             <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
-                        <button type="submit" class="btn btn-danger shadow-sm rounded-pill px-5 fw-bold">
+                        <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">
                             <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>

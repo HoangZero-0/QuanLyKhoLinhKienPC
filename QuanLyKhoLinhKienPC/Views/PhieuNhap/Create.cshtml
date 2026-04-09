@@ -4,129 +4,122 @@
     ViewData["Title"] = "Lập Phiếu Nhập Kho";
 }
 
-<style>
-    .content { overflow-y: auto !important; }
-</style>
-
-<div class="container-fluid pt-2">
-    <div class="row justify-content-center pb-5">
-        <div class="col-xl-12">
-            <div class="card shadow rounded-4 border-0 mb-4" style="box-shadow: 0 15px 30px -5px rgb(0 0 0 / 0.05) !important;">
-                <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0 text-primary fw-bold"><i class="fa-solid fa-file-circle-plus me-2"></i> Lập Phiếu Nhập Kho</h4>
-                    <div class="badge bg-light text-danger border px-4 py-2 rounded-pill shadow-sm">
-                        Tổng cộng: <span id="lblTongTien" class="fw-bold fs-5">0</span> <small>VNĐ</small>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="Create" id="frmPhieuNhap">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert" style="display:none;"></div>
-                        
-                        <div class="row g-5">
-                            <!-- LEFT: GENERAL INFO -->
-                            <div class="col-lg-3 col-md-4">
-                                <div class="bg-light rounded-4 p-4 border mb-4 shadow-inner">
-                                    <h6 class="text-uppercase text-primary fw-bold mb-4 small border-bottom pb-2"><i class="fa-solid fa-1 me-2"></i>Thông tin chung</h6>
-                                    
-                                    <div class="mb-4">
-                                        <label asp-for="MaNhaCungCap" class="form-label fw-bold text-secondary small text-uppercase ms-1">Nhà Cung Cấp <span class="text-danger">*</span></label>
-                                        <select asp-for="MaNhaCungCap" class="form-select form-select-lg rounded-pill fs-6 transition border shadow-xs" asp-items="ViewBag.MaNhaCungCap">
-                                            <option value="">-- Chọn NCC --</option>
-                                        </select>
-                                        <span asp-validation-for="MaNhaCungCap" class="text-danger small"></span>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <label asp-for="GhiChu" class="form-label fw-bold text-secondary small text-uppercase ms-1">Ghi Chú</label>
-                                        <textarea asp-for="GhiChu" class="form-control rounded-4 transition border shadow-xs" rows="3" placeholder="Ghi chú (nếu có)..."></textarea>
-                                    </div>
-
-                                    <div class="bg-white rounded-4 p-3 border border-success border-opacity-25 mt-5 shadow-xs">
-                                        <h6 class="text-success fw-bold small text-uppercase mb-3"><i class="fa-solid fa-file-excel me-2"></i>Nhập nhanh Excel</h6>
-                                        <p class="text-muted small mb-3">Tải file mẫu và import dữ liệu linh kiện hàng loạt.</p>
-                                        <div class="d-grid gap-2">
-                                            <a href="@Url.Action("DownloadTemplate", "PhieuNhap")" class="btn btn-outline-success btn-sm rounded-pill transition fw-bold">
-                                                <i class="fa-solid fa-download me-1"></i> File mẫu
-                                            </a>
-                                            <button type="button" class="btn btn-success btn-sm rounded-pill shadow-sm transition fw-bold" onclick="$('#fileExcel').click()">
-                                                <i class="fa-solid fa-upload me-1"></i> Tải lên Excel
-                                            </button>
-                                            <input type="file" id="fileExcel" class="d-none" accept=".xlsx, .xls" onchange="handleExcelUpload(this)" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- RIGHT: ITEMS TABLE -->
-                            <div class="col-lg-9 col-md-8">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="text-uppercase text-primary fw-bold mb-0 small"><i class="fa-solid fa-2 me-2"></i>Danh sách linh kiện</h6>
-                                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm transition fw-bold" onclick="themDong()">
-                                        <i class="fa-solid fa-plus-circle me-1"></i> Thêm dòng
-                                    </button>
-                                </div>
-
-                                <div class="card border border-light shadow-inner rounded-4 overflow-hidden mb-4">
-                                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                                        <table class="table premium-table mb-0 align-middle" id="tblChiTiet">
-                                            <thead class="bg-light sticky-top" style="z-index: 5;">
-                                                <tr>
-                                                    <th class="py-3 ps-4 text-secondary" style="width: 50px;">#</th>
-                                                    <th class="py-3 text-dark">Linh Kiện Nhập</th>
-                                                    <th class="py-3 text-dark text-center" style="width: 140px;">Mã Seri</th>
-                                                    <th class="py-3 text-dark text-center" style="width: 100px;">SL</th>
-                                                    <th class="py-3 text-dark text-end" style="width: 180px;">Đơn Giá (đ)</th>
-                                                    <th class="py-3 text-dark text-end pe-4" style="width: 160px;">Thành Tiền</th>
-                                                    <th class="py-3 text-center" style="width: 50px;"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Dynamic JS content here -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div id="hiddenInputsContainer"></div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4 pt-4 border-top">
-                            <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
-                                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
-                            </a>
-                            <button type="button" class="btn btn-primary shadow-lg rounded-pill px-5 fw-bold transition py-2" onclick="submitForm()">
-                                <i class="fa-solid fa-save me-2"></i> HOÀN TẤT VÀ LƯU PHIẾU
-                            </button>
-                        </div>
-                    </form>
-                </div>
+<div class="container-fluid pt-4 pb-5 px-lg-5 text-dark">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h3 class="fw-bold m-0 text-primary"><i class="fa-solid fa-plus-circle me-2"></i> Thêm Mới Phiếu Nhập</h3>
+            <p class="text-muted small mb-0 mt-1">Vui lòng nhập đầy đủ thông tin nhà cung cấp và danh sách linh kiện.</p>
+        </div>
+        <div class="d-flex justify-content-end align-items-center gap-3">
+             <div class="text-end">
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Tổng giá trị phiếu</small>
+                <div class="text-primary fw-bold fs-4"><span id="lblTongTien">0</span> <small class="fs-6">VNĐ</small></div>
             </div>
         </div>
     </div>
+
+    <form asp-action="Create" id="frmPhieuNhap">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert" style="display:none;"></div>
+        
+        <div class="row g-4">
+            <!-- CỘT TRÁI: THÔNG TIN CHUNG -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h6 class="text-secondary fw-bold text-uppercase small mb-4 border-start border-primary border-4 ps-2">Thông tin chung</h6>
+                        
+                        <div class="mb-4">
+                            <label asp-for="MaNhaCungCap" class="form-label fw-bold text-muted small text-uppercase">Nhà Cung Cấp <span class="text-danger">*</span></label>
+                            <select asp-for="MaNhaCungCap" class="form-select rounded-3 border-light-subtle transition shadow-xs" asp-items="ViewBag.MaNhaCungCap" style="padding: 0.6rem 1rem;">
+                                <option value="">-- Chọn Nhà Cung Cấp --</option>
+                            </select>
+                            <span asp-validation-for="MaNhaCungCap" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4 flex-grow-1 d-flex flex-column">
+                            <label asp-for="GhiChu" class="form-label fw-bold text-muted small text-uppercase">Ghi Chú</label>
+                            <textarea asp-for="GhiChu" class="form-control rounded-3 border-light-subtle transition shadow-xs flex-grow-1" style="min-height: 100px;" placeholder="Thông tin bổ sung nếu có..."></textarea>
+                        </div>
+
+                        <div class="p-4 bg-light rounded-4 border border-dashed text-center mt-2">
+                            <h6 class="text-primary fw-bold small text-uppercase mb-2">Nhập từ Excel</h6>
+                            <p class="text-muted mb-3" style="font-size: 0.75rem;">Sử dụng file mẫu để nhập hàng loạt linh kiện.</p>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a href="@Url.Action("DownloadTemplate", "PhieuNhap")" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">Mẫu</a>
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="$('#fileExcel').click()">Tải lên</button>
+                                <input type="file" id="fileExcel" class="d-none" accept=".xlsx, .xls" onchange="handleExcelUpload(this)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: CHI TIẾT SẢN PHẨM -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                    <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                        <h6 class="m-0 fw-bold text-dark text-uppercase small">Danh sách linh kiện nhập</h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold shadow-xs transition" onclick="themDong()">
+                            <i class="fa-solid fa-plus-circle me-1"></i> Thêm linh kiện
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 480px;">
+                            <table class="table mb-0 align-middle" id="tblChiTiet">
+                                <thead class="bg-light sticky-top">
+                                    <tr>
+                                        <th class="py-3 ps-4 text-center text-secondary" style="width: 50px;">#</th>
+                                        <th class="py-3 text-dark">Linh Kiện Nhập</th>
+                                        <th class="py-3 text-center" style="width: 150px;">Mã Seri (SN)</th>
+                                        <th class="py-3 text-center" style="width: 80px;">SL</th>
+                                        <th class="py-3 text-end" style="width: 160px;">Đơn Giá</th>
+                                        <th class="py-3 text-end pe-4" style="width: 160px;">Thành Tiền</th>
+                                        <th class="py-3 text-center" style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS content here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="hiddenInputsContainer"></div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4 border-top pt-4">
+            <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+            </a>
+            <button type="button" class="btn btn-primary shadow rounded-pill px-5 fw-bold transition" onclick="submitForm()">
+                <i class="fa-solid fa-save me-1"></i> Lưu lại
+            </button>
+        </div>
+    </form>
 </div>
 
-<!-- MODAL NHẬP SERI -->
-<div class="modal fade" id="modalSeri" tabindex="-1" aria-hidden="true">
+<!-- MODAL NHẬP SERI - DI CHUYỂN RA NGOÀI ĐỂ TRÁNH LỖI BACKDROP -->
+<div class="modal fade" id="modalSeri" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" style="z-index: 9999;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-white border-bottom py-3">
-                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-barcode text-primary me-2"></i>Nhập Danh Sách Seri</h5>
+            <div class="modal-header bg-white border-bottom py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-barcode me-2 text-primary"></i>Nhập Danh Sách Seri</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-secondary small text-uppercase">Dán danh sách Seri (mỗi mã 1 dòng)</label>
-                    <textarea id="txtModalSeri" class="form-control rounded-4 border transition p-3 font-monospace shadow-inner" rows="10" 
-                              placeholder="Ví dụ:&#10;SN-A001&#10;SN-A002..."></textarea>
-                </div>
-                <div class="alert alert-primary border-0 rounded-3 mb-0 small d-flex align-items-center">
-                    <i class="fa-solid fa-info-circle fs-5 me-3"></i>
-                    <div>Hệ thống sẽ tự động bóc tách và đếm số lượng dựa trên danh sách Seri.</div>
+                <label class="form-label text-muted small fw-bold text-uppercase mb-2">Mã Seri (Mỗi dòng 1 mã)</label>
+                <textarea id="txtModalSeri" class="form-control rounded-3 border-light-subtle font-monospace p-3 shadow-inner" rows="12" 
+                          placeholder="Ví dụ:&#10;SN-001&#10;SN-002..." style="resize: none;"></textarea>
+                <div class="mt-3 p-2 bg-light rounded-3 small text-muted d-flex align-items-center">
+                    <i class="fa-solid fa-circle-info me-2 text-primary"></i>
+                    <span>Số lượng linh kiện sẽ được tự động tính dựa trên số lượng mã Seri.</span>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-top-0 py-3">
-                 <button type="button" class="btn btn-light border rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Hủy bỏ</button>
-                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" onclick="luuSeriTuModal()">Xác nhận</button>
+            <div class="modal-footer bg-light border-0 py-3 px-4">
+                 <button type="button" class="btn btn-light border rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Đóng</button>
+                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="luuSeriTuModal()">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -134,7 +127,6 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
     <script>
         var dsSanPham = @Html.Raw(Json.Serialize(ViewBag.SanPhamList));
         var chiTietList = []; 
@@ -146,7 +138,7 @@
             var tongTienPhieu = 0;
 
             if(chiTietList.length === 0) {
-                tbody.append('<tr><td colspan="7" class="text-center text-muted fst-italic py-5"><i class="fa-solid fa-box-open fa-2x d-block mb-2 opacity-25"></i>Chưa có linh kiện nào.</td></tr>');
+                tbody.append('<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-box-open fa-2x d-block mb-3 opacity-25"></i>Phiếu nhập trống. Vui lòng thêm linh kiện.</td></tr>');
             } else {
                 chiTietList.forEach(function(item, index) {
                     var sanPhamOptions = '<option value="">-- Chọn linh kiện --</option>';
@@ -159,35 +151,32 @@
 
                     var thanhTien = item.SoLuong * item.DonGiaNhap;
                     tongTienPhieu += thanhTien;
-
+                    var btnClass = item.RawSeris ? "btn-primary" : "btn-outline-primary";
                     var displaySeri = item.RawSeris ? (item.SoLuong + " Seri") : "Nhập Seri";
-                    var btnClass = item.RawSeris ? "btn-success" : "btn-outline-primary";
 
                     var tr = `
                         <tr>
-                            <td class="text-center text-muted ps-4">${index + 1}</td>
+                            <td class="text-center text-muted ps-4 small">${index + 1}</td>
                             <td>
-                                <select class="form-select form-select-sm rounded-pill border shadow-xs" onchange="capNhatDong(${index}, this, 'MaSanPham')">
+                                <select class="form-select form-select-sm border-light-subtle rounded-3 shadow-xs" onchange="capNhatDong(${index}, this, 'MaSanPham')" style="padding: 0.4rem 0.8rem;">
                                     ${sanPhamOptions}
                                 </select>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-sm ${btnClass} rounded-pill w-100 shadow-xs transition" style="font-size: 0.75rem;" onclick="moModalSeri(${index})">
-                                    <i class="fa-solid fa-plus-circle me-1"></i> ${displaySeri}
+                                <button type="button" class="btn btn-sm ${btnClass} w-100 rounded-pill transition py-1 fw-semibold shadow-xs" onclick="moModalSeri(${index})" style="font-size: 0.8rem;">
+                                    <i class="fa-solid fa-barcode me-1"></i> ${displaySeri}
                                 </button>
                             </td>
+                            <td class="text-center fw-bold text-dark">${item.SoLuong}</td>
                             <td>
-                                <input type="number" class="form-control form-control-sm text-center fw-bold bg-light rounded-pill border-0" value="${item.SoLuong}" readonly />
+                                <input type="number" class="form-control form-control-sm text-end border-light-subtle rounded-3 shadow-xs" min="0" value="${item.DonGiaNhap}" onchange="capNhatDong(${index}, this, 'DonGiaNhap')" />
                             </td>
-                            <td>
-                                <input type="number" class="form-control form-control-sm text-end rounded-pill border shadow-xs" min="0" value="${item.DonGiaNhap}" onchange="capNhatDong(${index}, this, 'DonGiaNhap')" />
-                            </td>
-                            <td class="text-end fw-bold text-primary fs-6 pe-3">
+                            <td class="text-end fw-bold text-primary pe-4">
                                 ${new Intl.NumberFormat('vi-VN').format(thanhTien)}
                             </td>
-                            <td class="text-center pe-4">
-                                <button type="button" class="btn btn-sm text-danger border-0 p-0 transition" onclick="xoaDong(${index})">
-                                    <i class="fa-solid fa-trash-can"></i>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-link text-danger p-0 transition" title="Xóa dòng" onclick="xoaDong(${index})">
+                                    <i class="fa-solid fa-circle-xmark fs-5"></i>
                                 </button>
                             </td>
                         </tr>
@@ -210,9 +199,7 @@
 
         function capNhatDong(index, element, field) {
             var value = $(element).val();
-            if (field === 'DonGiaNhap') {
-                value = value === '' ? 0 : Number(value);
-            }
+            if (field === 'DonGiaNhap') value = value === '' ? 0 : Number(value);
             chiTietList[index][field] = value;
             renderTable();
         }
@@ -220,7 +207,9 @@
         function moModalSeri(index) {
             currentIndexForModal = index;
             $('#txtModalSeri').val(chiTietList[index].RawSeris);
-            var myModal = new bootstrap.Modal(document.getElementById('modalSeri'));
+            
+            var modalEl = document.getElementById('modalSeri');
+            var myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
             myModal.show();
             setTimeout(() => $('#txtModalSeri').focus(), 400);
         }
@@ -232,7 +221,10 @@
             var uniqueLines = [...new Set(lines)];
             chiTietList[currentIndexForModal].RawSeris = uniqueLines.join('\n');
             chiTietList[currentIndexForModal].SoLuong = uniqueLines.length;
-            bootstrap.Modal.getInstance(document.getElementById('modalSeri')).hide();
+            
+            var modalEl = document.getElementById('modalSeri');
+            var myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            myModal.hide();
             renderTable();
         }
 
@@ -240,56 +232,41 @@
             if (!input.files || !input.files[0]) return;
             var formData = new FormData();
             formData.append("file", input.files[0]);
-
-            Swal.fire({
-                title: 'Đang xử lý...',
-                didOpen: () => { Swal.showLoading(); }
-            });
-
             $.ajax({
-                url: '/PhieuNhap/ImportExcel',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                url: '/PhieuNhap/ImportExcel', type: 'POST', data: formData,
+                processData: false, contentType: false,
                 success: function (res) {
-                    Swal.close();
                     if (res.success) {
                         res.data.forEach(function (item) {
-                            var kMaSanPham = item.MaSanPham || item.maSanPham;
-                            var kTenSanPham = item.TenSanPham || item.tenSanPham;
-                            var kDonGiaNhap = item.DonGiaNhap || item.donGiaNhap || 0;
-                            var kRawSeris = item.RawSeris || item.rawSeris || "";
-                            var existing = chiTietList.find(c => c.MaSanPham == kMaSanPham);
+                            var kMa = item.MaSanPham || item.maSanPham;
+                            var kPrice = item.DonGiaNhap || item.donGiaNhap || 0;
+                            var kSeris = item.RawSeris || item.rawSeris || "";
+                            var existing = chiTietList.find(c => c.MaSanPham == kMa);
                             if (existing) {
-                                var newSeris = kRawSeris.split(/[\n,;|]/).map(s => s.trim().toUpperCase()).filter(s => s !== "");
-                                var oldSeris = existing.RawSeris.split('\n').map(s => s.trim().toUpperCase()).filter(s => s !== "");
-                                var combined = [...new Set([...oldSeris, ...newSeris])];
+                                var combined = [...new Set([...existing.RawSeris.split('\n'), ...kSeris.split('\n')])].filter(s => s.trim() !== "");
                                 existing.RawSeris = combined.join('\n');
                                 existing.SoLuong = combined.length;
-                                existing.DonGiaNhap = kDonGiaNhap;
+                                existing.DonGiaNhap = kPrice;
                             } else {
-                                var serisArr = kRawSeris.split(/[\n,;|]/).map(s => s.trim().toUpperCase()).filter(s => s !== "");
-                                chiTietList.push({ MaSanPham: kMaSanPham, TenSanPham: kTenSanPham, RawSeris: serisArr.join('\n'), SoLuong: serisArr.length, DonGiaNhap: kDonGiaNhap });
+                                var sArr = kSeris.split('\n').filter(s => s.trim() !== "");
+                                chiTietList.push({ MaSanPham: kMa, RawSeris: sArr.join('\n'), SoLuong: sArr.length, DonGiaNhap: kPrice });
                             }
                         });
                         renderTable();
-                        Swal.fire('Thành công', `Đã import ${res.data.length} mặt hàng.`, 'success');
-                    } else { Swal.fire('Lỗi', res.message, 'error'); }
+                    } else { alert(res.message); }
                 }
             });
         }
 
         function submitForm() {
-            if(!$('#MaNhaCungCap').val()) { Swal.fire('Lỗi', 'Chưa chọn Nhà Cung Cấp!', 'warning'); return; }
-            if(chiTietList.length === 0) { Swal.fire('Lỗi', 'Phiếu chưa có linh kiện!', 'warning'); return; }
+            if(!$('#MaNhaCungCap').val()) { alert('Lỗi: Vui lòng chọn Nhà Cung Cấp!'); return; }
+            if(chiTietList.length === 0) { alert('Lỗi: Vui lòng thêm ít nhất một linh kiện!'); return; }
             var hiddenContainer = $('#hiddenInputsContainer');
             hiddenContainer.empty();
             chiTietList.forEach(function(item, index) {
                 hiddenContainer.append(`<input type="hidden" name="Items[${index}].MaSanPham" value="${item.MaSanPham}" />`);
                 hiddenContainer.append(`<input type="hidden" name="Items[${index}].DonGiaNhap" value="${item.DonGiaNhap}" />`);
-                var escapedSeris = item.RawSeris.replace(/\n|(\r\n)/g, "|||");
-                hiddenContainer.append(`<input type="hidden" name="Items[${index}].RawSeris" value="${escapedSeris}" />`);
+                hiddenContainer.append(`<input type="hidden" name="Items[${index}].RawSeris" value="${item.RawSeris.replace(/\n|(\r\n)/g, "|||")}" />`);
             });
             $('#frmPhieuNhap').submit();
         }
@@ -301,6 +278,34 @@
 <style>
     .transition { transition: all 0.2s ease; }
     .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
     .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
+    .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+    .form-select:focus, .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
+    /* Fix triệt để nền xám (backdrop) bị lệch khi sử dụng zoom: 0.8 */
+    .modal-backdrop { 
+        position: fixed !important; 
+        top: 0 !important; 
+        left: 0 !important; 
+        width: 125vw !important; /* Phải bù lại tỷ lệ 1/0.8 = 125% */
+        height: 125vh !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        z-index: 1040 !important;
+        transform: none !important; /* Không dùng transform nữa */
+    }
+    .modal { z-index: 1050 !important; }
+    body.modal-open { 
+        padding-right: 0 !important; 
+        overflow: hidden !important; 
+    }
 </style>
+
+<script>
+    // Đảm bảo khi mở modal, backdrop được reset đúng vị trí
+    $(document).on('shown.bs.modal', '.modal', function () {
+        $('.modal-backdrop').css({
+            'top': '0',
+            'left': '0'
+        });
+    });
+</script>

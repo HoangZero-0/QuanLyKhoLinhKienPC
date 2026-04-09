@@ -4,10 +4,10 @@
     ViewData["Title"] = "Chi Tiết Phiếu Nhập";
 }
 
-<div class="d-flex flex-column pt-4 pb-5">
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
-        <h2 class="text-info m-0"><i class="fa-solid fa-eye me-2"></i> Chi Tiết Phiếu Nhập</h2>
+<div class="container-fluid pt-4 pb-5 px-sm-4 bg-light">
+    <!-- HEADER HÀNH ĐỘNG (Không hiển thị khi in) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print mx-auto" style="max-width: 900px;">
+        <h2 class="text-info m-0"><i class="fa-solid fa-eye me-1"></i> Chi Tiết Phiếu Nhập</h2>
         <div class="d-flex gap-2">
             @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
             {
@@ -15,150 +15,148 @@
                     <i class="fa-solid fa-pen-to-square me-1"></i> Chỉnh sửa
                 </a>
             }
-            <button onclick="window.print()" class="btn btn-primary shadow-sm rounded-pill px-4 fw-bold transition no-print">
+            <button onclick="window.print()" class="btn btn-dark shadow-sm rounded-pill px-4 fw-bold transition">
                 <i class="fa-solid fa-print me-1"></i> In phiếu
             </button>
-            <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-semibold text-secondary transition no-print">
+            <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-semibold text-secondary transition">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
         </div>
     </div>
 
-    <!-- TẦNG 1: THÔNG TIN CHUNG (HERO SECTION) -->
-    <div class="card shadow rounded-4 border-0 mb-4 mx-3 detail-card">
-        <div class="card-body p-4">
-            <div class="row g-4 align-items-center">
-                <div class="col-lg-3 col-md-4 text-center border-end">
-                    <div class="bg-light rounded-4 p-4 d-flex flex-column align-items-center justify-content-center border mb-3">
-                        <i class="fa-solid fa-file-invoice-dollar text-primary fa-4x mb-3"></i>
-                        <span class="badge bg-primary text-white border px-3 py-2 fw-bold font-monospace rounded-pill" style="font-size: 1.1rem;">
-                            #PN-@Model.MaPhieuNhap.ToString("D5")
-                        </span>
-                    </div>
-                </div>
-
-                <div class="col-lg-9 col-md-8">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h4 class="fw-bold text-dark mb-1">@Model.MaNhaCungCapNavigation?.TenNhaCungCap</h4>
-                            <div class="d-flex flex-wrap gap-3">
-                                <span class="text-muted small"><i class="fa-solid fa-calendar-day me-1 text-primary"></i> <strong>@Model.NgayNhap.ToString("dd/MM/yyyy HH:mm")</strong></span>
-                                <span class="text-muted small"><i class="fa-solid fa-user-circle me-1 text-primary"></i> <strong>@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống Admin")</strong></span>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <span class="text-danger fw-bold fs-3">@Model.TongTien.ToString("N0")</span>
-                            <span class="text-danger fw-bold fs-5 ms-1">VNĐ</span>
-                            <div class="text-muted small">Tổng giá trị phiếu nhập</div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-1">
-                        <div class="col-sm-6">
-                            <div class="p-3 rounded-3 bg-light border">
-                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Liên hệ NCC</small>
-                                <span class="text-dark fw-semibold"><i class="fa-solid fa-phone me-2 text-muted"></i> @(Model.MaNhaCungCapNavigation?.SoDienThoai ?? "N/A")</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="p-3 rounded-3 bg-light border h-100">
-                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Địa chỉ NCC</small>
-                                <span class="text-dark fw-semibold text-truncate d-block" title="@Model.MaNhaCungCapNavigation?.DiaChi">
-                                    <i class="fa-solid fa-map-marker-alt me-2 text-muted"></i> @(Model.MaNhaCungCapNavigation?.DiaChi ?? "N/A")
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- KHUNG HÓA ĐƠN A4 -->
+    <div class="invoice-container bg-white mx-auto p-4 p-md-5" style="max-width: 900px;">
+        <!-- Phần Header Cửa hàng -->
+        <div class="row border-bottom border-2 border-dark pb-3 mb-4 align-items-center">
+            <div class="col-sm-6 text-center text-sm-start mb-3 mb-sm-0">
+                <h5 class="fw-bold mb-1 text-uppercase">Cửa Hàng Linh Kiện PC</h5>
+                <p class="mb-0 small">Địa chỉ: Long Xuyên, An Giang</p>
+                <p class="mb-0 small">Điện thoại: 0123 456 789</p>
+            </div>
+            <div class="col-sm-6 text-center text-sm-end">
+                <h5 class="fw-bold mb-1 text-uppercase">Phiếu Nhập Kho</h5>
+                <p class="mb-0 small">Mã số: <strong>#PN-@Model.MaPhieuNhap.ToString("D5")</strong></p>
+                <p class="mb-0 small">Ngày lập: @Model.NgayNhap.ToString("dd/MM/yyyy HH:mm")</p>
             </div>
         </div>
-    </div>
 
-    <!-- TẦNG 2: DANH SÁCH LINH KIỆN -->
-    <div class="card shadow rounded-4 border-0 mb-4 mx-3 detail-card">
-        <div class="card-header bg-white py-3 px-4 border-bottom border-light">
-            <h5 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-boxes-stacked text-info me-2"></i>Danh Sách Linh Kiện Nhập</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table premium-table mb-0 align-middle">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="py-3 ps-4 text-center text-secondary" style="width: 50px;">STT</th>
-                            <th class="py-3 text-dark">Tên Sản Phẩm</th>
-                            <th class="py-3 text-dark text-center" style="width: 150px;">Số Lượng</th>
-                            <th class="py-3 text-dark text-end" style="width: 200px;">Đơn Giá Nhập</th>
-                            <th class="py-3 text-dark text-end pe-4" style="width: 200px;">Thành Tiền</th>
-                        </tr>
-                    </thead>
+        <!-- Thông tin Đối tác / Giao dịch -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <table class="table table-sm table-borderless mb-0">
                     <tbody>
-                        @{ int stt = 1; }
-                        @foreach (var ct in Model.ChiTietPhieuNhap)
+                        <tr>
+                            <td class="fw-semibold" style="width: 150px;">Nhà cung cấp:</td>
+                            <td class="text-uppercase fw-bold">@Model.MaNhaCungCapNavigation?.TenNhaCungCap</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Địa chỉ:</td>
+                            <td>@(string.IsNullOrEmpty(Model.MaNhaCungCapNavigation?.DiaChi) ? "---" : Model.MaNhaCungCapNavigation.DiaChi)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Số điện thoại:</td>
+                            <td>@(string.IsNullOrEmpty(Model.MaNhaCungCapNavigation?.SoDienThoai) ? "---" : Model.MaNhaCungCapNavigation.SoDienThoai)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Người lập phiếu:</td>
+                            <td>@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</td>
+                        </tr>
+                        @if (!string.IsNullOrEmpty(Model.GhiChu))
                         {
                             <tr>
-                                <td class="text-center text-muted ps-4">@(stt++)</td>
-                                <td class="py-3 fw-bold text-dark">
-                                    <a href="/SanPham/Details/@ct.MaSanPham" class="text-decoration-none text-dark hover-primary">
-                                        @ct.MaSanPhamNavigation?.TenSanPham
-                                    </a>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 fw-bold">
-                                        @ct.SoLuong
-                                    </span>
-                                </td>
-                                <td class="text-end fw-semibold text-muted">@ct.DonGiaNhap.ToString("N0") <small>đ</small></td>
-                                <td class="text-end fw-bold text-primary pe-4">@((ct.SoLuong * ct.DonGiaNhap).ToString("N0")) <small>đ</small></td>
+                                <td class="fw-semibold align-top">Ghi chú:</td>
+                                <td class="fst-italic">@Model.GhiChu</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- TẦNG 3: DANH SÁCH SERI MÁY -->
-    <div class="card shadow rounded-4 border-0 mx-3 detail-card">
-        <div class="card-header bg-white py-3 px-4 border-bottom border-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-barcode text-info me-2"></i>Danh Sách Số Seri Nhập</h5>
-            @if (!string.IsNullOrEmpty(Model.GhiChu))
-            {
-                <span class="text-muted small"><i class="fa-solid fa-note-sticky me-1"></i> @Model.GhiChu</span>
-            }
-        </div>
-        <div class="card-body p-3">
-             <div class="d-flex flex-wrap gap-2">
-                @if (Model.SeriSanPham != null && Model.SeriSanPham.Any())
-                {
-                    foreach (var s in Model.SeriSanPham)
+        <!-- Bảng Chi tiết Linh Kiện -->
+        <div class="table-responsive mb-3">
+            <table class="table table-bordered border-dark align-middle mb-0">
+                <thead class="text-center fw-bold" style="background-color: #f8f9fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <tr>
+                        <th style="width: 5%;">STT</th>
+                        <th style="width: 40%;">Tên Linh Kiện</th>
+                        <th style="width: 10%;">ĐVT</th>
+                        <th style="width: 10%;">SL</th>
+                        <th style="width: 15%;">Đơn Giá (VNĐ)</th>
+                        <th style="width: 20%;">Thành Tiền (VNĐ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int stt = 1; }
+                    @foreach (var ct in Model.ChiTietPhieuNhap)
                     {
-                        <div class="badge-seri d-flex align-items-center border rounded-3 px-2 py-1 bg-light">
-                            <span class="small text-muted me-2 font-monospace" style="font-size: 0.7rem;">@s.MaSanPhamNavigation?.TenSanPham:</span>
-                            <span class="fw-bold text-dark font-monospace" style="font-size: 0.85rem;">@s.SoSeri</span>
-                        </div>
+                        <tr>
+                            <td class="text-center">@(stt++)</td>
+                            <td class="fw-semibold">@ct.MaSanPhamNavigation?.TenSanPham</td>
+                            <td class="text-center">Cái</td>
+                            <td class="text-center fw-bold">@ct.SoLuong</td>
+                            <td class="text-end">@ct.DonGiaNhap.ToString("N0")</td>
+                            <td class="text-end fw-bold">@((ct.SoLuong * ct.DonGiaNhap).ToString("N0"))</td>
+                        </tr>
                     }
-                }
-                else
-                {
-                    <div class="text-center w-100 py-3 text-muted">Không có dữ liệu Seri cho phiếu này.</div>
-                }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end fw-bold py-3 text-uppercase">Tổng Cộng Tiền Hàng:</td>
+                        <td class="text-end fw-bold fs-5 py-3">@Model.TongTien.ToString("N0")</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <!-- Viết bằng chữ (Nếu cần, tính sau. Thêm 1 dòng nhỏ phía dưới là được) -->
+        </div>
+
+        <!-- Khu vực Seri đính kèm (nếu có) -->
+        @if (Model.SeriSanPham != null && Model.SeriSanPham.Any())
+        {
+            <div class="mb-4 mt-4">
+                <div class="border border-dark p-3">
+                    <p class="fw-bold mb-2 text-decoration-underline">Bảng kê Mã Seri (SN) chi tiết:</p>
+                    <div class="font-monospace lh-lg" style="font-size: 0.85em;">
+                        @{
+                            var grouped = Model.SeriSanPham.GroupBy(s => s.MaSanPhamNavigation?.TenSanPham);
+                            foreach (var group in grouped)
+                            {
+                                <div class="mb-1">
+                                    <span class="fw-bold me-2">@group.Key:</span>
+                                    <span>@string.Join(", ", group.Select(s => s.SoSeri))</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Khu vực Chữ ký -->
+        <div class="row pt-4 text-center mt-3" style="page-break-inside: avoid;">
+            <div class="col-4">
+                <p class="fw-bold mb-0">Người Lập Phiếu</p>
+                <p class="text-muted small fst-italic mb-5 pb-4">(Ký, ghi rõ họ tên)</p>
+            </div>
+            <div class="col-4">
+                <p class="fw-bold mb-0">Thủ Kho</p>
+                <p class="text-muted small fst-italic mb-5 pb-4">(Ký, ghi rõ họ tên)</p>
+            </div>
+            <div class="col-4">
+                <p class="fw-bold mb-0">Đại Diện Giao Hàng</p>
+                <p class="text-muted small fst-italic mb-5 pb-4">(Ký, ghi rõ họ tên)</p>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .detail-card { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important; }
-    .transition { transition: all 0.2s ease; }
-    .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
-    .premium-table th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .hover-primary:hover { color: #0d6efd !important; }
-    .badge-seri { border-color: #e2e8f0 !important; transition: transform 0.2s; }
-    .badge-seri:hover { transform: translateY(-2px); border-color: #cbd5e1 !important; }
+<link rel="stylesheet" href="~/css/print-invoice.css" />
 
-    @@media print {
-        .no-print { display: none !important; }
-        body { background: white !important; }
-        .detail-card { box-shadow: none !important; border: 1px solid #eee !important; }
+<style>
+    /* CSS cho vùng hiển thị web */
+    .transition { transition: all 0.2s ease; }
+    .invoice-container {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #ced4da;
     }
 </style>
