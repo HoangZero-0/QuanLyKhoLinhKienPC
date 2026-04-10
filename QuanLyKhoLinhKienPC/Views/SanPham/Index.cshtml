@@ -33,13 +33,13 @@
                 </div>
 
                 <div class="col-md-2">
-                    <select name="MaDanhMuc" class="form-select form-select-lg rounded-pill fs-6 transition border" asp-items="ViewBag.MaDanhMuc" onchange="this.form.submit()">
+                    <select name="MaDanhMuc" class="form-select form-select-lg rounded-pill fs-6 transition border" asp-items="@(ViewData["MaDanhMuc"] as SelectList)" onchange="this.form.submit()">
                         <option value="">-- Danh mục --</option>
                     </select>
                 </div>
 
                 <div class="col-md-2">
-                    <select name="HangSanXuat" class="form-select form-select-lg rounded-pill fs-6 transition border" asp-items="ViewBag.HangSanXuatList" onchange="this.form.submit()">
+                    <select name="HangSanXuat" class="form-select form-select-lg rounded-pill fs-6 transition border" asp-items="@(ViewData["HangSanXuatList"] as SelectList)" onchange="this.form.submit()">
                         <option value="">-- Hãng sản xuất --</option>
                     </select>
                 </div>

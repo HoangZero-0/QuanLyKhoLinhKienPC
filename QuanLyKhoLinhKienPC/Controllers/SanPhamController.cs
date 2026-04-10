@@ -70,7 +70,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .ToListAsync();
 
             ViewData["MaDanhMuc"] = new SelectList(_context.DanhMuc.Where(d => !d.IsDeleted), "MaDanhMuc", "TenDanhMuc", MaDanhMuc);
-            ViewBag.HangSanXuatList = new SelectList(hangSanXuatList, HangSanXuat);
+            ViewData["HangSanXuatList"] = new SelectList(hangSanXuatList, HangSanXuat);
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentHangSanXuat"] = HangSanXuat;
 
@@ -387,6 +387,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 6. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: SanPham/Trash
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Trash(string searchString, int? MaDanhMuc, string? HangSanXuat)
         {
             var dsSanPham = _context.SanPham
@@ -396,7 +397,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                dsSanPham = dsSanPham.Where(d => d.TenSanPham.Contains(searchString) || d.HangSanXuat.Contains(searchString));
+                dsSanPham = dsSanPham.Where(d => d.TenSanPham.Contains(searchString));
             }
 
             if (MaDanhMuc.HasValue)
@@ -417,7 +418,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .ToListAsync();
 
             ViewData["MaDanhMuc"] = new SelectList(_context.DanhMuc.Where(d => !d.IsDeleted), "MaDanhMuc", "TenDanhMuc", MaDanhMuc);
-            ViewBag.HangSanXuatList = new SelectList(hangSanXuatList, HangSanXuat);
+            ViewData["HangSanXuatList"] = new SelectList(hangSanXuatList, HangSanXuat);
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentHangSanXuat"] = HangSanXuat;
 

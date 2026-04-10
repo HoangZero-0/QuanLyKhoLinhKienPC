@@ -29,7 +29,7 @@
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
 
-                            <select name="MaNhaCungCap" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNhaCungCap" onchange="this.form.submit()">
+                            <select name="MaNhaCungCap" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="@(ViewData["MaNhaCungCap"] as SelectList)" onchange="this.form.submit()">
                                 <option value="">-- Nhà cung cấp --</option>
                             </select>
                         </div>
@@ -38,7 +38,7 @@
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
 
-                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="@(ViewData["MaNguoiDung"] as SelectList)" onchange="this.form.submit()">
                                 <option value="">-- Người nhập --</option>
                             </select>
                         </div>

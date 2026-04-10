@@ -29,22 +29,31 @@
                         <input type="hidden" asp-for="IsDeleted" />
 
                         <div class="row g-3">
-                            <div class="col-md-4 mb-1">
+                            <div class="col-md-6 mb-1">
                                 <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Mã Phiếu Xuất</label>
                                 <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 font-monospace text-dark shadow-xs" 
                                        value="#PX-@Model.MaPhieuXuat.ToString("D5")" readonly />
                             </div>
 
-                            <div class="col-md-4 mb-1">
+                            <div class="col-md-6 mb-1">
                                 <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Thời Gian Xuất</label>
                                 <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 text-dark shadow-xs" 
                                        value="@Model.NgayXuat.ToString("dd/MM/yyyy HH:mm")" readonly />
                             </div>
 
-                            <div class="col-md-4 mb-1">
+                            <div class="col-md-6 mb-1">
                                 <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Người Lập Phiếu</label>
                                 <input class="form-control form-control-lg rounded-pill fs-6 bg-light border-0 text-dark shadow-xs" 
                                        value="@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")" readonly />
+                            </div>
+
+                            <div class="col-md-6 mb-1">
+                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Tổng Giá Trị Phiếu (VNĐ)</label>
+                                <div class="input-group">
+                                    <input class="form-control form-control-lg rounded-pill-start fs-5 bg-light border-0 fw-bold text-primary shadow-xs ps-4" 
+                                           value="@Model.TongTien.ToString("N0")" readonly />
+                                    <span class="input-group-text bg-light border-0 rounded-pill-end fw-bold text-danger pe-4">VNĐ</span>
+                                </div>
                             </div>
 
                             <div class="col-md-6 mb-1 mt-3">
@@ -58,18 +67,9 @@
                                 <input asp-for="SoDienThoaiKhach" class="form-control form-control-lg rounded-pill fs-6 bg-white border-light-subtle text-dark shadow-xs transition" placeholder="SĐT khách..." />
                                 <span asp-validation-for="SoDienThoaiKhach" class="text-danger small ms-2"></span>
                             </div>
-
-                            <div class="col-md-12 mb-1 mt-3">
-                                <label class="form-label fw-bold text-secondary small text-uppercase ms-1">Tổng Giá Trị Phiếu (VNĐ)</label>
-                                <div class="input-group">
-                                    <input class="form-control form-control-lg rounded-pill-start fs-5 bg-light border-0 fw-bold text-danger shadow-xs ps-4" 
-                                           value="@Model.TongTien.ToString("N0")" readonly />
-                                    <span class="input-group-text bg-light border-0 rounded-pill-end fw-bold text-danger pe-4">VNĐ</span>
-                                </div>
-                            </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4 pt-4 border-top">
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
                             <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
                                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
                             </a>
@@ -87,7 +87,6 @@
 <style>
     .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; }
     .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; }
-    .form-control:focus { border-color: #ffc107; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25); }
 </style>
 
 @section Scripts {

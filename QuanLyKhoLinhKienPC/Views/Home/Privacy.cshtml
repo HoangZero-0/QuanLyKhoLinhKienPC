@@ -1,6 +1,71 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Chính Sách Bảo Mật";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container py-5">
+    <div class="bg-white shadow rounded-4 p-4 p-md-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-primary display-5">Chính Sách Bảo Mật</h1>
+            <p class="text-muted">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy")</p>
+            <hr class="mx-auto border-2 border-primary opacity-25" style="width: 100px;">
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <section class="mb-5">
+                    <h4 class="fw-bold mb-3"><i class="fa-solid fa-user-shield text-primary me-2"></i> 1. Thu thập thông tin</h4>
+                    <p>Hệ thống Quản lý Kho Linh Kiện PC chỉ thu thập các thông tin cần thiết phục vụ cho mục đích vận hành kinh doanh và quản lý nhân sự trong nội bộ, bao gồm:</p>
+                    <ul>
+                        <li>Họ tên, email, số điện thoại nhân viên để xác thực tài khoản.</li>
+                        <li>Thông tin giao dịch phiến nhập, phiếu xuất và quản lý hàng hóa.</li>
+                        <li>Nhật ký hoạt động (Audit Logs) để đảm bảo an toàn hệ thống.</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h4 class="fw-bold mb-3"><i class="fa-solid fa-lock text-primary me-2"></i> 2. Bảo mật dữ liệu</h4>
+                    <p>Chúng tôi cam kết bảo vệ dữ liệu của bạn bằng các biện pháp công nghệ tiên tiến nhất:</p>
+                    <ul>
+                        <li><strong>Mật khẩu:</strong> Được mã hóa bằng công nghệ BCrypt một chiều, không thể giải mã ngược.</li>
+                        <li><strong>Kết nối:</strong> Sử dụng giao thức HTTPS để mã hóa dữ liệu truyền tải giữa người dùng và máy chủ.</li>
+                        <li><strong>Phân quyền:</strong> Chỉ những người dùng có vai trò phù hợp mới được phép truy cập vào các vùng dữ liệu nhạy cảm.</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h4 class="fw-bold mb-3"><i class="fa-solid fa-share-nodes text-primary me-2"></i> 3. Chia sẻ thông tin</h4>
+                    <p>Chúng tôi tuyệt đối <strong>KHÔNG</strong> bán, trao đổi hoặc chia sẻ thông tin dữ liệu kho hàng hay thông tin cá nhân của người dùng cho bất kỳ bên thứ ba nào ngoài phạm vi vận hành của cửa hàng, trừ khi có yêu cầu bằng văn bản từ cơ quan pháp luật.</p>
+                </section>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 bg-light rounded-4 p-4 sticky-top" style="top: 2rem;">
+                    <h5 class="fw-bold mb-3">Liên hệ hỗ trợ</h5>
+                    <p class="small text-muted mb-4">Nếu bạn có bất kỳ câu hỏi nào về chính sách bảo mật này, vui lòng liên hệ bộ phận kỹ thuật.</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle me-3">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-bold">Email</p>
+                            <p class="mb-0 small">admin@linhkienpc.vn</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success p-2 rounded-circle me-3">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-bold">Điện thoại</p>
+                            <p class="mb-0 small">0123.456.789</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="/" class="btn btn-primary rounded-pill px-5">Quay lại Trang Chủ</a>
+        </div>
+    </div>
+</div>

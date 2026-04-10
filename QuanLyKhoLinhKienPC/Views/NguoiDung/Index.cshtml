@@ -47,7 +47,7 @@
                 <div class="col-md-3">
                     <div class="input-group input-group-lg">
 
-                        <select name="MaVaiTro" class="form-select rounded-pill fs-6 ps-3" asp-items="ViewBag.MaVaiTro" onchange="this.form.submit()">
+                        <select name="MaVaiTro" class="form-select rounded-pill fs-6 ps-3" asp-items="@(ViewData["MaVaiTro"] as SelectList)" onchange="this.form.submit()">
                             <option value="">-- Vai trò --</option>
                         </select>
                     </div>

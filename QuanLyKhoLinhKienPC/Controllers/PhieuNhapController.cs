@@ -27,7 +27,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
         // 1. DANH SÁCH
         // GET: PhieuNhap
-        public async Task<IActionResult> Index(string searchId, int? MaNhaCungCap, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
+        public async Task<IActionResult> Index(string searchString, int? MaNhaCungCap, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
             var query = _context.PhieuNhap
                 .Where(p => !p.IsDeleted)
@@ -37,10 +37,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .AsQueryable();
 
             // Lọc theo Mã phiếu (Nhập trên thanh tìm kiếm)
-            if (!string.IsNullOrEmpty(searchId))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 // Hỗ trợ cả định dạng "PN-00001" hoặc chỉ số "1"
-                string idStr = searchId.Replace("PN-", "").Replace("#", "").Trim();
+                string idStr = searchString.Replace("PN-", "").Replace("#", "").Trim();
                 if (int.TryParse(idStr, out int id))
                 {
                     query = query.Where(p => p.MaPhieuNhap == id);
@@ -48,7 +48,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 else
                 {
                     // Nếu không phải số, tìm theo Ghi chú
-                    query = query.Where(p => p.GhiChu.Contains(searchId));
+                    query = query.Where(p => p.GhiChu.Contains(searchString));
                 }
             }
 
@@ -76,15 +76,15 @@ namespace QuanLyKhoLinhKienPC.Controllers
             }
 
             // Chuẩn bị SelectList cho Dropdown lọc
-            ViewBag.MaNhaCungCap = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
-            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+            ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
 
             // Lưu trạng thái tìm kiếm
-            ViewBag.CurrentSearchId = searchId;
-            ViewBag.CurrentMaNhaCungCap = MaNhaCungCap;
-            ViewBag.CurrentMaNguoiDung = MaNguoiDung;
-            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentMaNhaCungCap"] = MaNhaCungCap;
+            ViewData["CurrentMaNguoiDung"] = MaNguoiDung;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
 
             var data = await query.OrderByDescending(p => p.NgayNhap).ToListAsync();
             return View(data);
@@ -126,7 +126,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap");
 
             // Danh sách Dropdown cho Detail (Javascript)
-            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new
+            ViewData["SanPhamList"] = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new
             {
                 MaSanPham = s.MaSanPham,
                 TenSanPham = s.TenSanPham
@@ -261,7 +261,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
 
             // Nếu lỗi, load lại dữ liệu dropdown
             ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", model.MaNhaCungCap);
-            ViewBag.SanPhamList = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { s.MaSanPham, s.TenSanPham }).ToList();
+            ViewData["SanPhamList"] = _context.SanPham.Where(s => !s.IsDeleted).Select(s => new { s.MaSanPham, s.TenSanPham }).ToList();
 
             return View(model);
         }
@@ -478,7 +478,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // 6. THÙNG RÁC (Hiện danh sách đã xóa)
         // GET: PhieuNhap/Trash
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
-        public async Task<IActionResult> Trash(string searchString, int? MaNhaCungCap, int? MaNguoiDung)
+        public async Task<IActionResult> Trash(string searchString, int? MaNhaCungCap, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
             var query = _context.PhieuNhap
                 .Where(p => p.IsDeleted)
@@ -512,9 +512,23 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 query = query.Where(p => p.MaNguoiDung == MaNguoiDung);
             }
 
-            ViewBag.MaNhaCungCap = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
-            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung.Where(u => !u.IsDeleted), "MaNguoiDung", "HoTen", MaNguoiDung);
+            // Lọc theo ngày
+            if (fromDate.HasValue)
+            {
+                query = query.Where(p => p.NgayNhap >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                var searchToDate = toDate.Value.AddDays(1);
+                query = query.Where(p => p.NgayNhap < searchToDate);
+            }
+
+            ViewData["MaNhaCungCap"] = new SelectList(_context.NhaCungCap.Where(n => !n.IsDeleted), "MaNhaCungCap", "TenNhaCungCap", MaNhaCungCap);
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung.Where(u => !u.IsDeleted), "MaNguoiDung", "HoTen", MaNguoiDung);
             ViewData["CurrentFilter"] = searchString;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
 
             return View(await query.OrderByDescending(p => p.NgayNhap).ToListAsync());
         }

@@ -1,7 +1,7 @@
 ﻿@model QuanLyKhoLinhKienPC.Models.PhieuXuat
 
 @{
-    ViewData["Title"] = "Xóa/Hủy Phiếu Xuất";
+    ViewData["Title"] = "Hủy Phiếu Xuất";
 }
 
 <style>
@@ -15,13 +15,13 @@
         <div class="col-md-6">
             <div class="card shadow rounded-4 border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
                 <div class="card-header bg-white border-bottom border-light py-3">
-                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Hủy Phiếu Xuất / Trả Hàng</h4>
+                    <h4 class="mb-0 text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> Xóa Phiếu Xuất</h4>
                 </div>
                 <div class="card-body text-center p-4">
-                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn hủy phiếu xuất này (KH trả lại hàng)?</h5>
+                    <h5 class="card-title text-danger mb-4">Bạn có chắc muốn chuyển Phiếu xuất này vào thùng rác?</h5>
 
                     <p class="text-muted small mb-4">
-                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Thao tác này sẽ hoàn trả các mã Seri về kho. Phiếu sẽ được chuyển vào lịch sử đơn hủy.
+                        <i class="fa-solid fa-circle-info"></i> Lưu ý: Dữ liệu sẽ được chuyển vào Thùng rác (có thể khôi phục lại khi cần).
                     </p>
 
                     <div class="bg-danger bg-opacity-10 py-4 rounded-4 mx-2 text-start shadow-inner border border-danger border-opacity-10">
@@ -29,30 +29,30 @@
                             <div class="col-sm-4 text-danger fw-semibold">Mã Phiếu:</div>
                             <div class="col-sm-8 fw-bold text-dark fs-5">#PX-@Model.MaPhieuXuat.ToString("D5")</div>
                             
-                            <div class="col-sm-4 text-danger fw-semibold">Khách Hàng:</div>
-                            <div class="col-sm-8 text-dark fw-bold">@Model.TenKhachHang</div>
-
-                            <div class="col-sm-4 text-danger fw-semibold">SĐT:</div>
-                            <div class="col-sm-8 text-dark">@(string.IsNullOrEmpty(Model.SoDienThoaiKhach) ? "---" : Model.SoDienThoaiKhach)</div>
-
                             <div class="col-sm-4 text-danger fw-semibold">Thời Gian:</div>
                             <div class="col-sm-8 text-dark">@Model.NgayXuat.ToString("dd/MM/yyyy HH:mm")</div>
 
                             <div class="col-sm-4 text-danger fw-semibold">Người Lập Phiếu:</div>
                             <div class="col-sm-8 text-dark">@(Model.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</div>
 
-                            <div class="col-sm-4 text-danger fw-semibold mt-3">Tiền Khách Trả:</div>
-                            <div class="col-sm-8 text-dark fw-bold fs-6 mt-3">@Model.TongTien.ToString("N0") VNĐ</div>
+                            <div class="col-sm-4 text-danger fw-semibold">Khách Hàng:</div>
+                            <div class="col-sm-8 text-dark">@Model.TenKhachHang</div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">SĐT:</div>
+                            <div class="col-sm-8 text-dark">@(string.IsNullOrEmpty(Model.SoDienThoaiKhach) ? "---" : Model.SoDienThoaiKhach)</div>
+
+                            <div class="col-sm-4 text-danger fw-semibold">Tổng Tiền:</div>
+                            <div class="col-sm-8 text-dark">@Model.TongTien.ToString("N0") VNĐ</div>
                         </div>
                     </div>
 
                     <form asp-action="Delete" class="mt-5 d-flex justify-content-between px-2">
                         <input type="hidden" asp-for="MaPhieuXuat" />
                         <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 text-secondary fw-semibold transition">
-                            <i class="fa-solid fa-xmark me-1"></i> Trở về
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy bỏ
                         </a>
                         <button type="submit" class="btn btn-danger shadow rounded-pill px-5 fw-bold transition">
-                            <i class="fa-solid fa-rotate-left me-1"></i> Xác Nhận Hủy/Trả Hàng
+                            <i class="fa-solid fa-trash me-1"></i> Đồng ý xóa
                         </button>
                     </form>
                 </div>

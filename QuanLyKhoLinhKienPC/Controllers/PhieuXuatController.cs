@@ -34,10 +34,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: PhieuXuat
         public async Task<IActionResult> Index(string searchString, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
-            ViewBag.CurrentFilter = searchString;
-            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
-            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentMaNguoiDung"] = MaNguoiDung;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
 
             var query = _context.PhieuXuat
                 .Where(p => !p.IsDeleted)
@@ -47,11 +48,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 string searchLower = searchString.ToLower().Trim();
-                int searchId = -1;
-                string numberPart = searchLower.Replace("px", "").Replace("-", "").Trim();
-                int.TryParse(numberPart, out searchId);
+                int parsedId = -1;
+                string numberPart = searchLower.Replace("px", "").Replace("-", "").Replace("#", "").Trim();
+                int.TryParse(numberPart, out parsedId);
 
-                query = query.Where(p => p.MaPhieuXuat == searchId ||
+                query = query.Where(p => p.MaPhieuXuat == parsedId ||
                                          (p.TenKhachHang != null && p.TenKhachHang.ToLower().Contains(searchLower)) ||
                                          (p.SoDienThoaiKhach != null && p.SoDienThoaiKhach.Contains(searchLower)));
             }
@@ -122,7 +123,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                         .ToList()
                 }).ToList();
 
-            ViewBag.SanPhamList = dsSanPham;
+            ViewData["SanPhamList"] = dsSanPham;
 
             return View();
         }
@@ -215,7 +216,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             }
 
             // Load lại dữ liệu nếu lỗi
-            ViewBag.SanPhamList = _context.SanPham
+            ViewData["SanPhamList"] = _context.SanPham
                 .Where(s => !s.IsDeleted)
                 .Select(s => new
                 {
@@ -398,10 +399,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên bán hàng")]
         public async Task<IActionResult> Trash(string searchString, int? MaNguoiDung, DateTime? fromDate, DateTime? toDate)
         {
-            ViewBag.CurrentFilter = searchString;
-            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
-            ViewBag.MaNguoiDung = new SelectList(_context.NguoiDung, "MaNguoiDung", "HoTen", MaNguoiDung);
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["FromDate"] = fromDate?.ToString("yyyy-MM-dd");
+            ViewData["ToDate"] = toDate?.ToString("yyyy-MM-dd");
+            ViewData["MaNguoiDung"] = new SelectList(_context.NguoiDung.Where(u => !u.IsDeleted), "MaNguoiDung", "HoTen", MaNguoiDung);
 
             var query = _context.PhieuXuat
                 .Where(p => p.IsDeleted)
@@ -411,11 +412,11 @@ namespace QuanLyKhoLinhKienPC.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 string searchLower = searchString.ToLower().Trim();
-                int searchId = -1;
-                string numberPart = searchLower.Replace("px", "").Replace("-", "").Trim();
-                int.TryParse(numberPart, out searchId);
+                int parsedId = -1;
+                string numberPart = searchLower.Replace("px", "").Replace("-", "").Replace("#", "").Trim();
+                int.TryParse(numberPart, out parsedId);
 
-                query = query.Where(p => p.MaPhieuXuat == searchId ||
+                query = query.Where(p => p.MaPhieuXuat == parsedId ||
                                          (p.TenKhachHang != null && p.TenKhachHang.ToLower().Contains(searchLower)) ||
                                          (p.SoDienThoaiKhach != null && p.SoDienThoaiKhach.Contains(searchLower)));
             }

@@ -56,7 +56,7 @@
                                 <label asp-for="MaVaiTro" class="form-label fw-bold">Vai trò <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-0"><i class="fa-solid fa-user-shield"></i></span>
-                                    <select asp-for="MaVaiTro" class="form-select form-select-lg bg-light border-0 fs-6" asp-items="ViewBag.MaVaiTro">
+                                    <select asp-for="MaVaiTro" class="form-select form-select-lg bg-light border-0 fs-6" asp-items="@(ViewData["MaVaiTro"] as SelectList)">
                                         <option value="">-- Chọn vai trò --</option>
                                     </select>
                                 </div>

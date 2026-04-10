@@ -7,32 +7,56 @@
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        .select2-container--default .select2-selection--multiple {
-            border: 1px solid #ced4da;
-            min-height: 38px;
-            border-radius: 0.375rem;
+        .transition { transition: all 0.2s ease; }
+        .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+        .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
+        .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+        .custom-table-container {
+            position: relative;
+            background: #fff;
+            height: 450px;
+            overflow-y: scroll;
+            overflow-x: hidden;
         }
-        .select2-container--default.select2-container--focus .select2-selection--multiple {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
-        }
-        .select2-container {
-            width: 100% !important;
+        /* Làm đẹp thanh cuộn */
+        .custom-table-container::-webkit-scrollbar { width: 6px; }
+        .custom-table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .custom-table-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .custom-table-container::-webkit-scrollbar-thumb:hover { background: #bbb; }
+        
+        .form-select:focus, .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
+
+        /* Custom Seri Picker Styles */
+        .custom-seri-picker { min-height: 38px; width: 100%; position: relative; }
+        .seri-item { transition: background-color 0.1s ease; cursor: pointer; }
+        .seri-item:hover { background-color: #e9ecef; color: #0b5ed7; }
+        .cursor-pointer { cursor: pointer; }
+        .seri-dropdown-list {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #dee2e6 !important;
+            z-index: 10000 !important;
+            display: none;
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 }
 
-<div class="container-fluid pt-4 pb-5 px-lg-5 text-dark">
+<div class="container-fluid pt-4 pb-0 px-lg-5 text-dark">
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
         <div>
-            <h3 class="fw-bold m-0 text-success"><i class="fa-solid fa-cart-arrow-down me-2"></i> Lập Phiếu Xuất Kho</h3>
-            <p class="text-muted small mb-0 mt-1">Vui lòng nhập thông tin khách hàng và chọn xuất kho các Linh kiện qua Mã Seri.</p>
+            <h3 class="fw-bold m-0 text-primary"><i class="fa-solid fa-plus-circle me-2"></i> Thêm Mới Phiếu Xuất</h3>
+            <p class="text-muted small mb-0 mt-1">Vui lòng nhập thông tin khách hàng và chọn xuất kho các linh kiện qua mã seri.</p>
         </div>
         <div class="d-flex justify-content-end align-items-center gap-3">
              <div class="text-end">
-                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Tổng Khách Trả</small>
-                <div class="text-danger fw-bold fs-4"><span id="lblTongTien">0</span> <small class="fs-6">VNĐ</small></div>
+                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.65rem;">Tổng giá trị phiếu</small>
+                <div class="text-primary fw-bold fs-4"><span id="lblTongTien">0</span> <small class="fs-6">VNĐ</small></div>
             </div>
         </div>
     </div>
@@ -40,28 +64,21 @@
     <form asp-action="Create" id="frmPhieuXuat">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert"></div>
         
-        <div class="row g-4">
+        <div class="row g-3">
             <!-- CỘT TRÁI: THÔNG TIN KHÁCH HÀNG -->
             <div class="col-lg-3">
                 <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h6 class="text-secondary fw-bold text-uppercase small mb-4 border-start border-success border-4 ps-2">Thông tin Khách hàng</h6>
+                        <h6 class="text-secondary fw-bold text-uppercase small mb-4 border-start border-primary border-4 ps-2 text-dark">Thông tin Khách hàng</h6>
                         
                         <div class="mb-4">
                             <label asp-for="TenKhachHang" class="form-label fw-bold text-muted small text-uppercase">Khách Hàng <span class="text-danger">*</span></label>
                             <input asp-for="TenKhachHang" class="form-control rounded-3 border-light-subtle transition shadow-xs" placeholder="Tên khách hàng..." style="padding: 0.6rem 1rem;" required />
-                            <span asp-validation-for="TenKhachHang" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-4">
                             <label asp-for="SoDienThoaiKhach" class="form-label fw-bold text-muted small text-uppercase">Số điện thoại <span class="text-danger">*</span></label>
                             <input asp-for="SoDienThoaiKhach" class="form-control rounded-3 border-light-subtle transition shadow-xs" placeholder="09xxxx..." style="padding: 0.6rem 1rem;" required />
-                            <span asp-validation-for="SoDienThoaiKhach" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-4 flex-grow-1 d-flex flex-column">
-                            <label asp-for="GhiChu" class="form-label fw-bold text-muted small text-uppercase">Ghi Chú Đơn</label>
-                            <textarea asp-for="GhiChu" class="form-control rounded-3 border-light-subtle transition shadow-xs flex-grow-1" style="min-height: 100px;" placeholder="Yêu cầu từ khách hoặc lưu ý bảo hành..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -72,22 +89,22 @@
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
                     <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
                         <h6 class="m-0 fw-bold text-dark text-uppercase small">Danh sách linh kiện bán</h6>
-                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-4 fw-bold shadow-xs transition" onclick="themDong()">
-                            <i class="fa-solid fa-plus-circle me-1"></i> Thêm sản phẩm
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold shadow-xs transition" onclick="themDong()">
+                            <i class="fa-solid fa-plus-circle me-1"></i> Thêm linh kiện
                         </button>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 520px;">
-                            <table class="table mb-0 align-middle" id="tblChiTiet">
+                        <div class="custom-table-container">
+                            <table class="table mb-0 align-middle" id="tblChiTiet" style="table-layout: fixed; width: 100%; border-collapse: separate;">
                                 <thead class="bg-light sticky-top">
                                     <tr>
-                                        <th class="py-3 ps-4 text-center text-secondary" style="width: 40px;">#</th>
-                                        <th class="py-3 text-dark" style="width: 22%">Linh Kiện Nhập</th>
-                                        <th class="py-3 text-center" style="width: 35%;">Chọn Mã Seri Bán (Quét kho)</th>
-                                        <th class="py-3 text-center" style="width: 60px;">SL</th>
-                                        <th class="py-3 text-end" style="width: 120px;">Đơn Giá</th>
+                                        <th class="py-3 ps-4 text-center text-secondary" style="width: 50px;">#</th>
+                                        <th class="py-3 text-dark" style="width: 250px;">Linh Kiện Bán</th>
+                                        <th class="py-3 text-center" style="width: 350px;">Mã Seri (SN)</th>
+                                        <th class="py-3 text-center" style="width: 80px;">SL</th>
+                                        <th class="py-3 text-end" style="width: 130px;">Đơn Giá</th>
                                         <th class="py-3 text-end pe-4" style="width: 130px;">Thành Tiền</th>
-                                        <th class="py-3 text-center" style="width: 40px;"></th>
+                                        <th class="py-3 text-center" style="width: 50px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,12 +118,12 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-between mt-4 border-top pt-4">
+        <div class="d-flex justify-content-between mt-2 border-top pt-2">
             <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
-            <button type="button" class="btn btn-success shadow rounded-pill px-5 fw-bold transition" onclick="submitForm()">
-                <i class="fa-solid fa-circle-check me-1"></i> XUẤT KHO & IN LẬP TỨC
+            <button type="button" class="btn btn-primary shadow rounded-pill px-5 fw-bold transition" onclick="submitForm()">
+                <i class="fa-solid fa-save me-1"></i> Lưu lại
             </button>
         </div>
     </form>
@@ -115,11 +132,9 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    
     <script>
-        var dsSanPham = @Html.Raw(Json.Serialize(ViewBag.SanPhamList));
+        var dsSanPham = @Html.Raw(Json.Serialize(ViewData["SanPhamList"]));
         var rawData = @Html.Raw(Json.Serialize(Model?.Items ?? new List<QuanLyKhoLinhKienPC.ViewModels.XuatKhoItemVM>()));
-        // Chuẩn hóa dữ liệu sang PascalCase để đồng bộ với logic JS trước đó
         var chiTietList = rawData.map(item => ({
             MaSanPham: item.maSanPham || item.MaSanPham || '',
             SelectedSeriIds: item.selectedSeriIds || item.SelectedSeriIds || [],
@@ -133,10 +148,10 @@
             var tongTienPhieu = 0;
 
             if(chiTietList.length === 0) {
-                tbody.append('<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-cart-shopping fa-2x d-block mb-3 opacity-25"></i>Đơn hàng trống. Bấm "Thêm sản phẩm" để bắt đầu dọn kho.</td></tr>');
+                tbody.append('<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-cart-shopping fa-2x d-block mb-3 opacity-25"></i>Phiếu xuất trống. Vui lòng thêm linh kiện.</td></tr>');
             } else {
                 chiTietList.forEach(function(item, index) {
-                    var sanPhamOptions = '<option value="">-- Chọn --</option>';
+                    var sanPhamOptions = '<option value="">-- Chọn linh kiện --</option>';
                     dsSanPham.forEach(function(sp) {
                         var kMaSP = sp.MaSanPham || sp.maSanPham;
                         var kTenSP = sp.TenSanPham || sp.tenSanPham;
@@ -155,18 +170,20 @@
                                     ${sanPhamOptions}
                                 </select>
                             </td>
-                            <td>
-                                <select class="form-control select-seri border-light-subtle rounded-3 shadow-xs" multiple="multiple" onchange="capNhatSeri(${index}, this)">
-                                    <!-- Options load qua JS dựa trên linh kiện -->
-                                </select>
+                            <td class="position-relative">
+                                <div class="custom-seri-picker" id="picker-${index}">
+                                    <div class="seri-tags d-flex flex-wrap gap-1 mb-1"></div>
+                                    <input type="text" class="form-control form-control-sm seri-search-input border-light-subtle rounded-3 shadow-xs" 
+                                           placeholder="🔍 Tìm Seri..." onfocus="openSeriList(${index})" onkeyup="filterSeri(${index}, this)"
+                                           ${item.MaSanPham ? '' : 'disabled'} />
+                                    <div class="seri-dropdown-list shadow-lg border rounded-3 bg-white"></div>
+                                </div>
                             </td>
-                            <td>
-                                <input type="number" class="form-control form-control-sm text-center fw-bold bg-light border-light-subtle rounded-3 shadow-xs" value="${item.SoLuong}" readonly />
-                            </td>
+                            <td class="text-center fw-bold text-dark">${item.SoLuong}</td>
                             <td>
                                 <input type="number" class="form-control form-control-sm text-end border-light-subtle rounded-3 shadow-xs" min="0" value="${item.DonGiaXuat}" onchange="capNhatGia(${index}, this)" />
                             </td>
-                            <td class="text-end fw-bold text-danger pe-4">
+                            <td class="text-end fw-bold text-primary pe-4" style="width: 130px;">
                                 ${new Intl.NumberFormat('vi-VN').format(thanhTien)}
                             </td>
                             <td class="text-center">
@@ -177,64 +194,82 @@
                         </tr>
                     `;
                     tbody.append(tr);
-                    
-                    // Khởi tạo Select2 cho ô Seri của dòng này
-                    initSelect2Seri(index);
+                    renderSeriTags(index);
                 });
             }
             $('#lblTongTien').text(new Intl.NumberFormat('vi-VN').format(tongTienPhieu));
         }
 
-        function initSelect2Seri(index) {
-            var row = $(`tr[data-index="${index}"]`);
-            var selectSeri = row.find('.select-seri');
+        function renderSeriTags(index) {
             var item = chiTietList[index];
-
-            if (!item.MaSanPham) {
-                selectSeri.prop('disabled', true);
-                return;
-            }
-
-            // Lấy danh sách Seri khả dụng của sản phẩm này
-            var prod = dsSanPham.find(s => (s.MaSanPham || s.maSanPham) == item.MaSanPham);
-            selectSeri.empty();
-            if (prod && prod.AvailableSeris) {
-                prod.AvailableSeris.forEach(function(seri) {
-                    var kMaSeri = seri.MaSeri || seri.maSeri;
-                    var kSoSeri = seri.SoSeri || seri.soSeri;
-                    var selected = item.SelectedSeriIds.includes(kMaSeri) ? 'selected' : '';
-                    selectSeri.append(`<option value="${kMaSeri}" ${selected}>${kSoSeri}</option>`);
+            var container = $(`#picker-${index} .seri-tags`);
+            container.empty();
+            if (item.SelectedSeriIds.length > 0) {
+                var prod = dsSanPham.find(s => (s.MaSanPham || s.maSanPham) == item.MaSanPham);
+                var lstSeri = prod ? (prod.AvailableSeris || prod.availableSeris) : [];
+                item.SelectedSeriIds.forEach(function(seriId) {
+                    var seri = lstSeri.find(s => (s.MaSeri || s.maSeri) == seriId);
+                    if (seri) {
+                        container.append(`
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-1 d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                ${seri.SoSeri || seri.soSeri}
+                                <i class="fa-solid fa-xmark cursor-pointer" onclick="removeSeri(${index}, ${seriId})"></i>
+                            </span>
+                        `);
+                    }
                 });
             }
-
-            selectSeri.select2({
-                placeholder: "🔍 Click chọn Seri...",
-                allowClear: true,
-                closeOnSelect: false
-            });
         }
+
+        function openSeriList(index) {
+            var item = chiTietList[index];
+            if (!item.MaSanPham) return;
+            $('.seri-dropdown-list').hide();
+            var picker = $(`#picker-${index}`);
+            var list = picker.find('.seri-dropdown-list');
+            var input = picker.find('.seri-search-input');
+            list.empty();
+            var prod = dsSanPham.find(s => (s.MaSanPham || s.maSanPham) == item.MaSanPham);
+            var lstSeri = prod ? (prod.AvailableSeris || prod.availableSeris) : [];
+            var keyword = input.val().toLowerCase();
+            var hasResult = false;
+            lstSeri.forEach(function(seri) {
+                var sNum = seri.SoSeri || seri.soSeri;
+                var sId = seri.MaSeri || seri.maSeri;
+                if (sNum.toLowerCase().includes(keyword) && !item.SelectedSeriIds.includes(sId)) {
+                    hasResult = true;
+                    list.append(`<div class="seri-item p-2 border-bottom cursor-pointer hover-bg-light small" onclick="selectSeri(${index}, ${sId})"><i class="fa-solid fa-barcode me-2 opacity-50"></i>${sNum}</div>`);
+                }
+            });
+            if (!hasResult) list.append('<div class="p-3 text-center text-muted small">Không tìm thấy Seri nào khả dụng</div>');
+            list.fadeIn(50);
+        }
+
+        function filterSeri(index, input) { openSeriList(index); }
+        function selectSeri(index, seriId) {
+            if (!chiTietList[index].SelectedSeriIds.includes(seriId)) {
+                chiTietList[index].SelectedSeriIds.push(seriId);
+                chiTietList[index].SoLuong = chiTietList[index].SelectedSeriIds.length;
+                renderTable();
+                $(`#picker-${index} .seri-search-input`).focus().val('');
+            }
+        }
+        function removeSeri(index, seriId) {
+            chiTietList[index].SelectedSeriIds = chiTietList[index].SelectedSeriIds.filter(id => id !== seriId);
+            chiTietList[index].SoLuong = chiTietList[index].SelectedSeriIds.length;
+            renderTable();
+        }
+        $(document).on('click', function(e) { if (!$(e.target).closest('.custom-seri-picker').length) $('.seri-dropdown-list').hide(); });
 
         function chonSanPham(index, selectElem) {
             var maSP = $(selectElem).val();
             var prod = dsSanPham.find(s => (s.MaSanPham || s.maSanPham) == maSP);
-            
             chiTietList[index].MaSanPham = maSP;
             chiTietList[index].DonGiaXuat = prod ? (prod.GiaBan || prod.giaBan) : 0;
             chiTietList[index].SelectedSeriIds = [];
             chiTietList[index].SoLuong = 0;
-            
             renderTable();
-            // Tự động focus vào ô Seri để chọn nhanh
-            setTimeout(() => {
-                 var select2Container = $(`tr[data-index="${index}"]`).find('.select2-container').focus();
-            }, 100);
-        }
-
-        function capNhatSeri(index, selectElem) {
-            var selectedIds = $(selectElem).val() || [];
-            chiTietList[index].SelectedSeriIds = selectedIds.map(id => parseInt(id));
-            chiTietList[index].SoLuong = selectedIds.length;
-            renderTable();
+            setTimeout(() => $(`#picker-${index} .seri-search-input`).focus(), 100);
         }
 
         function capNhatGia(index, inputElem) {
@@ -253,28 +288,30 @@
         }
 
         function submitForm() {
-            if(!$('#TenKhachHang').val() || !$('#SoDienThoaiKhach').val()) {
+            var sdt = $('#SoDienThoaiKhach').val();
+            // Regex linh hoạt: cho phép đầu số +, khoảng trắng, dấu gạch ngang và dài 10-11 số
+            var vnf_regex = /^(\+?\d{1,3}[- ]?)?\d{10,11}$/;
+
+            if(!$('#TenKhachHang').val() || !sdt) {
                 showToast('Vui lòng điền đầy đủ Tên và SĐT khách hàng!', 'warning');
                 return;
             }
-            if(chiTietList.length === 0) {
-                showToast('Vui lòng thêm ít nhất một sản phẩm!', 'warning');
+            if(!vnf_regex.test(sdt)) {
+                showToast('Số điện thoại không đúng định dạng Việt Nam!', 'error');
                 return;
             }
-
+            if(chiTietList.length === 0) {
+                showToast('Vui lòng thêm ít nhất một linh kiện!', 'warning');
+                return;
+            }
             var hopLe = true;
-            chiTietList.forEach(function(item) {
-                if(!item.MaSanPham || item.SoLuong <= 0) hopLe = false;
-            });
-
+            chiTietList.forEach(function(item) { if(!item.MaSanPham || item.SoLuong <= 0) hopLe = false; });
             if(!hopLe) {
                 showToast('Tất cả các dòng cần phải được chọn ít nhất 1 mã Seri.', 'error');
                 return;
             }
-
             var hiddenContainer = $('#hiddenInputsContainer');
             hiddenContainer.empty();
-            
             chiTietList.forEach(function(item, index) {
                 hiddenContainer.append(`<input type="hidden" name="Items[${index}].MaSanPham" value="${item.MaSanPham}" />`);
                 hiddenContainer.append(`<input type="hidden" name="Items[${index}].DonGiaXuat" value="${item.DonGiaXuat}" />`);
@@ -282,24 +319,68 @@
                     hiddenContainer.append(`<input type="hidden" name="Items[${index}].SelectedSeriIds[${sIdx}]" value="${seriId}" />`);
                 });
             });
-
             $('#frmPhieuXuat').submit();
         }
 
-        $(document).ready(function() {
-            renderTable();
-            
-            // Fix tabindex inside select2
-            $(document).on('select2:open', () => {
-                document.querySelector('.select2-search__field').focus();
-            });
-        });
+        $(document).ready(function() { renderTable(); });
     </script>
 }
 
 <style>
     .transition { transition: all 0.2s ease; }
     .shadow-xs { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
+    .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
     .border-dashed { border-style: dashed !important; border-width: 2px !important; }
-    .form-select:focus, .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
+    .form-select:focus, .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
+    
+    /* Custom Seri Picker Styles */
+    .custom-seri-picker {
+        min-height: 38px;
+        width: 100%;
+    }
+    .seri-item {
+        transition: background-color 0.1s ease;
+        cursor: pointer;
+    }
+    .seri-item:hover {
+        background-color: #e9ecef;
+        color: #0b5ed7;
+    }
+    .cursor-pointer { cursor: pointer; }
+    .seri-dropdown-list {
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        border: 1px solid #dee2e6 !important;
+        z-index: 10000 !important;
+    }
+    
+    /* Ghi đè CSS cũ */
+    .select-seri { display: none !important; }
+    
+    .select2-container--open {
+        z-index: 9999 !important;
+    }
+    
+    /* Ghi đè vị trí dropdown khi nằm trong ô td có position: relative */
+    .select2-container--default .select2-dropdown {
+        border-color: #dee2e6 !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+    /* Fix triệt để nền xám (backdrop) bị lệch khi sử dụng zoom: 0.8 */
+    .modal-backdrop { 
+        position: fixed !important; 
+        top: 0 !important; 
+        left: 0 !important; 
+        width: 125vw !important;
+        height: 125vh !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        z-index: 1040 !important;
+        transform: none !important;
+    }
+    .modal { z-index: 1050 !important; }
+    body.modal-open { 
+        padding-right: 0 !important; 
+        overflow: hidden !important; 
+    }
 </style>

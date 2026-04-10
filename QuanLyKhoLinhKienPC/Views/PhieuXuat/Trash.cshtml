@@ -1,12 +1,13 @@
 ﻿@model IEnumerable<QuanLyKhoLinhKienPC.Models.PhieuXuat>
 
 @{
-    ViewData["Title"] = "Thùng Rác Hóa Đơn Bán";
+    ViewData["Title"] = "Thùng Rác Phiếu Xuất";
 }
 
 <div class="d-flex flex-column h-100">
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Hóa Đơn Đã Hủy / Khách Trả Hàng</h2>
+        <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Phiếu Xuất</h2>
         <div>
             <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-medium transition text-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
@@ -27,7 +28,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
-                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="@(ViewData["MaNguoiDung"] as SelectList)" onchange="this.form.submit()">
                                 <option value="">-- Người lập phiếu --</option>
                             </select>
                         </div>
@@ -59,8 +60,8 @@
         </div>
     </div>
 
-
-    <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05) !important;">
+    <!-- DATA TABLE -->
+    <div class="card shadow rounded-4 flex-grow-1 overflow-hidden border-0" style="box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05) !important;">
         <div class="card-body p-0 position-relative">
             <div class="table-responsive" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-x: hidden; overflow-y: scroll;">
                 <table class="table premium-table mb-0 w-100 align-middle" style="table-layout: fixed;">
@@ -73,11 +74,58 @@
                             <th class="py-4" style="width: 18%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Khách Hàng</th>
                             <th class="py-4" style="width: 17%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Số Điện Thoại</th>
                             <th class="py-4 text-end" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Tổng Tiền</th>
-                            <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao Tác</th>
+                            <th class="py-4 text-center pe-4" style="width: 10%; position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Any())
+                        @if (Model != null && Model.Any())
+                        {
+                            int stt = 1;
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="text-center text-secondary fw-medium ps-4">@(stt++)</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-secondary border border-secondary border-opacity-10 rounded-pill px-3 py-2 fw-bold">
+                                            #PX-@item.MaPhieuXuat.ToString("D5")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark fs-6 d-block">@item.NgayXuat.ToString("dd/MM/yyyy")</div>
+                                        <small class="text-muted font-monospace">@item.NgayXuat.ToString("HH:mm:ss")</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark text-truncate" title="@item.TenKhachHang">
+                                            @item.TenKhachHang
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.SoDienThoaiKhach))
+                                        {
+                                            <span class="text-dark">@item.SoDienThoaiKhach</span>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted opacity-50">---</small>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold text-muted fs-6">
+                                        @item.TongTien.ToString("N0") <small>VNĐ</small>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <form asp-action="Restore" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục">
+                                                <i class="fa-solid fa-rotate-left"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <style>
                                 .empty-state-row { height: 350px; }
@@ -91,53 +139,6 @@
                                     </div>
                                 </td>
                             </tr>
-                        }
-                        else
-                        {
-                            int stt = 1;
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="text-center text-secondary fw-medium ps-4">@(stt++)</td>
-                                    <td class="text-center">
-                                        <span class="badge bg-light text-secondary border border-secondary border-opacity-10 rounded-pill px-3 py-2 fw-bold">
-                                            #PX-@item.MaPhieuXuat.ToString("D5")
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold text-dark fs-6 d-block text-muted"><del>@item.NgayXuat.ToString("dd/MM/yyyy")</del></div>
-                                        <small class="text-muted font-monospace"><del>@item.NgayXuat.ToString("HH:mm:ss")</del></small>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-muted"><del>@(item.MaNguoiDungNavigation?.HoTen ?? "Hệ thống")</del></span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold text-muted mb-0 text-truncate" title="@item.TenKhachHang">
-                                            <del>@item.TenKhachHang</del>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(item.SoDienThoaiKhach))
-                                        {
-                                            <span class="text-muted"><del>@item.SoDienThoaiKhach</del></span>
-                                        }
-                                        else
-                                        {
-                                            <small class="text-muted opacity-50">---</small>
-                                        }
-                                    </td>
-                                    <td class="text-end fw-bold text-muted fs-6">
-                                        <del>@string.Format("{0:N0}", item.TongTien) <small>VNĐ</small></del>
-                                    </td>
-                                    <td class="text-center pe-4">
-                                        <form asp-action="Restore" asp-route-id="@item.MaPhieuXuat" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-circle d-inline-flex align-items-center justify-content-center transition shadow-xs" style="width: 35px; height: 35px;" title="Khôi phục lại hóa đơn và xuất lại hàng khỏi kho">
-                                                <i class="fa-solid fa-rotate-left"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
                         }
                     </tbody>
                 </table>

@@ -34,7 +34,11 @@
   - Biến: camelCase
 - **Error Handling:** Sử dụng try-catch trong các Controller action, thường trả về Error View.
 - **Authentication:** Cookie Authentication (`PCCookieAuth`), yêu cầu đăng nhập toàn cục (`AuthorizeFilter`).
-- **Authorization:** Phân quyền dựa trên `MaVaiTro` trong bảng `NguoiDung`.
+- **Authorization (RBAC):** Phân quyền dựa trên 3 nhóm chính:
+  - `Admin`: Toàn quyền hệ thống.
+  - `Nhân viên kho`: Quản lý Danh mục, Sản phẩm, Nhà cung cấp và Nhập kho. Chặn Xuất kho.
+  - `Nhân viên bán hàng`: Lập và hủy Phiếu xuất. Chặn Nhập kho và Quản lý Sản phẩm/Danh mục.
+- **View Safety:** Sử dụng `ViewData` làm chuẩn truyền dữ liệu View (không dùng `ViewBag`). Đối với tìm kiếm, sử dụng `searchString` thống nhất toàn hệ thống.
 
 # 5. NGHIỆP VỤ & THỰC THỂ CHÍNH (DOMAIN & CORE ENTITIES)
 
@@ -64,7 +68,13 @@
 ## Flow 3: Xuất hàng (Export)
 
 - **Files chính:** `PhieuXuatController.cs`.
-- **Logic:** Tạo `PhieuXuat`, thêm `ChiTietPhieuXuat`, và cập nhật trạng thái `SeriSanPham` đã bán.
+- **Logic:** Tạo `PhieuXuat`, thêm `ChiTietPhieuXuat`, và cập nhật trạng thái `SeriSanPham` đã bán. Sử dụng Database Transaction để bảo vệ luồng rút kho.
+
+## Flow 4: Máy trạng thái Seri (Seri State Machine)
+
+- **Nguyên lý:** Mỗi Seri có 3 trạng thái: `1 (Trong kho)`, `2 (Đã bán)`, `3 (Lỗi/Bảo hành)`.
+- **Điều hướng:** Hệ thống tự động điều hướng trạng thái dựa trên sự tồn tại của `MaPhieuXuat`. (Chi tiết tại `inventory_core_logic.md`).
+- **An toàn:** Chốt chặn không cho xóa Phiếu nhập nếu hàng trong phiếu đã bán hoặc đang lỗi.
 
 # 7. TRẠNG THÁI DỰ ÁN & BACKLOG (STATE & TODO)
 
@@ -135,18 +145,32 @@
     - Chi tiết phiếu: Hiển thị danh sách Seri đã bán.
     - Thêm mới (Create): Giao diện JS, hiển thị tồn kho thực tế, **Tự động rút Seri từ kho** theo số lượng bán.
     - Xóa mềm: Cascade hoàn trả Seri về kho (Trạng thái 1) và gỡ liên kết phiếu xuất.
-    - Thùng rác & Khôi phục: Rút lại Seri từ kho (Chốt chặn: Chặn khôi phục nếu hàng đã bán lại cho khách khác).
-    - Bảo mật: Sử dụng **Transaction** bảo vệ luồng rút/trả kho.
-  - [x] `Cảnh báo tồn kho & Hoạt động`: Module Dashboard hiện thống kê cảnh báo hết hàng (khi số seri < 3) và hiển thị hoạt động nhập xuất gần đây.
+- [x] Setup dự án và kết nối Database.
+- [x] Tạo xong luồng xác thực (Auth flow).
+- [x] Đồng bộ hóa giao diện Index/Trash và thanh tìm kiếm cho toàn hệ thống.
+- [x] Nâng cấp hệ thống bẫy lỗi (404, 500) và trang báo lỗi Premium (Tiếng Việt).
+- [x] Địa phương hóa trang Chính sách bảo mật sang Tiếng Việt.
+- [x] `Quản lý Người dùng (NguoiDung)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
+- [x] `Quản lý Vai trò (VaiTro)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
+- [x] `Quản lý Danh mục (DanhMuc)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
+- [x] `Quản lý Sản phẩm (SanPham)`: Danh sách, Thêm, Xóa mềm, Thùng rác, Xử lý ảnh WebP.
+- [x] `Quản lý Nhà cung cấp (NhaCungCap)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
+- [x] `Quản lý Seri Sản phẩm (SeriSanPham)`: Truy vết, Bảo hành, Lọc trạng thái.
+- [x] `Nhập kho (PhieuNhap)`: Transaction, Sinh Seri tự động, Xóa mềm.
+- [x] `Xuất kho (PhieuXuat)`: Transaction, Rút Seri, Xóa mềm.
+- [x] `Cảnh báo tồn kho & Hoạt động`: Module Dashboard.
+- [x] `Tối ưu UI/UX & Bảo mật`: Chuẩn hóa 100% ViewData, searchString, RBAC.
+- [x] `Kiểm định Nghiệp vụ`: Xác nhận luồng Trạng thái Seri và Transaction.
 
 ## Đang tiến hành (In Progress)
 
-- [ ] `Tối ưu UI/UX`: Chỉnh sửa lại nhập, xuất toàn diện từ logic đến giao diện.
-- [ ] `Báo cáo & In ấn`: Phát triển chức năng xuất file PDF/Excel cho hóa đơn Nhập và Xuất, báo cáo doanh thu, báo cáo tồn kho (Excel: Dùng cho Nhập kho và Báo cáo thống kê. Dữ liệu nhập cần bóc tách nhiều cột (Header Auto-Detection, bóc tách Seri, làm sạch đơn giá). Thống kê cần Excel để kế toán/chủ shop có thể filter, tính toán lại, PDF: Dùng cho Phiếu Xuất (Hóa đơn bán hàng). Hóa đơn đưa cho khách hàng cần sự nguyên bản, không thể chỉnh sửa, in ra đẹp mắt và chuyên nghiệp).
-- [ ] `Mối liên hệ Giá cả`: Giá nhập (trong bảng ChiTietPhieuNhap) sẽ ảnh hưởng đến giá bán chung của SanPham. Tuy nhiên, không được tự động đè giá. Giải pháp dễ nhất: Khi lập Phiếu Nhập, hiển thị giá nhập hiện tại, hệ thống gợi ý cập nhật GiaBan bên bảng SanPham, nhưng quyền quyết định cuối cùng vẫn thuộc về nhân viên nhập kho.
+- [ ] (Tính năng) Xây dựng module xuất báo cáo Excel (Doanh thu, Tồn kho).
+- [ ] (Giao diện) Tích hợp biểu đồ thống kê trực quan Chart.js.
 
 ## Cần làm (TODO/Backlog)
 
+- [ ] Phát triển chức năng in ấn hóa đơn chuyên sâu (Server-side PDF).
+- [ ] Thêm unit test cho các Service cốt lõi.
 - [ ] Kiểm tra và xử lý triệt để các lỗi logic phát sinh trong quá trình vận hành thực tế.
 - [ ] Tối ưu hóa UI/UX cho các trang báo cáo thống kê.
 - [ ] Kiểm tra và xử lý các lỗi logic phát sinh.

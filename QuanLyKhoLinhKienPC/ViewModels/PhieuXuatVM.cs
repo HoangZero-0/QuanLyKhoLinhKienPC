@@ -9,9 +9,10 @@ namespace QuanLyKhoLinhKienPC.ViewModels
         public string TenKhachHang { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
+        [RegularExpression(@"^(?!0+$)(\+\d{1,3}[- ]?)?(?!0+$)\d{10,11}$", ErrorMessage = "Vui lòng nhập đúng định dạng số điện thoại (10-11 số)!")]
         public string SoDienThoaiKhach { get; set; } = string.Empty;
 
-        public string? GhiChu { get; set; }
+
 
         // Danh sách các mục xuất kho
         public List<XuatKhoItemVM> Items { get; set; } = new List<XuatKhoItemVM>();

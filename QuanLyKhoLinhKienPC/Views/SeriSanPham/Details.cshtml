@@ -151,7 +151,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center pt-2">
                                             <span class="text-muted fw-bold">Giá Nhập:</span>
-                                            <span class="fw-bold fs-4 text-danger">@string.Format("{0:N0}", ViewBag.DonGiaNhap) <small class="fs-6">VNĐ</small></span>
+                                            <span class="fw-bold fs-4 text-danger">@string.Format("{0:N0}", ViewData["DonGiaNhap"]) <small class="fs-6">VNĐ</small></span>
                                         </div>
                                     </div>
                                 }
@@ -210,7 +210,7 @@
                                         
                                         <div class="d-flex justify-content-between align-items-center pt-2">
                                             <span class="text-muted fw-bold">Giá Bán:</span>
-                                            <span class="fw-bold fs-4 text-primary">@string.Format("{0:N0}", ViewBag.DonGiaXuat) <small class="fs-6">VNĐ</small></span>
+                                            <span class="fw-bold fs-4 text-primary">@string.Format("{0:N0}", ViewData["DonGiaXuat"]) <small class="fs-6">VNĐ</small></span>
                                         </div>
 
                                     </div>

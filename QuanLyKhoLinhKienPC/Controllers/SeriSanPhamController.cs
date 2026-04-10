@@ -153,7 +153,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     donGiaNhap = chiTiet.DonGiaNhap;
                 }
             }
-            ViewBag.DonGiaNhap = donGiaNhap;
+            ViewData["DonGiaNhap"] = donGiaNhap;
 
             // Lấy đơn giá xuất (giá bán) từ ChiTietPhieuXuat
             decimal donGiaXuat = 0;
@@ -166,7 +166,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     donGiaXuat = chiTietXuat.GiaTien;
                 }
             }
-            ViewBag.DonGiaXuat = donGiaXuat;
+            ViewData["DonGiaXuat"] = donGiaXuat;
 
             return View(seri);
         }
@@ -271,7 +271,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                     donGiaNhap = chiTiet.DonGiaNhap;
                 }
             }
-            ViewBag.DonGiaNhap = donGiaNhap;
+            ViewData["DonGiaNhap"] = donGiaNhap;
 
             return View(seri);
         }

@@ -12,7 +12,8 @@ namespace QuanLyKhoLinhKienPC.ViewModels
 
         public List<string> ListSeris => string.IsNullOrWhiteSpace(RawSeris)
             ? new List<string>()
-            : RawSeris.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            : RawSeris.Replace("|||", "\n")
+                      .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                       .Select(s => s.Trim())
                       .Where(s => !string.IsNullOrEmpty(s))
                       .Distinct()

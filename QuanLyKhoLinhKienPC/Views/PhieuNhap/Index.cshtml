@@ -29,14 +29,14 @@
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
-                            <input type="text" name="searchId" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập mã phiếu, ghi chú..." value="@ViewBag.CurrentSearchId">
+                            <input type="text" name="searchString" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" placeholder="Nhập mã phiếu, ghi chú..." value="@ViewData["CurrentFilter"]">
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
 
-                            <select name="MaNhaCungCap" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNhaCungCap" onchange="this.form.submit()">
+                            <select name="MaNhaCungCap" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="@(ViewData["MaNhaCungCap"] as SelectList)" onchange="this.form.submit()">
                                 <option value="">-- Nhà cung cấp --</option>
                             </select>
                         </div>
@@ -45,7 +45,7 @@
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
 
-                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="ViewBag.MaNguoiDung" onchange="this.form.submit()">
+                            <select name="MaNguoiDung" class="form-select rounded-pill fs-6 ps-3 transition" asp-items="@(ViewData["MaNguoiDung"] as SelectList)" onchange="this.form.submit()">
                                 <option value="">-- Người nhập --</option>
                             </select>
                         </div>
@@ -56,14 +56,14 @@
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Từ Ngày</span>
-                            <input type="date" name="fromDate" id="fromDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewBag.FromDate" onchange="validateAndSubmit(this)" onkeydown="return false">
+                            <input type="date" name="fromDate" id="fromDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["FromDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-4 fs-6">Đến Ngày</span>
-                            <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewBag.ToDate" onchange="validateAndSubmit(this)" onkeydown="return false">
+                            <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["ToDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
                         </div>
                     </div>
 

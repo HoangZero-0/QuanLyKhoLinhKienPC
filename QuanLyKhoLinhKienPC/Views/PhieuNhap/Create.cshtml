@@ -4,9 +4,9 @@
     ViewData["Title"] = "Lập Phiếu Nhập Kho";
 }
 
-<div class="container-fluid pt-4 pb-5 px-lg-5 text-dark">
+<div class="container-fluid pt-4 pb-0 px-lg-5 text-dark">
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
         <div>
             <h3 class="fw-bold m-0 text-primary"><i class="fa-solid fa-plus-circle me-2"></i> Thêm Mới Phiếu Nhập</h3>
             <p class="text-muted small mb-0 mt-1">Vui lòng nhập đầy đủ thông tin nhà cung cấp và danh sách linh kiện.</p>
@@ -22,16 +22,16 @@
     <form asp-action="Create" id="frmPhieuNhap">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-4 shadow-sm py-2 mb-4" role="alert"></div>
         
-        <div class="row g-4">
+        <div class="row g-3">
             <!-- CỘT TRÁI: THÔNG TIN CHUNG -->
             <div class="col-lg-3">
                 <div class="card border-0 shadow-sm rounded-4 bg-white h-100">
                     <div class="card-body p-4 d-flex flex-column">
-                        <h6 class="text-secondary fw-bold text-uppercase small mb-4 border-start border-primary border-4 ps-2">Thông tin chung</h6>
+                        <h6 class="text-secondary fw-bold text-uppercase small mb-4 border-start border-primary border-4 ps-2 text-dark">Thông tin chung</h6>
                         
                         <div class="mb-4">
                             <label asp-for="MaNhaCungCap" class="form-label fw-bold text-muted small text-uppercase">Nhà Cung Cấp <span class="text-danger">*</span></label>
-                            <select asp-for="MaNhaCungCap" class="form-select rounded-3 border-light-subtle transition shadow-xs" asp-items="ViewBag.MaNhaCungCap" style="padding: 0.6rem 1rem;">
+                            <select asp-for="MaNhaCungCap" class="form-select rounded-3 border-light-subtle transition shadow-xs" asp-items="@(ViewData["MaNhaCungCap"] as SelectList)" style="padding: 0.6rem 1rem;">
                                 <option value="">-- Chọn Nhà Cung Cấp --</option>
                             </select>
                             <span asp-validation-for="MaNhaCungCap" class="text-danger small"></span>
@@ -65,16 +65,16 @@
                         </button>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 480px;">
-                            <table class="table mb-0 align-middle" id="tblChiTiet">
+                        <div class="custom-table-container">
+                            <table class="table mb-0 align-middle" id="tblChiTiet" style="table-layout: fixed; width: 100%; border-collapse: separate;">
                                 <thead class="bg-light sticky-top">
                                     <tr>
                                         <th class="py-3 ps-4 text-center text-secondary" style="width: 50px;">#</th>
-                                        <th class="py-3 text-dark">Linh Kiện Nhập</th>
-                                        <th class="py-3 text-center" style="width: 150px;">Mã Seri (SN)</th>
+                                        <th class="py-3 text-dark" style="width: 250px;">Linh Kiện Nhập</th>
+                                        <th class="py-3 text-center" style="width: 350px;">Mã Seri (SN)</th>
                                         <th class="py-3 text-center" style="width: 80px;">SL</th>
-                                        <th class="py-3 text-end" style="width: 160px;">Đơn Giá</th>
-                                        <th class="py-3 text-end pe-4" style="width: 160px;">Thành Tiền</th>
+                                        <th class="py-3 text-end" style="width: 130px;">Đơn Giá</th>
+                                        <th class="py-3 text-end pe-4" style="width: 130px;">Thành Tiền</th>
                                         <th class="py-3 text-center" style="width: 50px;"></th>
                                     </tr>
                                 </thead>
@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-between mt-4 border-top pt-4">
+        <div class="d-flex justify-content-between mt-2 border-top pt-2">
             <a asp-action="Index" class="btn btn-light border rounded-pill px-4 fw-medium transition text-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
@@ -128,7 +128,7 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        var dsSanPham = @Html.Raw(Json.Serialize(ViewBag.SanPhamList));
+        var dsSanPham = @Html.Raw(Json.Serialize(ViewData["SanPhamList"]));
         var rawData = @Html.Raw(Json.Serialize(Model?.Items ?? new List<QuanLyKhoLinhKienPC.ViewModels.SeriImportItem>()));
         // Chuẩn hóa dữ liệu sang PascalCase để đồng bộ với logic JS hiện tại
         var chiTietList = rawData.map(item => ({
@@ -146,7 +146,7 @@
             var tongTienPhieu = 0;
 
             if(chiTietList.length === 0) {
-                tbody.append('<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-box-open fa-2x d-block mb-3 opacity-25"></i>Phiếu nhập trống. Vui lòng thêm linh kiện.</td></tr>');
+                tbody.append('<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-cart-shopping fa-2x d-block mb-3 opacity-25"></i>Phiếu nhập trống. Vui lòng thêm linh kiện.</td></tr>');
             } else {
                 chiTietList.forEach(function(item, index) {
                     var sanPhamOptions = '<option value="">-- Chọn linh kiện --</option>';
@@ -179,7 +179,7 @@
                             <td>
                                 <input type="number" class="form-control form-control-sm text-end border-light-subtle rounded-3 shadow-xs" min="0" value="${item.DonGiaNhap}" onchange="capNhatDong(${index}, this, 'DonGiaNhap')" />
                             </td>
-                            <td class="text-end fw-bold text-primary pe-4">
+                            <td class="text-end fw-bold text-primary pe-4" style="width: 130px;">
                                 ${new Intl.NumberFormat('vi-VN').format(thanhTien)}
                             </td>
                             <td class="text-center">
@@ -269,14 +269,26 @@
         }
 
         function submitForm() {
-            if(!$('#MaNhaCungCap').val()) { 
-                showToast('Vui lòng chọn Nhà Cung Cấp!', 'warning');
-                return; 
+            if(!$('#MaNhaCungCap').val()) {
+                showToast('Vui lòng chọn Nhà cung cấp!', 'warning');
+                return;
             }
-            if(chiTietList.length === 0) { 
-                showToast('Vui lòng thêm ít nhất một linh kiện!', 'warning');
-                return; 
+
+            if (chiTietList.length === 0) {
+                showToast('Vui lòng thêm ít nhất một linh kiện vào phiếu!', 'warning');
+                return;
             }
+
+            var hopLe = true;
+            chiTietList.forEach(function(item) {
+                if(!item.MaSanPham || item.SoLuong <= 0) hopLe = false;
+            });
+
+            if(!hopLe) {
+                showToast('Vui lòng chọn linh kiện và nhập danh sách mã Seri cho tất cả các dòng!', 'error');
+                return;
+            }
+
             var hiddenContainer = $('#hiddenInputsContainer');
             hiddenContainer.empty();
             chiTietList.forEach(function(item, index) {
@@ -297,6 +309,28 @@
     .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); }
     .font-monospace { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; }
     .border-dashed { border-style: dashed !important; border-width: 2px !important; }
+    .custom-table-container {
+        position: relative;
+        background: #fff;
+        height: 450px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+    /* Làm đẹp thanh cuộn để không bị thô khi luôn hiện */
+    .custom-table-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .custom-table-container::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+    .custom-table-container::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
     .form-select:focus, .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); }
     /* Fix triệt để nền xám (backdrop) bị lệch khi sử dụng zoom: 0.8 */
     .modal-backdrop { 

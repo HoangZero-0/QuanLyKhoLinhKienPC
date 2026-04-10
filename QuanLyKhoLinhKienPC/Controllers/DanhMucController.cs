@@ -25,6 +25,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: DanhMuc
         public async Task<IActionResult> Index(string searchString)
         {
+            ViewData["CurrentFilter"] = searchString;
+
             var dsDanhMuc = _context.DanhMuc.Where(d => d.IsDeleted == false);
 
             if (!string.IsNullOrEmpty(searchString))
@@ -195,6 +197,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
         public async Task<IActionResult> Trash(string searchString)
         {
+            ViewData["CurrentFilter"] = searchString;
+
             var dsDanhMuc = _context.DanhMuc.Where(d => d.IsDeleted == true);
 
             if (!string.IsNullOrEmpty(searchString))

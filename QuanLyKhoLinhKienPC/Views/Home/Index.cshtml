@@ -18,7 +18,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Tổng Doanh Thu</p>
-                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewBag.TongDoanhThu ?? 0) VNĐ</h4>
+                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewData["TongDoanhThu"] ?? 0) VNĐ</h4>
                         </div>
                         <div class="fs-1 text-white-50">
                             <i class="fa-solid fa-sack-dollar"></i>
@@ -35,7 +35,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Hóa Đơn Bán</p>
-                            <h4 class="mb-0 fw-bold">@ViewBag.SoDonHang</h4>
+                            <h4 class="mb-0 fw-bold">@ViewData["SoDonHang"]</h4>
                         </div>
                         <div class="fs-1 text-white-50">
                             <i class="fa-solid fa-file-invoice-dollar"></i>
@@ -52,7 +52,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="mb-1 fw-bold text-uppercase" style="font-size: 0.85rem; color: #b67d02;">Tồn Kho Seri</p>
-                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewBag.TongTonKho ?? 0) <small class="fw-normal" style="font-size: 0.8rem;">Seri</small></h4>
+                            <h4 class="mb-0 fw-bold">@string.Format("{0:N0}", ViewData["TongTonKho"] ?? 0) <small class="fw-normal" style="font-size: 0.8rem;">Seri</small></h4>
                         </div>
                         <div class="fs-1" style="color: #c98b04;">
                             <i class="fa-solid fa-barcode"></i>
@@ -69,7 +69,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="mb-1 text-white-50 fw-bold text-uppercase" style="font-size: 0.85rem;">Sản Phẩm Quản Lý</p>
-                            <h4 class="mb-0 fw-bold">@ViewBag.TongSoSanPham <small class="fw-normal" style="font-size: 0.8rem;">Sản phẩm</small></h4>
+                            <h4 class="mb-0 fw-bold">@ViewData["TongSoSanPham"] <small class="fw-normal" style="font-size: 0.8rem;">Sản phẩm</small></h4>
                         </div>
                         <div class="fs-1 text-white-50">
                             <i class="fa-solid fa-box-open"></i>
@@ -90,9 +90,9 @@
                     
                     <div class="flex-grow-1 position-relative">
                         <div class="activity-feed" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-y: auto;">
-                        @if (ViewBag.HoatDongGanDay != null)
+                        @if (ViewData["HoatDongGanDay"] is IEnumerable<dynamic> hoatDongList)
                         {
-                            foreach (var hd in ViewBag.HoatDongGanDay)
+                            foreach (var hd in hoatDongList)
                             {
                                 <div class="d-flex align-items-start mb-4">
                                     <div class="flex-shrink-0">
@@ -129,9 +129,9 @@
                     
                     <div class="flex-grow-1 position-relative">
                         <div class="stock-alerts" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow-y: auto;">
-                        @if (ViewBag.CanhBaoHetHang != null && ((IEnumerable<dynamic>)ViewBag.CanhBaoHetHang).Any())
+                        @if (ViewData["CanhBaoHetHang"] is IEnumerable<dynamic> canhBaoList && canhBaoList.Any())
                         {
-                            foreach (var sp in ViewBag.CanhBaoHetHang)
+                            foreach (var sp in canhBaoList)
                             {
                                 <div class="bg-danger bg-opacity-10 border-0 mb-3 d-flex align-items-center justify-content-between p-3 rounded-3">
                                     <div>

@@ -25,6 +25,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: VaiTro
         public async Task<IActionResult> Index(string searchString)
         {
+            ViewData["CurrentFilter"] = searchString;
+
             var dsVaiTro = _context.VaiTro.Where(d => d.IsDeleted == false);
 
             if (!string.IsNullOrEmpty(searchString))
@@ -188,6 +190,8 @@ namespace QuanLyKhoLinhKienPC.Controllers
         // GET: VaiTro/Trash
         public async Task<IActionResult> Trash(string searchString)
         {
+            ViewData["CurrentFilter"] = searchString;
+
             var dsVaiTro = _context.VaiTro.Where(d => d.IsDeleted == true);
 
             if (!string.IsNullOrEmpty(searchString))

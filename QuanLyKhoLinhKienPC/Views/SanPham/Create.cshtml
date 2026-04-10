@@ -49,7 +49,7 @@
 
                                     <div class="col-md-6 mb-2">
                                         <label asp-for="MaDanhMuc" class="form-label fw-bold text-secondary small text-uppercase ms-1">Danh Mục <span class="text-danger">*</span></label>
-                                        <select asp-for="MaDanhMuc" class="form-select form-select-lg rounded-pill fs-6 transition border-light shadow-xs" asp-items="ViewBag.MaDanhMuc">
+                                        <select asp-for="MaDanhMuc" class="form-select form-select-lg rounded-pill fs-6 transition border-light shadow-xs" asp-items="@(ViewData["MaDanhMuc"] as SelectList)">
                                             <option value="">-- Chọn danh mục --</option>
                                         </select>
                                         <span asp-validation-for="MaDanhMuc" class="text-danger small"></span>

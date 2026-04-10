@@ -40,10 +40,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .Where(s => s.TrangThai == 1 && !s.IsDeleted)
                 .CountAsync();
 
-            ViewBag.TongDoanhThu = tongDoanhThu;
-            ViewBag.SoDonHang = soDonHang;
-            ViewBag.TongSoSanPham = tongSoSanPham;
-            ViewBag.TongTonKho = tongTonKho;
+            ViewData["TongDoanhThu"] = tongDoanhThu;
+            ViewData["SoDonHang"] = soDonHang;
+            ViewData["TongSoSanPham"] = tongSoSanPham;
+            ViewData["TongTonKho"] = tongTonKho;
 
             // 1. Cảnh báo hết hàng (Tồn kho < 3)
             var spHetHang = await _context.SanPham
@@ -57,7 +57,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 .OrderBy(x => x.TonKho)
                 .ToListAsync();
 
-            ViewBag.CanhBaoHetHang = spHetHang.Select(x => new
+            ViewData["CanhBaoHetHang"] = spHetHang.Select(x => new
             {
                 MaSanPham = x.SanPham.MaSanPham,
                 TenSanPham = x.SanPham.TenSanPham,
@@ -84,7 +84,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 MoTa = nk.MoTaChiTiet
             }).ToList();
 
-            ViewBag.HoatDongGanDay = listHoatDong;
+            ViewData["HoatDongGanDay"] = listHoatDong;
 
             return View();
         }
@@ -95,9 +95,27 @@ namespace QuanLyKhoLinhKienPC.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+
+            if (id == 404)
+            {
+                ViewData["ErrorMessage"] = "Rất tiếc, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di dời.";
+                ViewData["ErrorTitle"] = "Không Tìm Thấy Trang";
+            }
+            else if (id == 403)
+            {
+                ViewData["ErrorMessage"] = "Bạn không có quyền truy cập vào khu vực này.";
+                ViewData["ErrorTitle"] = "Truy Cập Bị Từ Chối";
+            }
+            else
+            {
+                ViewData["ErrorMessage"] = "Đã có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn.";
+                ViewData["ErrorTitle"] = "Lỗi Hệ Thống";
+            }
+
+            return View(new ErrorViewModel { RequestId = requestId });
         }
     }
 

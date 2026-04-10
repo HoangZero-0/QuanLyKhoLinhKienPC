@@ -41,7 +41,7 @@
                             <div class="col-sm-4 text-danger fw-semibold">Giá Nhập:</div>
                             <div class="col-sm-8 text-dark">
                                 @{
-                                    decimal donGiaNhap = ViewBag.DonGiaNhap != null ? (decimal)ViewBag.DonGiaNhap : 0;
+                                    decimal donGiaNhap = ViewData["DonGiaNhap"] != null ? (decimal)ViewData["DonGiaNhap"] : 0;
                                 }
                                 @donGiaNhap.ToString("N0") VNĐ
                             </div>
