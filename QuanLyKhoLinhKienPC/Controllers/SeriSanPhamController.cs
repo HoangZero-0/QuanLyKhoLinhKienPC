@@ -9,6 +9,8 @@ using QuanLyKhoLinhKienPC.Models;
 using Microsoft.AspNetCore.Authorization;
 using QuanLyKhoLinhKienPC.Helpers;
 using System.Security.Claims;
+using ClosedXML.Excel;
+
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     [Authorize]
@@ -406,6 +408,163 @@ namespace QuanLyKhoLinhKienPC.Controllers
             TempData["Success"] = $"Khôi phục Seri {seri.SoSeri} thành công.";
 
             return RedirectToAction(nameof(Trash));
+        }
+
+        // 7. XUẤT EXCEL DANH SÁCH SERI (Kiểm Kê Kho)
+        // 9. XUẤT EXCEL DANH SÁCH SERI
+        [HttpGet]
+        [Authorize(Roles = "Quản trị viên,Admin,Nhân viên kho")]
+        public async Task<IActionResult> ExportExcel(int? trangThaiFilter, string searchString, DateTime? fromDate, DateTime? toDate)
+        {
+            // --- Sao chép logic lọc từ action Index ---
+            var seriList = _context.SeriSanPham
+                .Include(s => s.MaSanPhamNavigation)
+                    .ThenInclude(sp => sp.MaDanhMucNavigation)
+                .Include(s => s.MaPhieuNhapNavigation)
+                    .ThenInclude(pn => pn.MaNhaCungCapNavigation)
+                .Include(s => s.MaPhieuNhapNavigation)
+                    .ThenInclude(pn => pn.ChiTietPhieuNhap)
+                .Include(s => s.MaPhieuXuatNavigation)
+                    .ThenInclude(px => px.ChiTietPhieuXuat)
+                .Where(s => !s.IsDeleted);
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                seriList = seriList.Where(s => s.SoSeri.Contains(searchString) ||
+                                               s.MaSanPhamNavigation.TenSanPham.Contains(searchString) ||
+                                               s.MaSanPhamNavigation.HangSanXuat.Contains(searchString));
+            }
+
+            if (trangThaiFilter.HasValue)
+            {
+                seriList = seriList.Where(s => s.TrangThai == trangThaiFilter.Value);
+            }
+
+            // Validate ngày hợp lệ cho SQL Server
+            var sqlMinDate = new DateTime(1753, 1, 1);
+            var sqlMaxDate = new DateTime(9999, 12, 31);
+            if (fromDate.HasValue && (fromDate.Value < sqlMinDate || fromDate.Value > sqlMaxDate)) fromDate = null;
+            if (toDate.HasValue && (toDate.Value < sqlMinDate || toDate.Value > sqlMaxDate)) toDate = null;
+
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                if (fromDate.HasValue && toDate.HasValue && fromDate.Value.Date > toDate.Value.Date)
+                {
+                    fromDate = null;
+                    toDate = null;
+                }
+                else
+                {
+                    DateTime? fDate = fromDate.HasValue ? fromDate.Value.Date : null;
+                    DateTime? tDate = toDate.HasValue ? toDate.Value.Date.AddDays(1).AddTicks(-1) : null;
+
+                    if (trangThaiFilter == 1)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value);
+                    }
+                    else if (trangThaiFilter == 2)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat <= tDate.Value);
+                    }
+                    else if (trangThaiFilter == 3)
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s =>
+                            (s.MaPhieuXuat == null && s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value) ||
+                            (s.MaPhieuXuat != null && s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat >= fDate.Value)
+                        );
+                        if (tDate.HasValue) seriList = seriList.Where(s =>
+                            (s.MaPhieuXuat == null && s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value) ||
+                            (s.MaPhieuXuat != null && s.MaPhieuXuatNavigation != null && s.MaPhieuXuatNavigation.NgayXuat <= tDate.Value)
+                        );
+                    }
+                    else
+                    {
+                        if (fDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap >= fDate.Value);
+                        if (tDate.HasValue) seriList = seriList.Where(s => s.MaPhieuNhapNavigation != null && s.MaPhieuNhapNavigation.NgayNhap <= tDate.Value);
+                    }
+                }
+            }
+
+            seriList = seriList.OrderByDescending(s => s.MaPhieuNhap).ThenBy(s => s.SoSeri);
+            var data = await seriList.ToListAsync();
+
+            // --- Xuất Excel bằng ClosedXML ---
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("DanhSachSeri");
+
+            // Tiêu đề báo cáo
+            ws.Cell(1, 1).Value = "DANH SÁCH MÃ SERI - KIỂM KÊ KHO";
+            ws.Range("A1:J1").Merge().Style.Font.Bold = true;
+            ws.Cell(1, 1).Style.Font.FontSize = 14;
+            ws.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            string trangThaiText = trangThaiFilter == 1 ? "Tồn Kho" : trangThaiFilter == 2 ? "Đã Bán" : trangThaiFilter == 3 ? "Lỗi/Bảo Hành" : "Tất cả";
+            string kyBaoCao = "";
+            if (fromDate.HasValue || toDate.HasValue)
+                kyBaoCao = $" | Từ {fromDate?.ToString("dd/MM/yyyy") ?? "..."} đến {toDate?.ToString("dd/MM/yyyy") ?? "..."}";
+            ws.Cell(2, 1).Value = $"Trạng thái: {trangThaiText}{kyBaoCao} | Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            ws.Range("A2:J2").Merge();
+            ws.Cell(2, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(2, 1).Style.Font.Italic = true;
+
+            // Header dòng 4
+            int headerRow = 4;
+            string[] headers = { "STT", "Tên Sản Phẩm", "Hãng SX", "Danh Mục", "Mã Seri (SN)", "Trạng Thái", "Ngày Nhập", "Nhà Cung Cấp", "Thực tế kiểm đếm", "Ghi chú" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(headerRow, i + 1).Value = headers[i];
+            }
+            var headerRange = ws.Range(headerRow, 1, headerRow, headers.Length);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            headerRange.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+
+            // Dữ liệu
+            int row = headerRow + 1;
+            int stt = 1;
+            foreach (var seri in data)
+            {
+                ws.Cell(row, 1).Value = stt;
+                ws.Cell(row, 2).Value = seri.MaSanPhamNavigation?.TenSanPham ?? "";
+                ws.Cell(row, 3).Value = seri.MaSanPhamNavigation?.HangSanXuat ?? "";
+                ws.Cell(row, 4).Value = seri.MaSanPhamNavigation?.MaDanhMucNavigation?.TenDanhMuc ?? "";
+                ws.Cell(row, 5).Value = seri.SoSeri;
+                ws.Cell(row, 6).Value = seri.TrangThai == 1 ? "Tồn Kho" : seri.TrangThai == 2 ? "Đã Bán" : "Lỗi/BH";
+                ws.Cell(row, 7).Value = seri.MaPhieuNhapNavigation?.NgayNhap.ToString("dd/MM/yyyy") ?? "";
+                ws.Cell(row, 8).Value = seri.MaPhieuNhapNavigation?.MaNhaCungCapNavigation?.TenNhaCungCap ?? "";
+                // Cột 9 & 10 để trống cho thủ kho điền
+                ws.Cell(row, 9).Value = "";
+                ws.Cell(row, 10).Value = "";
+
+                stt++;
+                row++;
+            }
+
+            // Dòng tổng cộng
+            ws.Cell(row, 1).Value = "TỔNG CỘNG:";
+            ws.Range(row, 1, row, 4).Merge().Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+            ws.Cell(row, 5).Value = data.Count;
+            ws.Cell(row, 5).Style.Font.Bold = true;
+            ws.Range(row, 1, row, headers.Length).Style.Fill.BackgroundColor = XLColor.FromHtml("#E2EFDA");
+            ws.Range(row, 1, row, headers.Length).Style.Border.TopBorder = XLBorderStyleValues.Thin;
+
+            // Viền toàn bảng
+            ws.Range(headerRow, 1, row, headers.Length).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(headerRow, 1, row, headers.Length).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            string fileName = $"Kiem_Ke_Seri_{DateTime.Now:dd-MM-yyyy_HHmm}.xlsx";
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }
 }

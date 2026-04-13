@@ -76,7 +76,45 @@
 - Khi `Phiếu Xuất` bị Hủy (Xóa mềm), các `Mã Seri` không còn trỏ về Hóa Đơn Khách Hàng. Chúng trở thành Máy Còn Kho.
 - Khi Click Nút "Khôi phục Hóa Đơn", thuật toán xuất sắc dùng `ChiTietPhieuXuat` (vốn được giữ nguyên trong thùng rác) làm lớp Proxy Table nội suy truy vết tìm và khóa các Seri lúc nãy trở ngược lại thành "Đã Bán". Nếu trong thời gian nằm Thùng Rác, nhân sự lầm tưởng mã Seri đó còn Kho và Đem Bán Lần Nữa (MaPhieuXuat != Null) thì hệ thống chốt chặn "Cấm Khôi Phục Hóa Đơn".
 
-# 7. TRẠNG THÁI DỰ ÁN & BACKLOG (STATE & TODO)
+# 7. MA TRẬN PHÂN QUYỀN MỞ RỘNG (RBAC CORE MATRIX)
+
+Dựa trên thiết kế kiến trúc toàn diện của dự án, 3 nhóm quyền chính thức được cấp phát như sau:
+
+## 7.1. Nguyên Tắc Phân Quyền Chung
+
+- **Admin (Quản trị viên):** Toàn quyền hệ thống, định đoạt nhân sự, cấu hình vai trò.
+- **Nhân viên kho:** Nắm giữ chìa khóa đối lưu vật lý tồn kho. Nhập kho, tạo lô Seri, xóa mềm và khôi phục (Restore) linh kiện từ giỏ rác.
+- **Nhân viên bán hàng:** Chỉ có quyền sinh hóa đơn Đầu Ra. Được khôi phục (Restore) hóa đơn xuất nhưng cấm chỉnh sửa thông tin gốc sản phẩm/seri của công ty.
+
+## 7.2. Bảng Chức Năng (11 Module Lõi)
+
+| Chức Năng (Controller) | Tác Vụ                          | Admin | Kho | Sale | Ghi chú                        |
+| ---------------------- | ------------------------------- | :---: | :-: | :--: | ------------------------------ |
+| **Hệ thống**           | Login, Hồ Sơ, Dashboard         |  ✅   | ✅  |  ✅  | Quyền tối thiểu                |
+| **Nhân sự**            | NguoiDung, VaiTro               |  ✅   | ❌  |  ❌  | Cấm đụng cấu hình Core         |
+| **Danh Mục & NCC**     | Xem, Tìm kiếm                   |  ✅   | ✅  |  ✅  | Sale cần xem để tư vấn         |
+|                        | Tạo, Sửa, Xóa (Soft), Khôi phục |  ✅   | ✅  |  ❌  | Kho quản lý Master Data        |
+| **Sản Phẩm**           | Xem, Tìm kiếm                   |  ✅   | ✅  |  ✅  | Sale xem tồn kho ảo            |
+|                        | Tạo, Sửa, Xóa (Soft), Khôi phục |  ✅   | ✅  |  ❌  | Kho nhập hàng lên kệ           |
+| **Nhập Kho**           | Xem, Tìm kiếm                   |  ✅   | ✅  |  ✅  |                                |
+|                        | Tạo phiếu, Sửa, Xóa, Khôi phục  |  ✅   | ✅  |  ❌  | _Nghiệp vụ tuyệt đối của Kho_  |
+| **Xuất Kho (Bán)**     | Xem, Tìm kiếm                   |  ✅   | ✅  |  ✅  |                                |
+|                        | Tạo hóa đơn, Sửa, Xóa, Restore  |  ✅   | ❌  |  ✅  | _Nghiệp vụ tuyệt đối của Sale_ |
+| **Seri**               | Xem, Tìm kiếm, Truy vết lỗi     |  ✅   | ✅  |  ✅  | Sale báo giá đổi trả           |
+|                        | Xóa thủ công, Restore Seri      |  ✅   | ✅  |  ❌  |                                |
+
+## 7.3. Bảng Báo Cáo & In Ấn (Double-Layer Secured)
+
+| Tính năng Tương tác          | Admin | Kho | Sale | Giải thích nghiệp vụ             |
+| ---------------------------- | :---: | :-: | :--: | -------------------------------- |
+| **1. In Phiếu Xuất (Khách)** |  ✅   | ❌  |  ✅  | Sale in bill. Kho chỉ nhặt hàng. |
+| **2. In Phiếu Nhập (NCC)**   |  ✅   | ✅  |  ❌  | Kho in tài liệu lưu hồ sơ.       |
+| **3. In DS Seri**            |  ✅   | ✅  |  ❌  | Kho in giấy xách đi đối soát.    |
+| **4. Xuất Excel DS Seri**    |  ✅   | ✅  |  ❌  | Kho xuất file kiểm kê.           |
+| **5. Xuất Excel NXT**        |  ✅   | ✅  |  ❌  | Kho chốt sổ Kế toán cuối tháng.  |
+| **6. Excel Doanh Thu**       |  ✅   | ❌  |  ❌  | **TUYỆT MẬT.** Độc quyền Admin.  |
+
+# 8. TRẠNG THÁI DỰ ÁN & BACKLOG (STATE & TODO)
 
 ## Hoàn thành (Done)
 
@@ -87,13 +125,10 @@
 - [x] **Module Nhân Viên & Vai Trò:** Ràng buộc tự xóa bản quyền, ngăn chặn xóa vai trò khi vẫn có Member tham gia nhóm đó.
 - [x] **Module Nhập Kho & Xuất Kho:** Tích hợp giao diện Front-end Javascript động theo dòng. Gói gọn mã vòng lặp sinh Phiếu và Seri bằng IDbContextTransaction. Chống Over-posting tuyệt đối trên form Edit. Cấu trúc Proxy Restoring (Khôi phục thông qua thực thể trung gian) hoàn hảo cho việc hồi sinh Hóa đơn.
 - [x] **Module Seri Sản Phẩm:** Giao diện Timeline Tracking sang trọng đẳng cấp để xem hành trình 1 chiếc máy. Truy vấn khoảng ngày phức hợp logic bằng Status Matrix. Tự tính ra "Hạn Bảo Hành Còn Không" với Sai số Millisecond = 0.
+- [x] **Hệ thống Báo Cáo Doanh Nghiệp (Excel Reporting):** Triển khai bộ 3 báo cáo cốt lõi bằng `ClosedXML.Excel`: (1) Kiểm kê Seri, (2) Doanh thu & Lợi nhuận (truy vết giá vốn từ Seri), (3) Nhập - Xuất - Tồn. Toàn bộ báo cáo tuân thủ styling chuyên nghiệp, hỗ trợ lọc theo thời gian và trạng thái.
+- [x] **Double-Layer RBAC Security (Bảo vệ dữ liệu tuyệt mật):** Khóa cứng 3 tuyến Báo Cáo Excel và 3 nút In Ấn PDF bằng ma trận quyền chuẩn doanh nghiệp: Khóa mức Controller `[Authorize(Roles="...")]` chống Bypass API, và tự động ẩn Elements trên mức Razor Views `@if(User.IsInRole(...))`. Admin toàn quyền, Sale bị chặn khỏi Báo Cáo Lợi Nhuận, Kho chỉ thấy luồng Hàng Hóa.
 - [x] **Chốt Kiểm Toán Toàn Diện Hệ Thống Lõi C# (Technical Audit Passed):** Sạch rác 100%, Dependency sạch, API Mapping/Validation không rò rỉ ngoại lệ chưa bắt (Unhandled Exception). Toàn bộ Database Constraints hoạt động đồng bộ với MVC Level Constraints! Mọi File dư thừa đã được phân tích.
 
 ## Đang tiến hành (In Progress)
 
-- [ ] (Bổ sung tính năng Doanh nghiệp) Xây dựng module Báo Cáo Excel Tổng Quan Doanh thu, Tồn kho (Dựa trên bộ khung `ClosedXML.Excel` đã được cấu hình nhúng thành công ở module `PhieuNhap` trước đó).
-
 ## Cần làm (TODO / Backlog)
-
-- [ ] (Future Update) Xây dựng cơ chế tải mẫu Import Bảng Giá cấu hình bằng Excel cho `Sản Phẩm` (để Admin Cập nhật giá bán bằng 1 Click cho Hàng Ngàn Sản phẩm dựa theo file .xlsx của Nhà phân phối).
-- [ ] Vận hành đánh giá hệ thống ở cấp Server Staging, thực hiện mô phỏng Stress-test với kho 2 Triệu bản ghi Seri để tiến hành Tuning Query Data (Nâng cấp cấu trúc Limit Offset/ Index DB) (Nếu cần thiết).

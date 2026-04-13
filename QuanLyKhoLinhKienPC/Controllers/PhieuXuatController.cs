@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using QuanLyKhoLinhKienPC.Helpers;
 using System.Security.Claims;
 using QuanLyKhoLinhKienPC.ViewModels;
+using ClosedXML.Excel;
 namespace QuanLyKhoLinhKienPC.Controllers
 {
     // DTO (Data Transfer Object) chuyên dụng để hứng dữ liệu "Giỏ hàng" từ Front-End gửi lên
@@ -513,6 +514,159 @@ namespace QuanLyKhoLinhKienPC.Controllers
         private bool PhieuXuatExists(int id)
         {
             return _context.PhieuXuat.Any(e => e.MaPhieuXuat == id);
+        }
+
+        // 10. XUẤT EXCEL BÁO CÁO DOANH THU & LỢI NHUẬN
+        // 8. Xuất Excel Báo Cáo Doanh Thu
+        [HttpGet]
+        [Authorize(Roles = "Quản trị viên,Admin")]
+        public async Task<IActionResult> ExportDoanhThu(DateTime? fromDate, DateTime? toDate)
+        {
+            // Validate ngày hợp lệ cho SQL Server
+            var sqlMinDate = new DateTime(1753, 1, 1);
+            var sqlMaxDate = new DateTime(9999, 12, 31);
+
+            if (fromDate.HasValue && (fromDate.Value < sqlMinDate || fromDate.Value > sqlMaxDate)) fromDate = null;
+            if (toDate.HasValue && (toDate.Value < sqlMinDate || toDate.Value > sqlMaxDate)) toDate = null;
+
+            if (fromDate.HasValue && toDate.HasValue && fromDate.Value.Date > toDate.Value.Date)
+            {
+                fromDate = null;
+                toDate = null;
+            }
+
+            var query = _context.PhieuXuat
+                .Where(p => !p.IsDeleted)
+                .Include(p => p.MaNguoiDungNavigation)
+                .AsQueryable();
+
+            if (fromDate.HasValue)
+                query = query.Where(p => p.NgayXuat >= fromDate.Value.Date);
+            if (toDate.HasValue)
+                query = query.Where(p => p.NgayXuat <= toDate.Value.Date.AddDays(1).AddTicks(-1));
+
+            var data = await query.OrderByDescending(p => p.NgayXuat).ToListAsync();
+
+            // Lấy toàn bộ Seri đã bán thuộc các phiếu xuất này để tính Tiền Vốn
+            var maPhieuXuats = data.Select(p => (int?)p.MaPhieuXuat).ToList();
+            var seriDaBan = await _context.SeriSanPham
+                .Where(s => s.MaPhieuXuat != null && maPhieuXuats.Contains(s.MaPhieuXuat))
+                .Include(s => s.MaPhieuNhapNavigation)
+                    .ThenInclude(pn => pn.ChiTietPhieuNhap)
+                .ToListAsync();
+
+            // Tính Tiền Vốn cho từng phiếu xuất
+            var tienVonDict = new Dictionary<int, decimal>();
+            foreach (var px in data)
+            {
+                var seriCuaPhieu = seriDaBan.Where(s => s.MaPhieuXuat == px.MaPhieuXuat).ToList();
+                decimal tienVon = 0;
+                foreach (var seri in seriCuaPhieu)
+                {
+                    // Tìm đơn giá nhập của seri này từ ChiTietPhieuNhap
+                    var chiTietNhap = seri.MaPhieuNhapNavigation?.ChiTietPhieuNhap
+                        ?.FirstOrDefault(ct => ct.MaSanPham == seri.MaSanPham);
+                    if (chiTietNhap != null)
+                        tienVon += chiTietNhap.DonGiaNhap;
+                }
+                tienVonDict[px.MaPhieuXuat] = tienVon;
+            }
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("DoanhThu_LoiNhuan");
+
+            // Tiêu đề
+            ws.Cell(1, 1).Value = "BÁO CÁO DOANH THU & LỢI NHUẬN";
+            ws.Range("A1:I1").Merge().Style.Font.Bold = true;
+            ws.Cell(1, 1).Style.Font.FontSize = 14;
+            ws.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            string kyBaoCao = "Tất cả";
+            if (fromDate.HasValue || toDate.HasValue)
+                kyBaoCao = $"Từ {fromDate?.ToString("dd/MM/yyyy") ?? "..."} đến {toDate?.ToString("dd/MM/yyyy") ?? "..."}";
+            ws.Cell(2, 1).Value = $"Kỳ báo cáo: {kyBaoCao} | Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            ws.Range("A2:I2").Merge();
+            ws.Cell(2, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(2, 1).Style.Font.Italic = true;
+
+            // Header dòng 4
+            int headerRow = 4;
+            string[] headers = { "STT", "Mã Phiếu", "Ngày Xuất", "Tên Khách Hàng", "SĐT Khách", "Người Lập Phiếu", "Doanh Thu", "Tiền Vốn", "Lợi Nhuận" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(headerRow, i + 1).Value = headers[i];
+            }
+            var headerRange = ws.Range(headerRow, 1, headerRow, headers.Length);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+            headerRange.Style.Font.FontColor = XLColor.White;
+            headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            // Dữ liệu
+            int row = headerRow + 1;
+            int stt = 1;
+            decimal tongDoanhThu = 0, tongTienVon = 0, tongLoiNhuan = 0;
+            foreach (var px in data)
+            {
+                decimal doanhThu = px.TongTien;
+                decimal tienVon = tienVonDict.GetValueOrDefault(px.MaPhieuXuat, 0);
+                decimal loiNhuan = doanhThu - tienVon;
+
+                ws.Cell(row, 1).Value = stt;
+                ws.Cell(row, 2).Value = $"PX-{px.MaPhieuXuat:D5}";
+                ws.Cell(row, 3).Value = px.NgayXuat.ToString("dd/MM/yyyy HH:mm");
+                ws.Cell(row, 4).Value = px.TenKhachHang ?? "";
+                ws.Cell(row, 5).Value = px.SoDienThoaiKhach ?? "";
+                ws.Cell(row, 6).Value = px.MaNguoiDungNavigation?.HoTen ?? "";
+                ws.Cell(row, 7).Value = doanhThu;
+                ws.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(row, 8).Value = tienVon;
+                ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(row, 9).Value = loiNhuan;
+                ws.Cell(row, 9).Style.NumberFormat.Format = "#,##0";
+
+                // Highlight lỗ (lợi nhuận âm)
+                if (loiNhuan < 0)
+                    ws.Range(row, 1, row, headers.Length).Style.Font.FontColor = XLColor.Red;
+
+                tongDoanhThu += doanhThu;
+                tongTienVon += tienVon;
+                tongLoiNhuan += loiNhuan;
+                stt++;
+                row++;
+            }
+
+            // Dòng TỔNG CỘNG
+            ws.Cell(row, 1).Value = "TỔNG CỘNG:";
+            ws.Range(row, 1, row, 6).Merge().Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+            ws.Cell(row, 7).Value = tongDoanhThu;
+            ws.Cell(row, 7).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(row, 8).Value = tongTienVon;
+            ws.Cell(row, 8).Style.NumberFormat.Format = "#,##0";
+            ws.Cell(row, 9).Value = tongLoiNhuan;
+            ws.Cell(row, 9).Style.NumberFormat.Format = "#,##0";
+            ws.Range(row, 7, row, 9).Style.Font.Bold = true;
+            ws.Range(row, 1, row, headers.Length).Style.Fill.BackgroundColor = XLColor.FromHtml("#E2EFDA");
+            ws.Range(row, 1, row, headers.Length).Style.Border.TopBorder = XLBorderStyleValues.Thin;
+
+            // Dòng tổng số hóa đơn
+            row++;
+            ws.Cell(row, 1).Value = $"Tổng số hóa đơn: {data.Count}";
+            ws.Range(row, 1, row, headers.Length).Merge().Style.Font.Italic = true;
+
+            // Viền bảng
+            ws.Range(headerRow, 1, row - 1, headers.Length).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(headerRow, 1, row - 1, headers.Length).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            string fileName = $"Doanh_Thu_Loi_Nhuan_{DateTime.Now:dd-MM-yyyy_HHmm}.xlsx";
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }
 }
