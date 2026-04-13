@@ -37,7 +37,7 @@
 - **Authorization (RBAC):** Phân quyền dựa trên 3 nhóm chính:
   - `Admin`: Toàn quyền hệ thống.
   - `Nhân viên kho`: Quản lý Danh mục, Sản phẩm, Nhà cung cấp và Nhập kho. Chặn Xuất kho.
-  - `Nhân viên bán hàng`: Lập và hủy Phiếu xuất. Chặn Nhập kho và Quản lý Sản phẩm/Danh mục.
+  - `Nhân viên bán hàng`: Lập và hủy Phiếu xuất. Chặn nhập kho
 - **View Safety:** Sử dụng `ViewData` làm chuẩn truyền dữ liệu View (không dùng `ViewBag`). Đối với tìm kiếm, sử dụng `searchString` thống nhất toàn hệ thống.
 
 # 5. NGHIỆP VỤ & THỰC THỂ CHÍNH (DOMAIN & CORE ENTITIES)
@@ -145,32 +145,12 @@
     - Chi tiết phiếu: Hiển thị danh sách Seri đã bán.
     - Thêm mới (Create): Giao diện JS, hiển thị tồn kho thực tế, **Tự động rút Seri từ kho** theo số lượng bán.
     - Xóa mềm: Cascade hoàn trả Seri về kho (Trạng thái 1) và gỡ liên kết phiếu xuất.
-- [x] Setup dự án và kết nối Database.
-- [x] Tạo xong luồng xác thực (Auth flow).
-- [x] Đồng bộ hóa giao diện Index/Trash và thanh tìm kiếm cho toàn hệ thống.
-- [x] Nâng cấp hệ thống bẫy lỗi (404, 500) và trang báo lỗi Premium (Tiếng Việt).
-- [x] Địa phương hóa trang Chính sách bảo mật sang Tiếng Việt.
-- [x] `Quản lý Người dùng (NguoiDung)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
-- [x] `Quản lý Vai trò (VaiTro)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
-- [x] `Quản lý Danh mục (DanhMuc)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
-- [x] `Quản lý Sản phẩm (SanPham)`: Danh sách, Thêm, Xóa mềm, Thùng rác, Xử lý ảnh WebP.
-- [x] `Quản lý Nhà cung cấp (NhaCungCap)`: Danh sách, Thêm, Xóa mềm, Thùng rác.
-- [x] `Quản lý Seri Sản phẩm (SeriSanPham)`: Truy vết, Bảo hành, Lọc trạng thái.
-- [x] `Nhập kho (PhieuNhap)`: Transaction, Sinh Seri tự động, Xóa mềm.
-- [x] `Xuất kho (PhieuXuat)`: Transaction, Rút Seri, Xóa mềm.
-- [x] `Cảnh báo tồn kho & Hoạt động`: Module Dashboard.
-- [x] `Tối ưu UI/UX & Bảo mật`: Chuẩn hóa 100% ViewData, searchString, RBAC.
-- [x] `Kiểm định Nghiệp vụ`: Xác nhận luồng Trạng thái Seri và Transaction.
 
 ## Đang tiến hành (In Progress)
 
 - [ ] (Tính năng) Xây dựng module xuất báo cáo Excel (Doanh thu, Tồn kho).
-- [ ] (Giao diện) Tích hợp biểu đồ thống kê trực quan Chart.js.
+- [ ] Kiểm tra toàn hệ thống các lỗi code - comment - hàm - thư viện thừa, rác k dùng tới
 
 ## Cần làm (TODO/Backlog)
 
-- [ ] Phát triển chức năng in ấn hóa đơn chuyên sâu (Server-side PDF).
-- [ ] Thêm unit test cho các Service cốt lõi.
 - [ ] Kiểm tra và xử lý triệt để các lỗi logic phát sinh trong quá trình vận hành thực tế.
-- [ ] Tối ưu hóa UI/UX cho các trang báo cáo thống kê.
-- [ ] Kiểm tra và xử lý các lỗi logic phát sinh.
