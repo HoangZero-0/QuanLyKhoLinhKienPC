@@ -42,10 +42,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
             return View(nguoiDung);
         }
 
-        // POST: HoSo/CapNhatThongTin
+        // POST: HoSo/CapNhatHoSo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index([Bind("HoTen,Email")] NguoiDung model)
+        public async Task<IActionResult> CapNhatHoSo([Bind("HoTen,Email")] NguoiDung model)
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userIdClaim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);

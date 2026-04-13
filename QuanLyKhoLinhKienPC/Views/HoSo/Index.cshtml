@@ -37,7 +37,7 @@
                         <p class="text-muted"><i class="fa-solid fa-id-badge"></i> @Html.DisplayFor(model => model.TenDangNhap)</p>
                     </div>
 
-                    <form asp-action="Index" method="post">
+                    <form asp-action="CapNhatHoSo" method="post">
                         <div class="mb-4 bg-light p-3 rounded">
                             <label class="form-label fw-bold small text-muted text-uppercase">Tên đăng nhập hệ thống</label>
                             <input type="text" class="form-control bg-white" value="@Model.TenDangNhap" disabled />
