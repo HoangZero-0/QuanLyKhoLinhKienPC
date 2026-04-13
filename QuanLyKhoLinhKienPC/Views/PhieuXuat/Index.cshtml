@@ -57,11 +57,19 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-dark btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm transition">
-                            <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm kiếm
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm
                         </button>
                     </div>
+                    @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
+                    {
+                        <div class="col-md-2">
+                            <a href="@Url.Action("ExportDoanhThu", "PhieuXuat", new { fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"] })" class="btn btn-success btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm transition">
+                                <i class="fa-solid fa-file-excel me-1"></i> Excel
+                            </a>
+                        </div>
+                    }
                 </div>
             </form>
         </div>

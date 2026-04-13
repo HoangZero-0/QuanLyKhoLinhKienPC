@@ -109,7 +109,7 @@
 
                             <select name="TrangThaiFilter" class="form-select rounded-pill fs-6 ps-3 transition" onchange="this.form.submit()">
                                 <option value="">-- Trạng thái --</option>
-                                <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Tồn Kho (Chưa Bán)</option>
+                                <option value="1" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "1")">Tồn Kho</option>
                                 <option value="2" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "2")">Đã Bán</option>
                                 <option value="3" selected="@(ViewData["TrangThaiFilter"]?.ToString() == "3")">Lỗi/Bảo Hành</option>
                             </select>
@@ -132,9 +132,15 @@
                             <input type="date" name="toDate" id="toDateInput" class="form-control border-start-0 rounded-end-pill fs-6 ps-0" min="1753-01-01" max="9999-12-31" value="@ViewData["ToDate"]" onchange="validateAndSubmit(this)" onkeydown="return false">
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-light border btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> In Thống Kê</button>
-                    </div>
+                    @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+                    {
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-light border btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> In</button>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("ExportExcel", "SeriSanPham", new { trangThaiFilter = ViewData["TrangThaiFilter"], searchString = ViewData["CurrentFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"] })" class="btn btn-success border btn-lg w-100 fw-bold rounded-pill fs-6 shadow-sm"><i class="fa-solid fa-file-excel"></i> Excel</a>
+                        </div>
+                    }
                 </div>
             </form>
         </div>

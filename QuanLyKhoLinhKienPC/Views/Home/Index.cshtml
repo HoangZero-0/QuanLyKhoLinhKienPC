@@ -80,6 +80,66 @@
         </div>
     </div>
 
+    @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin") || User.IsInRole("Nhân viên kho"))
+    {
+        <!-- Xuất Báo Cáo Nhập - Xuất - Tồn -->
+        <div class="row g-4 mt-1 flex-shrink-0">
+            <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body py-3 px-4">
+                    <form asp-controller="Home" asp-action="ExportNhapXuatTon" method="get" class="row g-3 align-items-center justify-content-center">
+                        <div class="col-auto">
+                            <h6 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-file-excel text-success me-2"></i>Báo Cáo Nhập - Xuất - Tồn</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-3" style="font-size: 0.85rem;">Từ</span>
+                                <input type="date" name="fromDate" id="fromDateNXT" class="form-control border-start-0 rounded-end-pill ps-0" 
+                                       min="1753-01-01" max="9999-12-31" onkeydown="return false" onchange="validateNXT(this)">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted border-end-0 rounded-start-pill ps-3" style="font-size: 0.85rem;">Đến</span>
+                                <input type="date" name="toDate" id="toDateNXT" class="form-control border-start-0 rounded-end-pill ps-0" 
+                                       min="1753-01-01" max="9999-12-31" onkeydown="return false" onchange="validateNXT(this)">
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+                                <i class="fa-solid fa-download me-1"></i> Xuất Excel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    <script>
+        function validateNXT(element) {
+            var fromStr = document.getElementById('fromDateNXT').value;
+            var toStr = document.getElementById('toDateNXT').value;
+
+            if (fromStr && toStr) {
+                var f = new Date(fromStr);
+                var t = new Date(toStr);
+
+                if (f > t) {
+                    if (typeof showToast === "function") {
+                        showToast('Ngày bắt đầu không thể lớn hơn ngày kết thúc!', 'error');
+                    } else {
+                        alert('Ngày bắt đầu không thể lớn hơn ngày kết thúc!');
+                    }
+                    element.value = ''; // Xóa giá trị sai ngay lập tức
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+
     <!-- Hoạt động gần đây & Cảnh báo hết hàng -->
     <div class="row g-4 mt-2 flex-grow-1 overflow-hidden">
         <!-- Hoạt động gần đây -->
