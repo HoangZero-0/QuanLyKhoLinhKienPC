@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -72,7 +71,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return View();
             }
 
-            // 4. Nếu hợp lệ, tạo hồ sơ Claims cho Cookie
+            // 5. Nếu hợp lệ, tạo hồ sơ Claims cho Cookie
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.MaNguoiDung.ToString()),
@@ -89,7 +88,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) // Lưu 7 ngày
             };
 
-            // 5. Phát hành Cookie đăng nhập
+            // 6. Phát hành Cookie đăng nhập
             await HttpContext.SignInAsync(
                 "PCCookieAuth",
                 new ClaimsPrincipal(claimsIdentity),

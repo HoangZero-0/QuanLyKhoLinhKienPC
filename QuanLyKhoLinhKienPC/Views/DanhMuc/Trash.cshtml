@@ -9,10 +9,6 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
         <h2 class="text-danger m-0"><i class="fa-solid fa-trash-can"></i> Thùng Rác Danh Mục</h2>
         <div>
-            @if (Model != null && Model.Any() && (User.IsInRole("Quản trị viên") || User.IsInRole("Admin")))
-            {
-
-            }
             <a asp-action="Index" class="btn btn-light border shadow-sm rounded-pill px-4 fw-medium transition text-secondary">
                 <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
             </a>
@@ -86,11 +82,6 @@
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
-
-                                        @if (User.IsInRole("Quản trị viên") || User.IsInRole("Admin"))
-                                        {
-
-                                        }
                                     </td>
                                 </tr>
                             }
