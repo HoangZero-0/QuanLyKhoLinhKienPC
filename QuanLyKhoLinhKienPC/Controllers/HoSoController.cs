@@ -101,13 +101,13 @@ namespace QuanLyKhoLinhKienPC.Controllers
             // Validation cơ bản
             if (string.IsNullOrEmpty(matKhauCu) || string.IsNullOrEmpty(matKhauMoi) || string.IsNullOrEmpty(xacNhanMatKhauMoi))
             {
-                TempData["ErrorDoiMK"] = "Vui lòng nhập đầy đủ các trường Mật khẩu.";
+                TempData["Error"] = "Vui lòng nhập đầy đủ các trường Mật khẩu.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (matKhauMoi != xacNhanMatKhauMoi)
             {
-                TempData["ErrorDoiMK"] = "Mật khẩu mới và xác nhận Mật khẩu không khớp nhau.";
+                TempData["Error"] = "Mật khẩu mới và xác nhận Mật khẩu không khớp nhau.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -119,10 +119,10 @@ namespace QuanLyKhoLinhKienPC.Controllers
                 return RedirectToAction("Logout", "Auth");
             }
 
-            // Kiểm tra Mật Khẩu Cũng
+            // Kiểm tra Mật Khẩu Cũ
             if (!SecurityHelper.VerifyPassword(matKhauCu, nguoiDung.MatKhau))
             {
-                TempData["ErrorDoiMK"] = "Mật khẩu hiện tại không chính xác.";
+                TempData["Error"] = "Mật khẩu hiện tại không chính xác.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -133,7 +133,7 @@ namespace QuanLyKhoLinhKienPC.Controllers
             {
                 _context.Update(nguoiDung);
                 await _context.SaveChangesAsync();
-                await ActivityLogger.LogAsync(_context, maNguoiDung, "Cập nhật", "Hỗ Sơ", $"Đổi Mật khẩu tài khoản");
+                await ActivityLogger.LogAsync(_context, maNguoiDung, "Cập nhật", "Hồ Sơ", $"Đổi Mật khẩu tài khoản");
                 TempData["Success"] = "Đổi Mật khẩu thành công!";
             }
             catch (DbUpdateConcurrencyException)
